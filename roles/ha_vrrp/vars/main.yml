@@ -1,0 +1,16 @@
+---
+_ha_vrrp_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+# The other member of the HA pair, when ha_vrrp_pair_group is used.
+_ha_vrrp_peer_host: >-
+  {{ (groups[ha_vrrp_pair_group] | difference([inventory_hostname]) | first)
+     if ha_vrrp_pair_group | length > 0 else '' }}
+# Explicit peer addresses win; otherwise take the peer host's local addresses.
+_ha_vrrp_peers: >-
+  {{ (hostvars[_ha_vrrp_peer_host].ha_vrrp_local_addresses | default({}) if _ha_vrrp_peer_host else {})
+     | combine(ha_vrrp_peer_addresses) }}
+_ha_vrrp_sg: "{{ ha_vrrp_sync_group | default({}, true) }}"
+_ha_vrrp_cs: "{{ ha_vrrp_conntrack_sync | default({}, true) }}"
+_ha_vrrp_conntrack_peer: >-
+  {{ _ha_vrrp_cs.peer
+     | default(hostvars[_ha_vrrp_peer_host].ha_vrrp_conntrack_sync_local_address | default('') if _ha_vrrp_peer_host else '') }}
+_ha_vrrp_sync_group_name: "{{ _ha_vrrp_cs.sync_group | default(_ha_vrrp_sg.name | default('')) }}"

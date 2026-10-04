@@ -1,0 +1,16 @@
+nat:
+  source:
+    rule:
+{% set nets = edge_nat_source_networks if edge_nat_source_networks else [none] %}
+{% for n in nets %}
+      - id: {{ edge_nat_rule_base | int + loop.index0 * 10 }}
+        description: {{ ('masquerade ' ~ (n or 'all')) | to_json }}
+        outbound_interface:
+          name: {{ edge_nat_wan_interface }}
+{%   if n %}
+        source:
+          address: {{ n | to_json }}
+{%   endif %}
+        translation:
+          address: masquerade
+{% endfor %}

@@ -1,0 +1,8 @@
+---
+ha_vrrp_groups: []
+ha_vrrp_local_addresses: {}
+ha_vrrp_peer_addresses: {}
+ha_vrrp_pair_group: ""
+ha_vrrp_sync_group: null
+ha_vrrp_conntrack_sync: null
+ha_vrrp_conntrack_sync_local_address: ""

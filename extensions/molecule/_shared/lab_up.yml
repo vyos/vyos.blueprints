@@ -1,0 +1,31 @@
+---
+- name: Deploy the scenario's containerlab topology
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _topology: "{{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_DIRECTORY') }}/topology.clab.yml"
+  tasks:
+    - name: Deploy lab
+      ansible.builtin.command:
+        cmd: containerlab deploy --reconfigure --topo {{ _topology }}
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      changed_when: true
+
+- name: Wait for VyOS nodes to accept configuration
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 22
+        timeout: 300
+      delegate_to: localhost
+
+    - name: Wait for the configuration system
+      vyos.vyos.vyos_command:
+        commands: [show version]
+      register: _ready
+      until: _ready is succeeded
+      retries: 30
+      delay: 10

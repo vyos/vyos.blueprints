@@ -1,0 +1,38 @@
+---
+- name: Read VRRP state
+  vyos.vyos.vyos_command:
+    commands:
+      - show vrrp
+  register: _ha_vrrp_v
+
+- name: Record per-group state on this node
+  ansible.builtin.set_fact:
+    _ha_vrrp_v_state: >-
+      {{ _ha_vrrp_v_state | default({}) | combine({item.name:
+         (_ha_vrrp_v.stdout[0] | regex_search('(?m)^' ~ item.name ~ '\s.*?\b(MASTER|BACKUP|FAULT)\b', '\1') | default([''], true) | first)}) }}
+  loop: "{{ ha_vrrp_groups }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Every group is MASTER or BACKUP on this node
+  ansible.builtin.assert:
+    that: _ha_vrrp_v_state[item.name] in ['MASTER', 'BACKUP']
+    fail_msg: "VRRP group {{ item.name }} is '{{ _ha_vrrp_v_state[item.name] }}' on {{ inventory_hostname }}"
+    quiet: true
+  loop: "{{ ha_vrrp_groups }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Exactly one MASTER per group across the pair
+  ansible.builtin.assert:
+    that: >-
+      groups[ha_vrrp_pair_group]
+      | map('extract', hostvars, ['_ha_vrrp_v_state', item.name])
+      | select('equalto', 'MASTER') | list | length == 1
+    fail_msg: "VRRP group {{ item.name }} does not have exactly one MASTER"
+    quiet: true
+  loop: "{{ ha_vrrp_groups }}"
+  loop_control:
+    label: "{{ item.name }}"
+  run_once: true
+  when: ha_vrrp_pair_group | length > 0

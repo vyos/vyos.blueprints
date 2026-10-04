@@ -1,0 +1,43 @@
+---
+- name: Static WAN needs a gateway
+  ansible.builtin.assert:
+    that: edge_nat_wan_gateway | length > 0
+    fail_msg: edge_nat_wan_gateway is required when edge_nat_wan_address is not 'dhcp'
+    quiet: true
+  when: _edge_nat_static | bool
+
+- name: Address the WAN interface
+  vyos.vyos.vyos_l3_interfaces:
+    config:
+      - name: "{{ edge_nat_wan_interface }}"
+        ipv4:
+          - address: "{{ edge_nat_wan_address }}"
+    state: "{{ _edge_nat_state }}"
+  register: _edge_nat_r_wan
+
+- name: Add default route via the WAN gateway
+  vyos.vyos.vyos_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: 0.0.0.0/0
+                next_hops:
+                  - forward_router_address: "{{ edge_nat_wan_gateway }}"
+    state: "{{ _edge_nat_state }}"
+  register: _edge_nat_r_route
+  when: _edge_nat_static | bool
+
+- name: Masquerade outbound traffic
+  vyos.vyos.vyos_nat:
+    config: "{{ lookup('ansible.builtin.template', 'nat.yml.j2') | from_yaml }}"
+    state: "{{ _edge_nat_state }}"
+  register: _edge_nat_r_nat
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_edge_nat_r_wan, _edge_nat_r_route, _edge_nat_r_nat]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
+  when: vyos_blueprints_render_only | default(false) | bool

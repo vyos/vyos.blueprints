@@ -1,0 +1,32 @@
+{# Split each interface's addresses into ipv4/ipv6 and nest VLAN sub-interfaces. #}
+{% macro families(addrs, indent) %}
+{%   set v6 = addrs | select('search', ':') | list + (addrs | select('equalto', 'dhcpv6') | list) %}
+{%   set v4 = addrs | reject('in', v6) | list %}
+{%   if v4 %}
+{{ indent }}ipv4:
+{%     for a in v4 %}
+{{ indent }}  - address: {{ a | to_json }}
+{%     endfor %}
+{%   endif %}
+{%   if v6 %}
+{{ indent }}ipv6:
+{%     for a in v6 %}
+{{ indent }}  - address: {{ a | to_json }}
+{%     endfor %}
+{%   endif %}
+{% endmacro %}
+{% set addressed = base_interfaces | selectattr('addresses', 'defined') | selectattr('addresses') | list %}
+{% set parents = addressed | map(attribute='name') | map('regex_replace', '\\..*$', '') | unique | list %}
+{% for p in parents %}
+{%   set phys = addressed | selectattr('name', 'equalto', p) | first | default({}, true) %}
+{%   set vifs = addressed | selectattr('name', 'match', '^' ~ p ~ '\\.') | list %}
+- name: {{ p }}
+{{ families(phys.addresses | default([]), '  ') -}}
+{%   if vifs %}
+  vifs:
+{%     for v in vifs %}
+    - vlan_id: {{ v.name.split('.')[1] | int }}
+{{ families(v.addresses, '      ') -}}
+{%     endfor %}
+{%   endif %}
+{% endfor %}

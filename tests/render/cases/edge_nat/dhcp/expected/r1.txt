@@ -1,0 +1,4 @@
+set interfaces ethernet eth1 address 'dhcp'
+set nat source rule 100 description 'masquerade all'
+set nat source rule 100 outbound-interface name eth1
+set nat source rule 100 translation address masquerade

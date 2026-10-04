@@ -1,0 +1,4 @@
+servers:
+{% for s in base_ntp_servers %}
+  - server: {{ s | to_json }}
+{% endfor %}

@@ -1,0 +1,5 @@
+---
+edge_nat_wan_address: dhcp
+edge_nat_wan_gateway: ""
+edge_nat_source_networks: []
+edge_nat_rule_base: 100

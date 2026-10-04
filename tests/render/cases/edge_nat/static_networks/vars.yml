@@ -1,0 +1,5 @@
+---
+edge_nat_wan_interface: eth1
+edge_nat_wan_address: 203.0.113.2/24
+edge_nat_wan_gateway: 203.0.113.1
+edge_nat_source_networks: [192.168.10.0/24, 192.168.20.0/24]

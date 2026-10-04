@@ -1,0 +1,9 @@
+---
+- name: Verify
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.base
+        tasks_from: verify

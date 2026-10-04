@@ -1,0 +1,27 @@
+{# Physical interfaces with optional VLAN sub-interfaces (name "ethX.VID"). #}
+{% set parents = base_interfaces | map(attribute='name') | map('regex_replace', '\\..*$', '') | unique | list %}
+{% for p in parents %}
+{%   set phys = base_interfaces | selectattr('name', 'equalto', p) | first | default({'name': p}, true) %}
+{%   set vifs = base_interfaces | selectattr('name', 'match', '^' ~ p ~ '\\.') | list %}
+- name: {{ p }}
+  enabled: {{ phys.enabled | default(true) | bool }}
+{%   if phys.description is defined %}
+  description: {{ phys.description | to_json }}
+{%   endif %}
+{%   if phys.mtu is defined %}
+  mtu: {{ phys.mtu | int }}
+{%   endif %}
+{%   if vifs %}
+  vifs:
+{%     for v in vifs %}
+    - vlan_id: {{ v.name.split('.')[1] | int }}
+      enabled: {{ v.enabled | default(true) | bool }}
+{%       if v.description is defined %}
+      description: {{ v.description | to_json }}
+{%       endif %}
+{%       if v.mtu is defined %}
+      mtu: {{ v.mtu | int }}
+{%       endif %}
+{%     endfor %}
+{%   endif %}
+{% endfor %}

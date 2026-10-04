@@ -1,0 +1,18 @@
+---
+# Shared by both routers - from docs.vyos.io configexamples/ha.html
+ha_vrrp_pair_group: ha_pair
+ha_vrrp_groups:
+  - name: int
+    vrid: 201
+    interface: eth1.201
+    address: [10.200.201.1/24]
+  - name: public
+    vrid: 113
+    interface: eth1.100
+    address: [203.0.113.1/24]
+ha_vrrp_sync_group:
+  name: sync
+  members: [int]
+ha_vrrp_conntrack_sync:
+  interface: eth1.201
+  sync_queue_size: 8

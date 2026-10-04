@@ -1,0 +1,12 @@
+name: ha-pair
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:latest}
+  nodes:
+    router1:
+      kind: vyosnetworks_vyos
+    router2:
+      kind: vyosnetworks_vyos
+  links:
+    - endpoints: ["router1:eth1", "router2:eth1"]

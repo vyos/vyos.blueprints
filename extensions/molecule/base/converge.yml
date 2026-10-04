@@ -1,0 +1,6 @@
+---
+- name: Converge
+  hosts: vyos
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base

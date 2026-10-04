@@ -1,0 +1,137 @@
+---
+argument_specs:
+  main:
+    short_description: VRRP high-availability pair (docs blueprint "High Availability Walkthrough")
+    description:
+      - Configures VRRP groups, an optional sync-group and optional
+        conntrack-sync on each member of a two-node HA pair.
+      - Put shared settings (C(ha_vrrp_groups), C(ha_vrrp_sync_group),
+        C(ha_vrrp_conntrack_sync)) in the pair's group_vars and per-node settings
+        (C(ha_vrrp_priority), C(ha_vrrp_local_addresses)) in host_vars.
+      - Unicast peers are taken from C(ha_vrrp_peer_addresses), or derived
+        from the other host in C(ha_vrrp_pair_group). Without either, VRRP
+        uses multicast.
+      - Interfaces and their real addresses are not configured here; use
+        C(vyos.blueprints.base) first.
+    options:
+      ha_vrrp_groups:
+        type: list
+        elements: dict
+        required: true
+        description: VRRP groups, identical on both nodes.
+        options:
+          name:
+            type: str
+            required: true
+            description: Group name.
+          vrid:
+            type: int
+            required: true
+            description: Virtual router ID (1-255).
+          interface:
+            type: str
+            required: true
+            description: Interface the group runs on, e.g. C(eth1.201).
+          address:
+            type: list
+            elements: str
+            required: true
+            description: Virtual address(es) in CIDR notation.
+          no_preempt:
+            type: bool
+            default: true
+            description: Do not take mastership back after recovery (the blueprint default).
+          advertise_interval:
+            type: int
+            description: Advertisement interval in seconds.
+          description:
+            type: str
+            description: Group description.
+          track_interfaces:
+            type: list
+            elements: str
+            description: Interfaces whose failure lowers this node to backup.
+      ha_vrrp_priority:
+        type: int
+        required: true
+        description: This node's priority (higher wins), applied to every group.
+      ha_vrrp_local_addresses:
+        type: dict
+        default: {}
+        description:
+          - Map of group name to this node's own address on that group's
+            interface (no prefix length). Used as hello-source-address and,
+            with C(ha_vrrp_pair_group), as the peer address on the other node.
+      ha_vrrp_peer_addresses:
+        type: dict
+        default: {}
+        description: Map of group name to the peer's address. Overrides derivation.
+      ha_vrrp_pair_group:
+        type: str
+        default: ""
+        description: Inventory group containing exactly the two HA members.
+      ha_vrrp_sync_group:
+        type: dict
+        description: Optional sync-group so all member groups fail over together.
+        options:
+          name:
+            type: str
+            required: true
+            description: Sync-group name.
+          members:
+            type: list
+            elements: str
+            required: true
+            description: VRRP group names in the sync-group.
+      ha_vrrp_conntrack_sync:
+        type: dict
+        description:
+          - Optional connection-tracking replication (docs section "NAT and conntrack-sync").
+          - Configured with vyos.vyos.vyos_config because vyos.vyos has no
+            resource module for it yet; the role only adds settings.
+        options:
+          interface:
+            type: str
+            required: true
+            description: Interface used for replication traffic.
+          sync_group:
+            type: str
+            description: Sync-group driving failover. Defaults to C(ha_vrrp_sync_group.name).
+          accept_protocols:
+            type: list
+            elements: str
+            default: [tcp, udp, icmp]
+            description: Protocols to replicate.
+          mcast_group:
+            type: str
+            description: Multicast group. Ignored when a unicast peer is known.
+          peer:
+            type: str
+            description: Unicast peer. Derived from the pair when omitted.
+          sync_queue_size:
+            type: int
+            description: Sync queue size in MB.
+      ha_vrrp_conntrack_sync_local_address:
+        type: str
+        default: ""
+        description: This node's address on the conntrack-sync interface, used to derive the peer.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the ha_vrrp role
+    description:
+      - Run with C(tasks_from=verify) against both members in the same play.
+      - Checks every group is up on each node and that exactly one node is
+        MASTER per group.
+    options:
+      ha_vrrp_groups:
+        type: list
+        elements: dict
+        required: true
+        description: Same value as for C(main).
+      ha_vrrp_pair_group:
+        type: str
+        default: ""
+        description: Inventory group of the pair; enables the one-MASTER check.

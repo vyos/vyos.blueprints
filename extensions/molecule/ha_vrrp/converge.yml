@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: ha_pair
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ha_vrrp

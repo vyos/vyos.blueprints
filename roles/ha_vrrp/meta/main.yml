@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: VyOS maintainers and contributors
+  description: Two-node VRRP high availability with optional sync-group and conntrack-sync
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: GenericLinux
+      versions: [all]
+  galaxy_tags: [vyos, networking, vrrp, ha]
+dependencies: []

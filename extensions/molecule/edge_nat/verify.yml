@@ -1,0 +1,19 @@
+---
+- name: Verify role state
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.edge_nat
+        tasks_from: verify
+
+- name: Verify traffic is masqueraded
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Ping the ISP from the LAN host through the router
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-edge-nat-lan ping -c 3 -W 2 203.0.113.1
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      changed_when: false

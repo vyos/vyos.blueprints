@@ -1,0 +1,13 @@
+---
+- name: Destroy the scenario's containerlab topology
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _topology: "{{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_DIRECTORY') }}/topology.clab.yml"
+  tasks:
+    - name: Destroy lab
+      ansible.builtin.command:
+        cmd: containerlab destroy --cleanup --topo {{ _topology }}
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      changed_when: true
+      failed_when: false

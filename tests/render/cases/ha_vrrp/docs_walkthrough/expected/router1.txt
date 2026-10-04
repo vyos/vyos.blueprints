@@ -1,0 +1,21 @@
+set high-availability vrrp group int address 10.200.201.1/24
+set high-availability vrrp group int hello-source-address 10.200.201.2
+set high-availability vrrp group int interface eth1.201
+set high-availability vrrp group int no-preempt
+set high-availability vrrp group int peer-address 10.200.201.3
+set high-availability vrrp group int priority 200
+set high-availability vrrp group int vrid 201
+set high-availability vrrp group public address 203.0.113.1/24
+set high-availability vrrp group public hello-source-address 203.0.113.2
+set high-availability vrrp group public interface eth1.100
+set high-availability vrrp group public no-preempt
+set high-availability vrrp group public peer-address 203.0.113.3
+set high-availability vrrp group public priority 200
+set high-availability vrrp group public vrid 113
+set high-availability vrrp sync-group sync member int
+set service conntrack-sync accept-protocol 'icmp'
+set service conntrack-sync accept-protocol 'tcp'
+set service conntrack-sync accept-protocol 'udp'
+set service conntrack-sync failover-mechanism vrrp sync-group 'sync'
+set service conntrack-sync interface eth1.201 peer '10.200.201.3'
+set service conntrack-sync sync-queue-size '8'

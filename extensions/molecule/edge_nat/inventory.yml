@@ -1,0 +1,20 @@
+---
+all:
+  children:
+    vyos:
+      hosts:
+        r1:
+          ansible_host: clab-bp-edge-nat-r1
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin
+        base_interfaces:
+          - name: eth2
+            description: LAN
+            addresses: [192.168.10.1/24]
+        edge_nat_wan_interface: eth1
+        edge_nat_wan_address: 203.0.113.2/24
+        edge_nat_wan_gateway: 203.0.113.1
+        edge_nat_source_networks: [192.168.10.0/24]

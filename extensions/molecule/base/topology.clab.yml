@@ -1,0 +1,12 @@
+name: bp-base
+topology:
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+    peer:
+      kind: linux
+      image: alpine:3
+  links:
+    - endpoints: ["r1:eth1", "peer:eth1"]
+    - endpoints: ["r1:eth2", "peer:eth2"]

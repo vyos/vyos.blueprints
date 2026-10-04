@@ -1,0 +1,12 @@
+---
+- name: VRRP high-availability pair
+  hosts: ha_pair
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ha_vrrp
+  post_tasks:
+    - name: Show rendered commands
+      ansible.builtin.debug:
+        var: vyos_blueprints_rendered
+      when: show_rendered | default(false) | bool

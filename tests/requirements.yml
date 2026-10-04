@@ -1,0 +1,9 @@
+---
+# Development / CI dependencies. vyos.vyos comes from git until the
+# offline-render fix (get_os_version for state=rendered/parsed) is released.
+collections:
+  - name: https://github.com/vyos/vyos.vyos.git
+    type: git
+    version: main
+  - name: ansible.netcommon
+  - name: ansible.utils

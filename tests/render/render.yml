@@ -1,0 +1,36 @@
+---
+- name: Render a role offline and compare with its golden commands
+  hosts: all
+  gather_facts: false
+  vars:
+    _expected_file: "{{ case_dir }}/expected/{{ inventory_hostname }}.txt"
+  tasks:
+    - name: Render the role
+      ansible.builtin.include_role:
+        name: "vyos.blueprints.{{ role }}"
+      vars:
+        vyos_blueprints_render_only: true
+
+    - name: Normalise rendered commands
+      ansible.builtin.set_fact:
+        _actual: "{{ vyos_blueprints_rendered | default([]) | map('trim') | sort }}"
+
+    - name: Write golden file
+      ansible.builtin.copy:
+        content: "{{ _actual | join('\n') }}\n"
+        dest: "{{ _expected_file }}"
+        mode: "0644"
+      delegate_to: localhost
+      when: update_golden | bool
+
+    - name: Compare with golden file
+      ansible.builtin.assert:
+        that: _actual == _expected
+        fail_msg: |
+          Rendered commands differ from {{ _expected_file }}
+          missing: {{ _expected | difference(_actual) }}
+          unexpected: {{ _actual | difference(_expected) }}
+        success_msg: "{{ _actual | length }} commands match"
+      vars:
+        _expected: "{{ lookup('ansible.builtin.file', _expected_file).splitlines() | map('trim') | select | sort }}"
+      when: not (update_golden | bool)

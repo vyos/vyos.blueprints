@@ -1,0 +1,92 @@
+---
+argument_specs:
+  main:
+    short_description: Baseline settings for a VyOS node
+    description:
+      - Sets hostname, interface descriptions/state/MTU, IPv4/IPv6 addressing
+        (including VLAN sub-interfaces), NTP servers and remote syslog.
+      - Uses vyos.vyos resource modules with C(state=merged); settings not
+        described here are left untouched.
+      - Do not list the management interface unless you mean to change it.
+    options:
+      base_hostname:
+        type: str
+        description: System hostname. Defaults to C(inventory_hostname_short).
+      base_interfaces:
+        type: list
+        elements: dict
+        default: []
+        description:
+          - Interfaces to configure. A name like C(eth1.201) is a VLAN
+            sub-interface (vif 201) of C(eth1).
+        options:
+          name:
+            type: str
+            required: true
+            description: Interface name, e.g. C(eth1) or C(eth1.201).
+          description:
+            type: str
+            description: Interface description.
+          enabled:
+            type: bool
+            default: true
+            description: Administrative state.
+          mtu:
+            type: int
+            description: Interface MTU.
+          addresses:
+            type: list
+            elements: str
+            default: []
+            description:
+              - Addresses in CIDR notation, or C(dhcp) / C(dhcpv6).
+                Entries containing C(:) are treated as IPv6.
+      base_ntp_servers:
+        type: list
+        elements: str
+        default: []
+        description: NTP server hostnames or addresses.
+      base_syslog_hosts:
+        type: list
+        elements: dict
+        default: []
+        description: Remote syslog destinations.
+        options:
+          host:
+            type: str
+            required: true
+            description: Syslog server hostname or address.
+          port:
+            type: int
+            description: Destination port.
+          protocol:
+            type: str
+            choices: [udp, tcp]
+            description: Transport protocol.
+          facility:
+            type: str
+            default: all
+            description: Facility to forward.
+          level:
+            type: str
+            default: info
+            description: Minimum severity to forward.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description:
+          - Do not touch the device; collect the commands each module would
+            send into the C(vyos_blueprints_rendered) fact instead.
+  verify:
+    short_description: Post-deployment checks for the base role
+    description:
+      - Run with C(tasks_from=verify). Uses the same inputs as C(main).
+    options:
+      base_hostname:
+        type: str
+        description: Expected hostname.
+      base_interfaces:
+        type: list
+        elements: dict
+        default: []
+        description: Interfaces whose static addresses must be present.

@@ -1,0 +1,24 @@
+---
+namespace: vyos
+name: blueprints
+version: 0.1.0
+readme: README.md
+authors:
+  - VyOS maintainers and contributors
+description: >-
+  Ansible roles that deploy the VyOS Configuration Blueprints
+  (docs.vyos.io configexamples) on top of the vyos.vyos resource modules.
+license_file: LICENSE
+tags: [vyos, networking, network, blueprints]
+dependencies:
+  vyos.vyos: ">=6.0.0"
+  ansible.netcommon: ">=6.0.0"
+repository: https://github.com/vyos/vyos.blueprints
+documentation: https://github.com/vyos/vyos.blueprints/tree/main/docs
+issues: https://vyos.dev
+build_ignore:
+  - .github
+  - extensions
+  - tests
+  - scripts
+  - "*.tar.gz"

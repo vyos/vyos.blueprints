@@ -1,0 +1,13 @@
+---
+- name: Check the edge router
+  hosts: edge
+  gather_facts: false
+  tasks:
+    - name: Base checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.base
+        tasks_from: verify
+    - name: Edge NAT checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.edge_nat
+        tasks_from: verify

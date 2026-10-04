@@ -1,0 +1,3 @@
+---
+_edge_nat_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_edge_nat_static: "{{ edge_nat_wan_address != 'dhcp' }}"

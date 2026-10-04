@@ -1,0 +1,37 @@
+---
+- name: Check pair and sync-group consistency
+  ansible.builtin.assert:
+    that:
+      - ha_vrrp_pair_group | length == 0 or (groups[ha_vrrp_pair_group] | default([]) | length == 2)
+      - ha_vrrp_pair_group | length == 0 or inventory_hostname in groups[ha_vrrp_pair_group]
+      - _ha_vrrp_sg.members | default([]) | difference(ha_vrrp_groups | map(attribute='name')) | length == 0
+      - _ha_vrrp_cs | length == 0 or _ha_vrrp_sync_group_name | length > 0
+    fail_msg: >-
+      ha_vrrp_pair_group must name a group of exactly two hosts that includes this host;
+      sync-group members must be defined VRRP groups; conntrack-sync needs a sync-group.
+    quiet: true
+
+- name: Configure VRRP groups and sync-group
+  vyos.vyos.vyos_ha:
+    config: "{{ lookup('ansible.builtin.template', 'ha.yml.j2') | from_yaml }}"
+    state: "{{ _ha_vrrp_state }}"
+  register: _ha_vrrp_r_vrrp
+
+- name: Configure conntrack-sync
+  vyos.vyos.vyos_config:
+    lines: "{{ _ha_vrrp_conntrack_lines }}"
+  vars:
+    _ha_vrrp_conntrack_lines: "{{ lookup('ansible.builtin.template', 'conntrack_sync.j2').splitlines() | select | list }}"
+  register: _ha_vrrp_r_conntrack
+  when:
+    - _ha_vrrp_cs | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + _ha_vrrp_r_vrrp.rendered | default([])
+         + ((lookup('ansible.builtin.template', 'conntrack_sync.j2').splitlines() | select | list)
+            if _ha_vrrp_cs | length > 0 else []) }}
+  when: vyos_blueprints_render_only | default(false) | bool

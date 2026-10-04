@@ -1,0 +1,28 @@
+---
+- name: Read NAT rules and routing table
+  vyos.vyos.vyos_command:
+    commands:
+      - show nat source rules
+      - show ip route 0.0.0.0/0
+  register: _edge_nat_v
+
+- name: Masquerade rules are installed
+  ansible.builtin.assert:
+    that: _edge_nat_v.stdout[0] is search('(?m)^\s*' ~ item ~ '\b')
+    fail_msg: "source NAT rule {{ item }} missing from 'show nat source rules'"
+    quiet: true
+  loop: "{{ range(edge_nat_rule_base | int,
+            edge_nat_rule_base | int + ([edge_nat_source_networks | length, 1] | max) * 10, 10) | list }}"
+
+- name: A default route exists
+  ansible.builtin.assert:
+    that: _edge_nat_v.stdout[1] is search('0\.0\.0\.0/0')
+    fail_msg: no IPv4 default route installed
+    quiet: true
+
+- name: Default route points at the configured gateway
+  ansible.builtin.assert:
+    that: edge_nat_wan_gateway in _edge_nat_v.stdout[1]
+    fail_msg: "default route does not use {{ edge_nat_wan_gateway }}"
+    quiet: true
+  when: _edge_nat_static | bool

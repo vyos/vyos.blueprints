@@ -1,0 +1,16 @@
+---
+base_hostname: router1
+base_interfaces:
+  - name: eth1
+    description: LAN trunk
+    mtu: 9000
+  - name: eth1.201
+    description: internal
+    addresses: [10.200.201.2/24]
+  - name: eth2
+    description: uplink
+    addresses: [dhcp, "2001:db8:100::2/64"]
+base_ntp_servers: [0.pool.ntp.org, 1.pool.ntp.org]
+base_syslog_hosts:
+  - host: 192.0.2.50
+    level: warning

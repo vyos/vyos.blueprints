@@ -1,0 +1,45 @@
+---
+- name: Set hostname
+  vyos.vyos.vyos_hostname:
+    config:
+      hostname: "{{ base_hostname }}"
+    state: "{{ _base_state }}"
+  register: _base_r_hostname
+
+- name: Set interface state, descriptions and MTU
+  vyos.vyos.vyos_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'interfaces.yml.j2') | from_yaml }}"
+    state: "{{ _base_state }}"
+  register: _base_r_interfaces
+  when: base_interfaces | length > 0
+
+- name: Set interface addressing
+  vyos.vyos.vyos_l3_interfaces:
+    config: "{{ _base_l3 }}"
+    state: "{{ _base_state }}"
+  vars:
+    _base_l3: "{{ lookup('ansible.builtin.template', 'l3_interfaces.yml.j2') | from_yaml }}"
+  register: _base_r_l3
+  when: base_interfaces | selectattr('addresses', 'defined') | selectattr('addresses') | list | length > 0
+
+- name: Set NTP servers
+  vyos.vyos.vyos_ntp_global:
+    config: "{{ lookup('ansible.builtin.template', 'ntp.yml.j2') | from_yaml }}"
+    state: "{{ _base_state }}"
+  register: _base_r_ntp
+  when: base_ntp_servers | length > 0
+
+- name: Set remote syslog
+  vyos.vyos.vyos_logging_global:
+    config: "{{ lookup('ansible.builtin.template', 'syslog.yml.j2') | from_yaml }}"
+    state: "{{ _base_state }}"
+  register: _base_r_syslog
+  when: base_syslog_hosts | length > 0
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_base_r_hostname, _base_r_interfaces, _base_r_l3, _base_r_ntp, _base_r_syslog]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
+  when: vyos_blueprints_render_only | default(false) | bool

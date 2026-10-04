@@ -1,0 +1,11 @@
+set interfaces ethernet eth1 address '203.0.113.2/24'
+set nat source rule 100 description 'masquerade 192.168.10.0/24'
+set nat source rule 100 outbound-interface name eth1
+set nat source rule 100 source address 192.168.10.0/24
+set nat source rule 100 translation address masquerade
+set nat source rule 110 description 'masquerade 192.168.20.0/24'
+set nat source rule 110 outbound-interface name eth1
+set nat source rule 110 source address 192.168.20.0/24
+set nat source rule 110 translation address masquerade
+set protocols static route 0.0.0.0/0
+set protocols static route 0.0.0.0/0 next-hop '203.0.113.1'

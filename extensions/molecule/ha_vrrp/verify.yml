@@ -1,0 +1,20 @@
+---
+- name: Verify
+  hosts: ha_pair
+  gather_facts: false
+  tasks:
+    - name: Wait for VRRP to elect a master
+      ansible.builtin.pause:
+        seconds: 15
+      run_once: true
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ha_vrrp
+        tasks_from: verify
+
+    - name: The higher-priority node owns the virtual addresses
+      ansible.builtin.assert:
+        that: hostvars['r1']._ha_vrrp_v_state.int == 'MASTER'
+        quiet: true
+      run_once: true

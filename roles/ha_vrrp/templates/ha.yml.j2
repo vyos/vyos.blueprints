@@ -1,0 +1,34 @@
+vrrp:
+  groups:
+{% for g in ha_vrrp_groups %}
+    - name: {{ g.name }}
+      vrid: {{ g.vrid | int }}
+      interface: {{ g.interface }}
+      priority: {{ ha_vrrp_priority | int }}
+      address:
+{%   for a in ([g.address] if g.address is string else g.address) %}
+        - {{ a | to_json }}
+{%   endfor %}
+      no_preempt: {{ g.no_preempt | default(true) | bool }}
+{%   if g.advertise_interval is defined %}
+      advertise_interval: {{ g.advertise_interval | int }}
+{%   endif %}
+{%   if g.description is defined %}
+      description: {{ g.description | to_json }}
+{%   endif %}
+{%   if g.name in ha_vrrp_local_addresses %}
+      hello_source_address: {{ ha_vrrp_local_addresses[g.name] | to_json }}
+{%   endif %}
+{%   if g.name in _ha_vrrp_peers %}
+      peer_address: {{ _ha_vrrp_peers[g.name] | to_json }}
+{%   endif %}
+{%   if g.track_interfaces | default([]) %}
+      track:
+        interface: {{ g.track_interfaces | to_json }}
+{%   endif %}
+{% endfor %}
+{% if _ha_vrrp_sg %}
+  sync_groups:
+    - name: {{ _ha_vrrp_sg.name }}
+      member: {{ _ha_vrrp_sg.members | to_json }}
+{% endif %}

@@ -1,0 +1,25 @@
+---
+all:
+  children:
+    vyos:
+      hosts:
+        r1:
+          ansible_host: clab-bp-base-r1
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin
+        base_hostname: molecule-r1
+        base_interfaces:
+          - name: eth1
+            description: molecule trunk
+          - name: eth1.201
+            description: internal
+            addresses: [10.200.201.2/24]
+          - name: eth2
+            description: molecule uplink
+            addresses: [192.0.2.2/24, "2001:db8:100::2/64"]
+        base_ntp_servers: [192.0.2.123]
+        base_syslog_hosts:
+          - host: 192.0.2.50

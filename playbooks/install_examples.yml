@@ -1,0 +1,17 @@
+---
+- name: Copy vyos.blueprints examples into the current directory
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _dest: "{{ lookup('ansible.builtin.env', 'PWD') }}/vyos-blueprints-examples/"
+  tasks:
+    - name: Copy examples (existing files are not overwritten)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../examples/"
+        dest: "{{ _dest }}"
+        force: false
+        mode: preserve
+
+    - name: Where to look
+      ansible.builtin.debug:
+        msg: "Examples copied to {{ _dest }} - start with its README.md"

@@ -1,0 +1,15 @@
+---
+# One inventory group per HA pair; ha_vrrp_pair_group points at it.
+all:
+  children:
+    ha_pair:
+      hosts:
+        router1:
+          ansible_host: clab-ha-pair-router1   # your router's address
+        router2:
+          ansible_host: clab-ha-pair-router2
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: admin
+    ansible_password: admin                    # use ansible-vault for real devices

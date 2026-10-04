@@ -1,0 +1,17 @@
+{% set c = _ha_vrrp_cs %}
+{% set base = 'set service conntrack-sync' %}
+{{ base }} failover-mechanism vrrp sync-group '{{ _ha_vrrp_sync_group_name }}'
+{% if _ha_vrrp_conntrack_peer %}
+{{ base }} interface {{ c.interface }} peer '{{ _ha_vrrp_conntrack_peer }}'
+{% else %}
+{{ base }} interface {{ c.interface }}
+{% if c.mcast_group is defined %}
+{{ base }} mcast-group '{{ c.mcast_group }}'
+{% endif %}
+{% endif %}
+{% for p in c.accept_protocols | default(['tcp', 'udp', 'icmp']) %}
+{{ base }} accept-protocol '{{ p }}'
+{% endfor %}
+{% if c.sync_queue_size is defined %}
+{{ base }} sync-queue-size '{{ c.sync_queue_size }}'
+{% endif %}
