@@ -1,0 +1,17 @@
+set service ntp server 0.pool.ntp.org
+set service snmp community '********' authorization ro
+set service snmp community '********' authorization rw
+set service snmp community '********' client 192.0.2.50
+set service snmp community '********' network 198.51.100.0/24
+set service snmp contact noc@example.net
+set service snmp listen-address 192.0.2.1
+set service snmp location 'DC1 rack 12'
+set service snmp trap-source 192.0.2.1
+set service snmp trap-target 192.0.2.50
+set service snmp trap-target 192.0.2.50 community '********'
+set system login radius server 192.0.2.70 key '********'
+set system login radius server 192.0.2.70 timeout '5'
+set system login radius server 192.0.2.71 key '********'
+set system login radius server 192.0.2.71 port '1645'
+set system login radius source-address '192.0.2.1'
+set system syslog remote 192.0.2.60 facility all level notice

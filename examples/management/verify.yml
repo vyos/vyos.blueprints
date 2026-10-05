@@ -1,0 +1,9 @@
+---
+- name: Check the management plane
+  hosts: routers
+  gather_facts: false
+  tasks:
+    - name: Management checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.management
+        tasks_from: verify

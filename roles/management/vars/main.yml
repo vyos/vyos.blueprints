@@ -1,0 +1,15 @@
+---
+_management_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_management_snmp: "{{ management_snmp | default({}, true) }}"
+_management_radius: "{{ management_radius | default({}, true) }}"
+# Secrets are replaced with this in vyos_blueprints_rendered so previews and
+# golden files never contain them.
+_management_mask: "'********'"
+_management_secret_patterns:
+  - '(community) \S+'
+  - '(radius server \S+ key) \S+'
+  - '((?:plaintext|encrypted)-(?:key|password)) \S+'
+_management_trap_lines: "{{ (lookup('ansible.builtin.template', 'snmp_traps.j2') or '').splitlines() | select | list }}"
+_management_radius_lines: >-
+  {{ ((lookup('ansible.builtin.template', 'radius.j2') or '').splitlines() | select | list)
+     if _management_radius | length > 0 else [] }}

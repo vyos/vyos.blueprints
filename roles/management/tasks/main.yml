@@ -1,0 +1,64 @@
+---
+- name: Configure SNMP
+  vyos.vyos.vyos_snmp_server:
+    config: "{{ lookup('ansible.builtin.template', 'snmp.yml.j2') | from_yaml }}"
+    state: "{{ _management_state }}"
+  register: _management_r_snmp
+  no_log: true
+  when: _management_snmp | length > 0
+
+- name: Configure SNMPv2c trap targets
+  # vyos_snmp_server drops trap-target community/port and allows only one target,
+  # so traps go through vyos_config until that is fixed in vyos.vyos.
+  vyos.vyos.vyos_config:
+    lines: "{{ _management_trap_lines }}"
+  register: _management_r_traps
+  no_log: true
+  when:
+    - _management_snmp.trap_targets | default([]) | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Configure remote syslog
+  vyos.vyos.vyos_logging_global:
+    config: "{{ lookup('ansible.builtin.template', 'syslog.yml.j2') | from_yaml }}"
+    state: "{{ _management_state }}"
+  register: _management_r_syslog
+  when: management_syslog_hosts | length > 0
+
+- name: Configure NTP servers
+  vyos.vyos.vyos_ntp_global:
+    config: "{{ lookup('ansible.builtin.template', 'ntp.yml.j2') | from_yaml }}"
+    state: "{{ _management_state }}"
+  register: _management_r_ntp
+  when: management_ntp_servers | length > 0
+
+- name: Configure RADIUS login
+  vyos.vyos.vyos_config:
+    lines: "{{ _management_radius_lines }}"
+  register: _management_r_radius
+  no_log: true
+  when:
+    - _management_radius | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands with secrets masked  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([]) + _management_lines }}
+  vars:
+    _management_raw: >-
+      {{ ([_management_r_snmp, _management_r_syslog, _management_r_ntp]
+          | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten)
+         + _management_trap_lines
+         + _management_radius_lines }}
+    _management_lines: >-
+      {%- set out = [] -%}
+      {%- for line in _management_raw -%}
+      {%-   set ns = namespace(l=line) -%}
+      {%-   for p in _management_secret_patterns -%}
+      {%-     set ns.l = ns.l | regex_replace(p, '\\1 ' ~ _management_mask) -%}
+      {%-   endfor -%}
+      {%-   set _ = out.append(ns.l) -%}
+      {%- endfor -%}
+      {{ out }}
+  when: vyos_blueprints_render_only | default(false) | bool

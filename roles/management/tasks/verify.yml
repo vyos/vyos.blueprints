@@ -1,0 +1,43 @@
+---
+- name: Read committed configuration
+  vyos.vyos.vyos_command:
+    commands:
+      - show configuration commands
+  register: _management_v
+  no_log: true
+
+- name: SNMP communities and location are committed
+  ansible.builtin.assert:
+    that:
+      - _management_v.stdout[0] is search("set service snmp community '?" ~ (item.name | regex_escape) ~ "'?\\s")
+    fail_msg: an SNMP community from management_snmp.communities is not configured
+    quiet: true
+  loop: "{{ (management_snmp | default({}, true)).communities | default([]) }}"
+  loop_control:
+    label: community
+  no_log: true
+
+- name: Syslog destinations are committed
+  ansible.builtin.assert:
+    that: _management_v.stdout[0] is search('set system syslog remote ' ~ (item.host | regex_escape) ~ '\\s')
+    fail_msg: "syslog destination {{ item.host }} is not configured"
+    quiet: true
+  loop: "{{ management_syslog_hosts | default([]) }}"
+  loop_control:
+    label: "{{ item.host }}"
+
+- name: NTP servers are committed
+  ansible.builtin.assert:
+    that: _management_v.stdout[0] is search('set service ntp server ' ~ (item | regex_escape) ~ '\\b')
+    fail_msg: "NTP server {{ item }} is not configured"
+    quiet: true
+  loop: "{{ management_ntp_servers | default([]) }}"
+
+- name: RADIUS servers are committed
+  ansible.builtin.assert:
+    that: _management_v.stdout[0] is search('set system login radius server ' ~ (item.address | regex_escape) ~ '\\s')
+    fail_msg: "RADIUS server {{ item.address }} is not configured"
+    quiet: true
+  loop: "{{ (management_radius | default({}, true)).servers | default([]) }}"
+  loop_control:
+    label: "{{ item.address }}"

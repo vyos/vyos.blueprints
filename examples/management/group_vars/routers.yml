@@ -1,0 +1,27 @@
+---
+# Management plane: SNMP (communities, location, trap targets), remote syslog,
+# NTP and RADIUS login. Keep communities and the RADIUS key in ansible-vault,
+# and keep a local admin user as fallback when enabling RADIUS login.
+base_interfaces:
+  - name: eth1
+    addresses:
+      - 192.0.2.1/24
+management_snmp:
+  contact: molecule@example.net
+  location: containerlab
+  communities:
+    - name: '{{ vault_snmp_community }}'
+      clients:
+        - 192.0.2.50
+  trap_targets:
+    - address: 192.0.2.50
+      community: '{{ vault_snmp_trap_community }}'
+management_syslog_hosts:
+  - host: 192.0.2.50
+management_ntp_servers:
+  - 192.0.2.50
+management_radius:
+  servers:
+    - address: 192.0.2.50
+      key: '{{ vault_radius_key }}'
+      timeout: 2

@@ -1,0 +1,14 @@
+name: bp-mgmt
+topology:
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+    nms:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 192.0.2.50/24 dev eth1
+        - apk add --no-cache net-snmp-tools
+  links:
+    - endpoints: ["r1:eth1", "nms:eth1"]

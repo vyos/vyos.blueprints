@@ -1,0 +1,5 @@
+---
+management_snmp: null
+management_syslog_hosts: []
+management_ntp_servers: []
+management_radius: null

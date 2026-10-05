@@ -1,0 +1,26 @@
+{% set s = _management_snmp %}
+{% for k in ['contact', 'location', 'description', 'trap_source'] if s[k] is defined %}
+{{ k }}: {{ s[k] | to_json }}
+{% endfor %}
+{% if s.listen_addresses | default([]) %}
+listen_addresses:
+{%   for a in s.listen_addresses %}
+  - address: {{ a | to_json }}
+{%   endfor %}
+{% endif %}
+{% if s.communities | default([]) %}
+communities:
+{%   for c in s.communities %}
+  - name: {{ c.name | to_json }}
+    authorization_type: {{ c.authorization | default('ro') }}
+{%     if c.clients | default([]) %}
+    clients: {{ c.clients | to_json }}
+{%     endif %}
+{%     if c.networks | default([]) %}
+    networks: {{ c.networks | to_json }}
+{%     endif %}
+{%   endfor %}
+{% endif %}
+{% if s.v3 is defined and s.v3 %}
+snmp_v3: {{ s.v3 | to_json }}
+{% endif %}

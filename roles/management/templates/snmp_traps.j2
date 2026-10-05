@@ -1,0 +1,9 @@
+{% for t in _management_snmp.trap_targets | default([]) %}
+set service snmp trap-target {{ t.address }}
+{%   if t.community is defined %}
+set service snmp trap-target {{ t.address }} community '{{ t.community }}'
+{%   endif %}
+{%   if t.port is defined %}
+set service snmp trap-target {{ t.address }} port '{{ t.port }}'
+{%   endif %}
+{% endfor %}

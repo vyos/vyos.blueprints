@@ -37,6 +37,7 @@ validated, idempotent, testable unit.
 | `vyos.blueprints.mpls_ldp` | MPLS forwarding and LDP | building block; used by [L3VPN for Hub-and-Spoke connectivity with VyOS](https://docs.vyos.io/en/1.5/configexamples/l3vpn-hub-and-spoke.html) |
 | `vyos.blueprints.l2tp_lns` | L2TP network server for PPP sessions from a LAC, RADIUS or local authentication | [PPPoE over L2TP](https://docs.vyos.io/en/1.5/configexamples/lac-lns.html) |
 | `vyos.blueprints.dmvpn` | DMVPN - NHRP for hubs and spokes (phase 3), IPsec profile in transport mode, unprotected-GRE drop rule | [DMVPN Dual HUB Dual Cloud](https://docs.vyos.io/en/1.5/configexamples/dmvpn-dualhub-dualcloud.html) |
+| `vyos.blueprints.management` | SNMP v2c/v3 and trap targets, remote syslog, NTP, RADIUS login; secrets masked | building block (roadmap: management plane) |
 
 Every role has documented, validated inputs (`ansible-doc -t role vyos.blueprints.<role>`)
 and a `verify` entry point with operational checks

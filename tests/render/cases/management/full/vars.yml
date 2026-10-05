@@ -1,0 +1,28 @@
+---
+management_snmp:
+  contact: noc@example.net
+  location: DC1 rack 12
+  listen_addresses: [192.0.2.1]
+  communities:
+    - name: n0c-ro
+      clients: [192.0.2.50]
+    - name: n0c-rw
+      authorization: rw
+      networks: [198.51.100.0/24]
+  trap_source: 192.0.2.1
+  trap_targets:
+    - address: 192.0.2.50
+      community: n0c-traps
+management_syslog_hosts:
+  - host: 192.0.2.60
+    level: notice
+management_ntp_servers: [0.pool.ntp.org]
+management_radius:
+  servers:
+    - address: 192.0.2.70
+      key: s3cr3t-1
+      timeout: 5
+    - address: 192.0.2.71
+      key: s3cr3t-2
+      port: 1645
+  source_address: 192.0.2.1

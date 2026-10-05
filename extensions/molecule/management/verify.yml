@@ -1,0 +1,28 @@
+---
+- name: Verify role state
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.management
+        tasks_from: verify
+
+- name: Verify SNMP answers the NMS
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Query sysLocation from the NMS container
+      ansible.builtin.command:
+        cmd: >-
+          docker exec clab-bp-mgmt-nms
+          snmpget -v2c -c molecule-ro -t 3 -r 3 192.0.2.1 SNMPv2-MIB::sysLocation.0
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      register: _snmpget
+      changed_when: false
+      no_log: true
+
+    - name: The sysLocation value matches
+      ansible.builtin.assert:
+        that: "'containerlab' in _snmpget.stdout"
+        quiet: true

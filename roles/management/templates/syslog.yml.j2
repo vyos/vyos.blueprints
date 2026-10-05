@@ -1,0 +1,13 @@
+hosts:
+{% for h in management_syslog_hosts %}
+  - hostname: {{ h.host | to_json }}
+{%   if h.port is defined %}
+    port: {{ h.port | int }}
+{%   endif %}
+{%   if h.protocol is defined %}
+    protocol: {{ h.protocol }}
+{%   endif %}
+    facilities:
+      - facility: {{ h.facility | default('all') }}
+        severity: {{ h.level | default('info') }}
+{% endfor %}

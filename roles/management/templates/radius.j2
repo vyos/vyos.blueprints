@@ -1,0 +1,20 @@
+{% set r = _management_radius %}
+{% set base = 'set system login radius' %}
+{% for s in r.servers %}
+{{ base }} server {{ s.address }} key '{{ s.key }}'
+{%   if s.port is defined %}
+{{ base }} server {{ s.address }} port '{{ s.port }}'
+{%   endif %}
+{%   if s.timeout is defined %}
+{{ base }} server {{ s.address }} timeout '{{ s.timeout }}'
+{%   endif %}
+{%   if s.disable | default(false) | bool %}
+{{ base }} server {{ s.address }} disable
+{%   endif %}
+{% endfor %}
+{% if r.source_address is defined %}
+{{ base }} source-address '{{ r.source_address }}'
+{% endif %}
+{% if r.vrf is defined %}
+{{ base }} vrf '{{ r.vrf }}'
+{% endif %}

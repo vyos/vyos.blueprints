@@ -1,0 +1,179 @@
+---
+argument_specs:
+  main:
+    short_description: Management plane - SNMP, traps, syslog, NTP, RADIUS login
+    description:
+      - Configures the services a router needs to be monitored and administered.
+      - SNMP, syslog and NTP use vyos.vyos resource modules. RADIUS login uses
+        vyos.vyos.vyos_config because vyos.vyos has no resource module for
+        C(system login radius) yet.
+      - Overlaps with C(base) for syslog and NTP; configure them in one role only.
+      - Secrets (communities, keys) are masked in C(vyos_blueprints_rendered).
+    options:
+      management_snmp:
+        type: dict
+        description: SNMP agent settings. Omit to leave SNMP untouched.
+        options:
+          contact:
+            type: str
+            description: sysContact.
+          location:
+            type: str
+            description: sysLocation.
+          description:
+            type: str
+            description: sysDescr.
+          listen_addresses:
+            type: list
+            elements: str
+            default: []
+            description: Addresses the agent listens on (default port).
+          communities:
+            type: list
+            elements: dict
+            default: []
+            description: SNMPv2c communities.
+            options:
+              name:
+                type: str
+                required: true
+                no_log: true
+                description: Community string.
+              authorization:
+                type: str
+                choices: [ro, rw]
+                default: ro
+                description: Access level.
+              clients:
+                type: list
+                elements: str
+                default: []
+                description: Hosts allowed to use this community.
+              networks:
+                type: list
+                elements: str
+                default: []
+                description: Networks allowed to use this community.
+          trap_source:
+            type: str
+            description: Source address for traps.
+          trap_targets:
+            type: list
+            elements: dict
+            default: []
+            description:
+              - SNMPv2c trap receivers.
+              - Configured with vyos.vyos.vyos_config because
+                vyos.vyos.vyos_snmp_server drops the community and port of a
+                trap target and supports only one.
+            options:
+              address:
+                type: str
+                required: true
+                description: Receiver address.
+              community:
+                type: str
+                no_log: true
+                description: Community sent with traps.
+              port:
+                type: int
+                description: Receiver port.
+          v3:
+            type: dict
+            description:
+              - SNMPv3 settings, passed through unchanged as the C(snmp_v3) option
+                of vyos.vyos.vyos_snmp_server (users, groups, views,
+                trap_targets, engine_id).
+      management_syslog_hosts:
+        type: list
+        elements: dict
+        default: []
+        description: Remote syslog destinations.
+        options:
+          host:
+            type: str
+            required: true
+            description: Syslog server hostname or address.
+          port:
+            type: int
+            description: Destination port.
+          protocol:
+            type: str
+            choices: [udp, tcp]
+            description: Transport protocol.
+          facility:
+            type: str
+            default: all
+            description: Facility to forward.
+          level:
+            type: str
+            default: info
+            description: Minimum severity to forward.
+      management_ntp_servers:
+        type: list
+        elements: str
+        default: []
+        description: NTP server hostnames or addresses.
+      management_radius:
+        type: dict
+        description:
+          - RADIUS authentication for CLI/SSH logins. Omit to leave it untouched.
+          - Keep a local user as fallback; RADIUS-only lockouts are hard to recover.
+        options:
+          servers:
+            type: list
+            elements: dict
+            required: true
+            description: RADIUS servers, tried in order.
+            options:
+              address:
+                type: str
+                required: true
+                description: Server address.
+              key:
+                type: str
+                required: true
+                no_log: true
+                description: Shared secret.
+              port:
+                type: int
+                description: Authentication port (VyOS default 1812).
+              timeout:
+                type: int
+                description: Query timeout in seconds.
+              disable:
+                type: bool
+                default: false
+                description: Keep the server configured but unused.
+          source_address:
+            type: str
+            description: Source address for RADIUS queries.
+          vrf:
+            type: str
+            description: VRF used to reach the servers.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the management role
+    description:
+      - Run with C(tasks_from=verify). Uses the same inputs as C(main).
+      - Checks that every configured item is present in the committed configuration.
+    options:
+      management_snmp:
+        type: dict
+        description: Same value as for C(main).
+      management_syslog_hosts:
+        type: list
+        elements: dict
+        default: []
+        description: Same value as for C(main).
+      management_ntp_servers:
+        type: list
+        elements: str
+        default: []
+        description: Same value as for C(main).
+      management_radius:
+        type: dict
+        description: Same value as for C(main).

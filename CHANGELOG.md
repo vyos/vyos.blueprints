@@ -28,3 +28,4 @@
 - New roles `mpls_ldp` and `l3vpn`; `vrf_lite` gains `label vpn export`, VRF networks and CE `as-override`; `bgp` gains log-neighbor-changes (docs blueprint "L3VPN for Hub-and-Spoke connectivity with VyOS").
 - New role `l2tp_lns` (docs blueprint "PPPoE over L2TP"); its Molecule scenario is experimental.
 - New role `dmvpn`; `gre_tunnel` gains GRE key and enable-multicast; `ospf` gains interface area, `passive disable`, `passive-interface default` and an optional router-id (docs blueprint "DMVPN Dual HUB Dual Cloud").
+- New role `management`: SNMP (communities, v3, trap targets), remote syslog, NTP and RADIUS login; secrets are masked in rendered output.
