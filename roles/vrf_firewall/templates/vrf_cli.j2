@@ -1,0 +1,15 @@
+{# VRF bindings for non-plain-ethernet interfaces, and inter-VRF leak routes. #}
+{% for v in vrf_firewall_vrfs %}
+{%   for i in v.interfaces | default([]) if i is not match('^eth\d+$') %}
+{%     set m = i | regex_search('^([a-z]+)(\d+)(?:\.(\d+))?$', '\\1', '\\2', '\\3') %}
+{%     set kind = _vrf_firewall_iftypes[m[0]] %}
+{%     if m[2] %}
+set interfaces {{ kind }} {{ m[0] ~ m[1] }} vif {{ m[2] }} vrf '{{ v.name }}'
+{%     else %}
+set interfaces {{ kind }} {{ i }} vrf '{{ v.name }}'
+{%     endif %}
+{%   endfor %}
+{%   for r in v.routes | default([]) if r.vrf is defined %}
+set vrf name {{ v.name }} protocols static route {{ r.dest }} interface {{ r.interface }} vrf '{{ r.vrf }}'
+{%   endfor %}
+{% endfor %}

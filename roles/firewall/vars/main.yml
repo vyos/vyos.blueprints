@@ -1,0 +1,3 @@
+---
+_firewall_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_firewall_filters: [input, forward, output]

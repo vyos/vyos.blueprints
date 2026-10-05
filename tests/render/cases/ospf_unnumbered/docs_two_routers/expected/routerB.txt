@@ -1,0 +1,12 @@
+set interfaces ethernet eth1 address '192.168.0.2/32'
+set interfaces ethernet eth2 address '192.168.0.2/32'
+set interfaces loopback lo address '192.168.0.2/32'
+set protocols ospf area '0.0.0.0'
+set protocols ospf area 0.0.0.0 authentication md5
+set protocols ospf area 0.0.0.0 network 192.168.0.2/32
+set protocols ospf interface eth1 authentication md5 key-id 1 md5-key '********'
+set protocols ospf interface eth1 network point-to-point
+set protocols ospf interface eth2 authentication md5 key-id 1 md5-key '********'
+set protocols ospf interface eth2 network point-to-point
+set protocols ospf parameters router-id '192.168.0.2'
+set protocols ospf redistribute connected

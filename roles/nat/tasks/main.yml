@@ -1,0 +1,15 @@
+---
+- name: Configure source and destination NAT
+  vyos.vyos.vyos_nat:
+    config:
+      nat: >-
+        {{ ({'source': {'rule': nat_source_rules}} if nat_source_rules else {})
+           | combine({'destination': {'rule': nat_destination_rules}} if nat_destination_rules else {}) }}
+    state: "{{ _nat_state }}"
+  register: _nat_r
+  when: (nat_source_rules | length > 0) or (nat_destination_rules | length > 0)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + (_nat_r.rendered | default([])) }}"
+  when: vyos_blueprints_render_only | default(false) | bool

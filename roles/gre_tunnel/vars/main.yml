@@ -1,0 +1,11 @@
+---
+_gre_tunnel_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_gre_tunnel_cli_lines: "{{ (lookup('ansible.builtin.template', 'tunnels.j2') or '').splitlines() | select | list }}"
+_gre_tunnel_l3: >-
+  {%- set out = [] -%}
+  {%- for t in gre_tunnel_interfaces if t.addresses | default([]) -%}
+  {%-   set addrs = [] -%}
+  {%-   for a in t.addresses -%}{%- set _ = addrs.append({'address': a}) -%}{%- endfor -%}
+  {%-   set _ = out.append({'name': t.name, 'ipv4': addrs}) -%}
+  {%- endfor -%}
+  {{ out }}

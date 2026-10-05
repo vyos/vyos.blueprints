@@ -1,0 +1,47 @@
+{%- macro rule_family(r) -%}
+{%-   set addrs = [r.source.address | default('') if r.source is defined and r.source else '',
+                   r.destination.address | default('') if r.destination is defined and r.destination else ''] | select | list -%}
+{%-   if r.family is defined and r.family -%}{{ r.family }}
+{%-   elif addrs | select('search', ':') | list -%}ipv6
+{%-   elif addrs -%}ipv4
+{%-   else -%}both
+{%-   endif -%}
+{%- endmacro -%}
+{% for afi in _zone_firewall_families %}
+- afi: {{ afi }}
+  rule_sets:
+{%   for p in _zone_firewall_policies %}
+    - name: {{ (p['from'] ~ '-' ~ p['to'] ~ ('-6' if afi == 'ipv6' else '')) | to_json }}
+      default_action: {{ p.default_action | default('drop') }}
+      enable_default_log: true
+      rules:
+{%     if zone_firewall_base_rules | bool %}
+        - number: 1
+          action: accept
+          state: {established: true, related: true}
+        - number: 2
+          action: drop
+          log: enable
+          state: {invalid: true}
+{%     endif %}
+{%     for r in p.rules | default([]) if rule_family(r) in [afi, 'both'] %}
+        - number: {{ r.number | int }}
+          action: {{ r.action | default('accept') }}
+{%       if r.description is defined %}
+          description: {{ r.description | to_json }}
+{%       endif %}
+{%       if r.protocol is defined %}
+          protocol: {{ ('ipv6-icmp' if (afi == 'ipv6' and r.protocol == 'icmp') else r.protocol) | to_json }}
+{%       endif %}
+{%       if r.log | default(zone_firewall_log_rules) | bool %}
+          log: enable
+{%       endif %}
+{%       for side in ['source', 'destination'] if r[side] is defined and r[side] %}
+          {{ side }}:
+{%         for k in ['address', 'port'] if r[side][k] is defined %}
+            {{ k }}: {{ r[side][k] | string | to_json }}
+{%         endfor %}
+{%       endfor %}
+{%     endfor %}
+{%   endfor %}
+{% endfor %}

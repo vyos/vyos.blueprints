@@ -1,0 +1,63 @@
+name: bridge-firewall
+topology:
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+      image: ${VYOS_IMAGE:=vyos:latest}
+    h1:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 192.168.0.1/24 dev eth1
+        - ip -6 addr add fd00:b0::1/64 dev eth1
+    h2:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 192.168.0.2/24 dev eth1
+        - ip -6 addr add fd00:b0::2/64 dev eth1
+    h3:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 10.1.1.102/24 dev eth1
+        - ip route replace default via 10.1.1.1
+    h4:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 10.1.1.103/24 dev eth1
+        - ip route replace default via 10.1.1.1
+    h5:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 10.2.2.5/24 dev eth1
+        - ip route replace default via 10.2.2.1
+    h6:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 10.2.2.6/24 dev eth1
+        - ip route replace default via 10.2.2.1
+    h7:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 10.2.2.7/24 dev eth1
+        - ip route replace default via 10.2.2.1
+    wan:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 203.0.113.100/24 dev eth1
+        - ip route replace default via 203.0.113.1
+  links:
+    - endpoints: ["r1:eth1", "h1:eth1"]
+    - endpoints: ["r1:eth2", "h2:eth1"]
+    - endpoints: ["r1:eth3", "h3:eth1"]
+    - endpoints: ["r1:eth4", "h4:eth1"]
+    - endpoints: ["r1:eth5", "h5:eth1"]
+    - endpoints: ["r1:eth6", "h6:eth1"]
+    - endpoints: ["r1:eth7", "h7:eth1"]
+    - endpoints: ["r1:eth8", "wan:eth1"]

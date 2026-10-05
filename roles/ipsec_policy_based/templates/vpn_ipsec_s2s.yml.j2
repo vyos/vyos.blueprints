@@ -1,0 +1,29 @@
+peer:
+{% for p in ipsec_policy_based_peers %}
+  - name: {{ p.name | to_json }}
+    authentication:
+      mode: pre-shared-secret
+{%   if p.authentication_ids | default(true) | bool %}
+      local_id: {{ p.local_id | default(p.local_address) | to_json }}
+      remote_id: {{ p.remote_id | default(p.remote_address) | to_json }}
+{%   endif %}
+    connection_type: {{ p.connection_type | default('initiate') }}
+    default_esp_group: {{ ipsec_policy_based_esp_group.name | default('ESP-GROUP') | to_json }}
+    ike_group: {{ ipsec_policy_based_ike_group.name | default('IKE-GROUP') | to_json }}
+    local_address: {{ p.local_address | to_json }}
+    remote_address: [{{ p.remote_address | to_json }}]
+{%   if p.virtual_address is defined %}
+    virtual_address: [{{ p.virtual_address | to_json }}]
+{%   endif %}
+    tunnel:
+{%   for t in p.tunnels %}
+      - tunnel_id: {{ t.id | default(loop.index) | int }}
+        local:
+          prefix: [{{ t.local_prefix | to_json }}]
+        remote:
+          prefix: [{{ t.remote_prefix | to_json }}]
+{%     if t.protocol is defined %}
+        protocol: {{ t.protocol | to_json }}
+{%     endif %}
+{%   endfor %}
+{% endfor %}

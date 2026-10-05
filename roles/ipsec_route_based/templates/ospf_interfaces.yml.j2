@@ -1,0 +1,12 @@
+{% for i in _ipsec_route_based_ospf.passive_interfaces | default([]) %}
+- name: {{ i }}
+  address_family:
+    - afi: ipv4
+      passive: true
+{% endfor %}
+{% for p in ipsec_route_based_peers %}
+- name: {{ p.vti.interface }}
+  address_family:
+    - afi: ipv4
+      network: point-to-point
+{% endfor %}

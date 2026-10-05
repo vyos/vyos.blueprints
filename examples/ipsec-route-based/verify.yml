@@ -1,0 +1,9 @@
+---
+- name: Check the VPN
+  hosts: vpn
+  gather_facts: false
+  tasks:
+    - name: IPsec and OSPF checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ipsec_route_based
+        tasks_from: verify

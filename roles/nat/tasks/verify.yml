@@ -1,0 +1,25 @@
+---
+- name: Read NAT rules
+  vyos.vyos.vyos_command:
+    commands:
+      - show nat source rules
+      - show nat destination rules
+  register: _nat_v
+
+- name: Every source NAT rule is installed
+  ansible.builtin.assert:
+    that: _nat_v.stdout[0] is search('(?m)^\s*' ~ item.id ~ '\b')
+    fail_msg: "source NAT rule {{ item.id }} is not installed"
+    quiet: true
+  loop: "{{ nat_source_rules }}"
+  loop_control:
+    label: "{{ item.id }}"
+
+- name: Every destination NAT rule is installed
+  ansible.builtin.assert:
+    that: _nat_v.stdout[1] is search('(?m)^\s*' ~ item.id ~ '\b')
+    fail_msg: "destination NAT rule {{ item.id }} is not installed"
+    quiet: true
+  loop: "{{ nat_destination_rules }}"
+  loop_control:
+    label: "{{ item.id }}"

@@ -1,0 +1,11 @@
+---
+vrf_firewall_bind_to_all: true
+vrf_firewall_forward_rules: []
+vrf_firewall_forward_default_action: drop
+vrf_firewall_input_rules: []
+vrf_firewall_input_default_action: drop
+vrf_firewall_default_log: true
+vrf_firewall_state_policy:
+  established: accept
+  related: accept
+  invalid: drop

@@ -1,0 +1,9 @@
+---
+- name: Check the OSPF fabric
+  hosts: fabric
+  gather_facts: false
+  tasks:
+    - name: OSPF checks (all routers in one play for the route checks)
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ospf_unnumbered
+        tasks_from: verify

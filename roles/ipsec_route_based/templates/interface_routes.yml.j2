@@ -1,0 +1,5 @@
+{% for r in ipsec_route_based_interface_routes %}
+- dest: {{ r.dest | to_json }}
+  next_hops:
+    - interface: {{ r.interface | to_json }}
+{% endfor %}

@@ -1,0 +1,18 @@
+---
+# docs.vyos.io/en/1.5/configexamples/ipsec-cisco-route-based.html
+# "vyos" is the router this collection configures. "cisco" is a second VyOS in
+# the lab standing in for the page's Cisco router; on a real network, configure
+# the Cisco side as shown on the page and remove it from this inventory.
+all:
+  children:
+    vpn:
+      hosts:
+        vyos:
+          ansible_host: clab-ipsec-route-based-vyos   # your router's address
+        cisco:
+          ansible_host: clab-ipsec-route-based-cisco
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: admin
+    ansible_password: admin                        # use ansible-vault for real devices

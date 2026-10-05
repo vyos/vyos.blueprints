@@ -1,0 +1,28 @@
+zone:
+{% for z in zone_firewall_zones %}
+  - name: {{ z.name | to_json }}
+    default_action: {{ z.default_action | default('drop') }}
+{%   if z.default_log | default(true) | bool %}
+    default_log: true
+{%   endif %}
+{%   if z.description is defined %}
+    description: {{ z.description | to_json }}
+{%   endif %}
+{%   if z.local | default(false) | bool %}
+    local_zone: true
+{%   else %}
+    interfaces: {{ z.interfaces | default([]) | to_json }}
+{%   endif %}
+{%   set srcs = _zone_firewall_policies | selectattr('to', 'equalto', z.name) | list %}
+{%   if srcs %}
+    sources:
+{%     for p in srcs %}
+      - zone: {{ p['from'] | to_json }}
+        firewall:
+          name: {{ (p['from'] ~ '-' ~ z.name) | to_json }}
+{%       if zone_firewall_ipv6 | bool %}
+          ipv6_name: {{ (p['from'] ~ '-' ~ z.name ~ '-6') | to_json }}
+{%       endif %}
+{%     endfor %}
+{%   endif %}
+{% endfor %}

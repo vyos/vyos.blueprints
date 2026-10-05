@@ -1,0 +1,29 @@
+---
+- name: Verify role state
+  hosts: vpn
+  gather_facts: false
+  tasks:
+    - name: Wait for IKE, IPsec and OSPF
+      ansible.builtin.pause:
+        seconds: 45
+      run_once: true
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ipsec_route_based
+        tasks_from: verify
+
+- name: Verify traffic through the tunnel, as in the page's "Checking Connectivity"
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Ping across the VPN in both directions
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-ipsec-{{ item.from }} ping -c 3 -W 2 {{ item.to }}
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      changed_when: false
+      loop:
+        - {from: pc1, to: 192.168.10.2}
+        - {from: pc3, to: 192.168.0.2}
+      loop_control:
+        label: "{{ item.from }} -> {{ item.to }}"

@@ -1,0 +1,9 @@
+---
+- name: Check the zone firewall
+  hosts: firewall
+  gather_facts: false
+  tasks:
+    - name: Zone checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.zone_firewall
+        tasks_from: verify

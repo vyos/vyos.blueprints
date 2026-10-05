@@ -1,0 +1,7 @@
+as_number: {{ bgp_unnumbered_asn | int }}
+bgp_params:
+  router_id: {{ bgp_unnumbered_router_id | to_json }}
+  bestpath:
+    compare_routerid: true
+  default:
+    no_ipv4_unicast: true

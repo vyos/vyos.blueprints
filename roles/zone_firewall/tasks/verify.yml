@@ -1,0 +1,24 @@
+---
+- name: Read zone policy
+  vyos.vyos.vyos_command:
+    commands:
+      - show firewall zone-policy
+  register: _zone_firewall_v
+
+- name: Every zone is active
+  ansible.builtin.assert:
+    that: _zone_firewall_v.stdout[0] is search('(?m)^\s*' ~ (item.name | regex_escape) ~ '\s')
+    fail_msg: "zone {{ item.name }} is missing from 'show firewall zone-policy'"
+    quiet: true
+  loop: "{{ zone_firewall_zones }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Member interfaces are bound
+  ansible.builtin.assert:
+    that: _zone_firewall_v.stdout[0] is search('\b' ~ (item.1 | regex_escape) ~ '\b')
+    fail_msg: "interface {{ item.1 }} of zone {{ item.0.name }} is not bound"
+    quiet: true
+  loop: "{{ zone_firewall_zones | subelements('interfaces', skip_missing=true) }}"
+  loop_control:
+    label: "{{ item.0.name }} {{ item.1 }}"

@@ -1,0 +1,17 @@
+---
+# docs.vyos.io/en/1.5/configexamples/policy-based-ipsec-and-firewall.html
+# Shared IPsec settings, as on the page (both routers)
+ipsec_policy_based_ike_group:
+  name: IKE-GROUP
+  key_exchange: ikev2
+  proposal_id: 1
+  dh_group: 14
+  encryption: aes256
+  hash: sha256
+ipsec_policy_based_esp_group:
+  name: ESP-GROUP
+  mode: tunnel
+  proposal_id: 1
+  encryption: aes256
+  hash: sha256
+ipsec_policy_based_interfaces: [eth0]

@@ -1,0 +1,20 @@
+---
+- name: Create the tunnel interfaces
+  # vyos_interfaces cannot set encapsulation or endpoints, and a tunnel must
+  # be created with them in one commit, so this goes through vyos_config.
+  vyos.vyos.vyos_config:
+    lines: "{{ _gre_tunnel_cli_lines }}"
+  register: _gre_tunnel_r_cli
+  when: not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Address the tunnel interfaces
+  vyos.vyos.vyos_l3_interfaces:
+    config: "{{ _gre_tunnel_l3 }}"
+    state: "{{ _gre_tunnel_state }}"
+  register: _gre_tunnel_r_l3
+  when: _gre_tunnel_l3 | length > 0
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + _gre_tunnel_cli_lines + (_gre_tunnel_r_l3.rendered | default([])) }}"
+  when: vyos_blueprints_render_only | default(false) | bool

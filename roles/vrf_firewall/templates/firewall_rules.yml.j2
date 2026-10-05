@@ -1,0 +1,45 @@
+{% macro rules(lst) %}
+{%   for r in lst %}
+        - number: {{ r.number | int }}
+          action: {{ r.action | default('accept') }}
+{%     if r.description is defined %}
+          description: {{ r.description | to_json }}
+{%     endif %}
+{%     if r.protocol is defined %}
+          protocol: {{ r.protocol | to_json }}
+{%     endif %}
+{%     if r.log | default(false) | bool %}
+          log: enable
+{%     endif %}
+{%     for side in ['inbound_interface', 'outbound_interface'] if r[side] is defined %}
+          {{ side }}:
+            name: {{ r[side] | to_json }}
+{%     endfor %}
+{%     for side in ['source', 'destination'] if r[side] is defined and r[side] %}
+          {{ side }}:
+{%       for k in ['address', 'port'] if r[side][k] is defined %}
+            {{ k }}: {{ r[side][k] | string | to_json }}
+{%       endfor %}
+{%     endfor %}
+{%   endfor %}
+{% endmacro %}
+- afi: ipv4
+  rule_sets:
+    - filter: forward
+      default_action: {{ vrf_firewall_forward_default_action }}
+{% if vrf_firewall_default_log | bool %}
+      enable_default_log: true
+{% endif %}
+{% if vrf_firewall_forward_rules %}
+      rules:
+{{ rules(vrf_firewall_forward_rules) -}}
+{% endif %}
+    - filter: input
+      default_action: {{ vrf_firewall_input_default_action }}
+{% if vrf_firewall_default_log | bool %}
+      enable_default_log: true
+{% endif %}
+{% if vrf_firewall_input_rules %}
+      rules:
+{{ rules(vrf_firewall_input_rules) -}}
+{% endif %}

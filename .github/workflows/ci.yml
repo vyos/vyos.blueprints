@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [base, edge_nat, ha_vrrp]
+        scenario: [base, edge_nat, ha_vrrp, ospf_unnumbered, bgp_unnumbered, zone_firewall, vrf_firewall, bridge_firewall, ipsec_route_based, ipsec_policy_based, policy_ipsec_firewall, gre_tunnel, ipsec_route_based_bgp, ipsec_route_based_bgp_dual]
     steps:
       - uses: actions/checkout@v4
         with:

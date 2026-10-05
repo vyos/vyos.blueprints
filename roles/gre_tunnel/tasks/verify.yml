@@ -1,0 +1,15 @@
+---
+- name: Read interfaces
+  vyos.vyos.vyos_command:
+    commands:
+      - show interfaces
+  register: _gre_tunnel_v
+
+- name: Every tunnel interface is up
+  ansible.builtin.assert:
+    that: _gre_tunnel_v.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '\s.*\bu/u\b')
+    fail_msg: "tunnel {{ item.name }} is not up"
+    quiet: true
+  loop: "{{ gre_tunnel_interfaces }}"
+  loop_control:
+    label: "{{ item.name }}"

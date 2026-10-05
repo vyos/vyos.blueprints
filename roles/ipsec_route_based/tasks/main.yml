@@ -1,0 +1,113 @@
+---
+- name: Peers sharing a PSK entry use the same key
+  ansible.builtin.assert:
+    that: >-
+      ipsec_route_based_peers | selectattr('psk_name', 'defined') | selectattr('psk_name', 'equalto', _ipsec_route_based_psk_name)
+      | map(attribute='psk') | unique | length == 1
+    fail_msg: "peers with psk_name {{ _ipsec_route_based_psk_name }} have different psk values"
+    quiet: true
+  loop: "{{ ipsec_route_based_peers | selectattr('psk_name', 'defined') | map(attribute='psk_name') | unique | list }}"
+  loop_control:
+    loop_var: _ipsec_route_based_psk_name
+  no_log: true
+
+- name: Create the VTIs
+  vyos.vyos.vyos_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'vti.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_vti
+
+- name: Clamp TCP MSS on the VTIs
+  # vyos_interfaces has no option for ip adjust-mss.
+  vyos.vyos.vyos_config:
+    lines: "{{ _ipsec_route_based_cli_lines }}"
+  register: _ipsec_route_based_r_cli
+  when:
+    - _ipsec_route_based_cli_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Address the VTIs
+  vyos.vyos.vyos_l3_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'vti_l3.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_vti_l3
+
+- name: Configure IKE/ESP groups, pre-shared keys and options
+  vyos.vyos.vyos_vpn_ipsec:
+    config: "{{ lookup('ansible.builtin.template', 'vpn_ipsec.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_ipsec
+  no_log: true
+
+- name: Configure the site-to-site peers
+  vyos.vyos.vyos_vpn_ipsec_s2s:
+    config: "{{ lookup('ansible.builtin.template', 'vpn_ipsec_s2s.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_s2s
+
+- name: Add the default route towards the WAN gateway
+  vyos.vyos.vyos_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: 0.0.0.0/0
+                next_hops:
+                  - forward_router_address: "{{ ipsec_route_based_default_gateway }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_route
+  when: ipsec_route_based_default_gateway | length > 0
+
+- name: Add interface routes through the VTIs (e.g. to the peer's BGP listener)
+  vyos.vyos.vyos_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes: "{{ lookup('ansible.builtin.template', 'interface_routes.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_ifroutes
+  when: ipsec_route_based_interface_routes | length > 0
+
+- name: Run BGP over the VTIs
+  vyos.vyos.vyos_bgp_global:
+    config: "{{ lookup('ansible.builtin.template', 'bgp_global.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_bgp
+  when: _ipsec_route_based_bgp | length > 0
+
+- name: Set BGP address-family options (networks, soft-reconfiguration)
+  vyos.vyos.vyos_bgp_address_family:
+    config: "{{ _ipsec_route_based_bgp_af }}"
+    state: "{{ _ipsec_route_based_state }}"
+  vars:
+    _ipsec_route_based_bgp_af: "{{ lookup('ansible.builtin.template', 'bgp_address_family.yml.j2') | from_yaml }}"
+  register: _ipsec_route_based_r_bgp_af
+  when:
+    - _ipsec_route_based_bgp | length > 0
+    - _ipsec_route_based_bgp_af | length > 1
+
+- name: Run OSPF over the VTIs
+  vyos.vyos.vyos_ospfv2:
+    config: "{{ lookup('ansible.builtin.template', 'ospfv2.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_ospf
+  when: _ipsec_route_based_ospf | length > 0
+
+- name: Set OSPF interface options (point-to-point VTIs, passive LANs)
+  vyos.vyos.vyos_ospf_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'ospf_interfaces.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_ospf_if
+  when: _ipsec_route_based_ospf | length > 0
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + (_ipsec_route_based_r_vti.rendered | default([]))
+         + _ipsec_route_based_cli_lines
+         + ([_ipsec_route_based_r_vti_l3, _ipsec_route_based_r_ipsec, _ipsec_route_based_r_s2s,
+             _ipsec_route_based_r_route, _ipsec_route_based_r_ifroutes, _ipsec_route_based_r_bgp,
+             _ipsec_route_based_r_bgp_af, _ipsec_route_based_r_ospf, _ipsec_route_based_r_ospf_if]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten | unique) }}
+  when: vyos_blueprints_render_only | default(false) | bool

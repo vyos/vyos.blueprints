@@ -1,0 +1,11 @@
+as_number: {{ bgp_unnumbered_asn | int }}
+address_family:
+{% for afi in bgp_unnumbered_address_families %}
+  - afi: {{ afi }}
+{%   if bgp_unnumbered_redistribute %}
+    redistribute:
+{%     for r in bgp_unnumbered_redistribute %}
+      - protocol: {{ r }}
+{%     endfor %}
+{%   endif %}
+{% endfor %}

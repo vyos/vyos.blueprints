@@ -1,0 +1,13 @@
+name: bgp-unnumbered
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:latest}
+  nodes:
+    routerA:
+      kind: vyosnetworks_vyos
+    routerB:
+      kind: vyosnetworks_vyos
+  links:
+    - endpoints: ["routerA:eth1", "routerB:eth1"]
+    - endpoints: ["routerA:eth2", "routerB:eth2"]

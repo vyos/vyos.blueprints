@@ -1,0 +1,42 @@
+group:
+{% if firewall_groups.network | default([]) %}
+  network_group:
+{%   for g in firewall_groups.network %}
+    - name: {{ g.name | to_json }}
+      afi: ipv4
+{%     if g.description is defined %}
+      description: {{ g.description | to_json }}
+{%     endif %}
+      members:
+{%     for n in g.networks %}
+        - address: {{ n | to_json }}
+{%     endfor %}
+{%   endfor %}
+{% endif %}
+{% if firewall_groups.address | default([]) %}
+  address_group:
+{%   for g in firewall_groups.address %}
+    - name: {{ g.name | to_json }}
+      afi: ipv4
+{%     if g.description is defined %}
+      description: {{ g.description | to_json }}
+{%     endif %}
+      members:
+{%     for a in g.addresses %}
+        - address: {{ a | to_json }}
+{%     endfor %}
+{%   endfor %}
+{% endif %}
+{% if firewall_groups.port | default([]) %}
+  port_group:
+{%   for g in firewall_groups.port %}
+    - name: {{ g.name | to_json }}
+{%     if g.description is defined %}
+      description: {{ g.description | to_json }}
+{%     endif %}
+      members:
+{%     for p in g.ports %}
+        - port: {{ p | string | to_json }}
+{%     endfor %}
+{%   endfor %}
+{% endif %}

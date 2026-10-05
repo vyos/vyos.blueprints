@@ -1,0 +1,16 @@
+set interfaces loopback lo address '192.168.0.1/32'
+set protocols bgp address-family ipv4-unicast redistribute connected
+set protocols bgp address-family ipv6-unicast redistribute connected
+set protocols bgp neighbor eth1 interface v6only
+set protocols bgp neighbor eth1 interface v6only peer-group 'fabric'
+set protocols bgp neighbor eth2 interface v6only
+set protocols bgp neighbor eth2 interface v6only peer-group 'fabric'
+set protocols bgp parameters bestpath as-path multipath-relax
+set protocols bgp parameters bestpath compare-routerid
+set protocols bgp parameters default no-ipv4-unicast
+set protocols bgp parameters router-id 192.168.0.1
+set protocols bgp peer-group fabric address-family ipv4-unicast
+set protocols bgp peer-group fabric address-family ipv6-unicast
+set protocols bgp peer-group fabric capability extended-nexthop
+set protocols bgp peer-group fabric remote-as 'external'
+set protocols bgp system-as 64496

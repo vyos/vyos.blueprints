@@ -1,0 +1,9 @@
+---
+- name: Check both Azure tunnels
+  hosts: onprem
+  gather_facts: false
+  tasks:
+    - name: IPsec and BGP checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ipsec_route_based
+        tasks_from: verify

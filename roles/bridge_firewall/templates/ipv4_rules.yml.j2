@@ -1,0 +1,54 @@
+{#- IPv4 firewall for routed traffic and router access, via vyos_firewall_rules. -#}
+{% set routed = bridge_firewall_bridges | selectattr('ip_forward', 'defined') | list %}
+{% set access = bridge_firewall_bridges | selectattr('router_access', 'defined') | list %}
+- afi: ipv4
+  rule_sets:
+{% if access %}
+    - filter: input
+      rules:
+{%   if bridge_firewall_state_rules | bool %}
+        - {number: 10, action: accept, state: {established: true, related: true}}
+        - {number: 20, action: drop, state: {invalid: true}}
+{%   endif %}
+{%   for b in access %}
+        - number: {{ 100 + loop.index * 10 }}
+          action: {{ 'accept' if b.router_access == 'accept' else 'drop' }}
+          description: {{ ((b.router_access == 'accept') | ternary('Accept access from ', 'Deny access from ') ~ b.name) | to_json }}
+          inbound_interface: {group: {{ (b.name ~ '-ifaces') | to_json }}}
+{%   endfor %}
+{% endif %}
+{% if routed %}
+    - filter: forward
+      default_action: {{ bridge_firewall_ipv4_forward_default_action }}
+      rules:
+{%   if bridge_firewall_state_rules | bool %}
+        - {number: 5, action: accept, state: {established: true, related: true}}
+        - {number: 10, action: drop, state: {invalid: true}}
+{%   endif %}
+{%   for b in routed %}
+        - number: {{ 100 + loop.index * 10 }}
+          action: jump
+          description: {{ (b.name ~ ' traffic') | to_json }}
+          inbound_interface: {group: {{ (b.name ~ '-ifaces') | to_json }}}
+          jump_target: {{ ('ip-' ~ b.name ~ '-fwd') | to_json }}
+{%   endfor %}
+{%   for b in routed %}
+    - name: {{ ('ip-' ~ b.name ~ '-fwd') | to_json }}
+      default_action: {{ b.ip_forward.default_action | default('drop') }}
+{%     if b.ip_forward.rules | default([]) %}
+      rules:
+{%       for r in b.ip_forward.rules %}
+        - number: {{ r.number | int }}
+          action: {{ r.action | default('accept') }}
+{%         if r.description is defined %}
+          description: {{ r.description | to_json }}
+{%         endif %}
+{%         if r.outbound_interface is defined %}
+          outbound_interface: {name: {{ r.outbound_interface | to_json }}}
+{%         elif r.outbound_bridge is defined %}
+          outbound_interface: {group: {{ (r.outbound_bridge ~ '-ifaces') | to_json }}}
+{%         endif %}
+{%       endfor %}
+{%     endif %}
+{%   endfor %}
+{% endif %}

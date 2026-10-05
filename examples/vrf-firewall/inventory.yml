@@ -1,0 +1,13 @@
+---
+# docs.vyos.io/en/1.5/configexamples/fwall-and-vrf.html
+all:
+  children:
+    router:
+      hosts:
+        r1:
+          ansible_host: clab-vrf-firewall-r1   # your router's address
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: admin
+    ansible_password: admin                 # use ansible-vault for real devices

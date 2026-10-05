@@ -1,0 +1,139 @@
+---
+argument_specs:
+  main:
+    short_description: VRFs with route leaking and firewall (docs blueprint "VRF and firewall example")
+    description:
+      - Creates VRFs with their routing tables, puts interfaces (including
+        VLANs) into them, adds static routes including routes into another VRF
+        (route leaking), sets the global state policy and configures the IPv4
+        forward and input filters.
+      - Interface addressing belongs to C(vyos.blueprints.base); PPPoE is not
+        configured here.
+      - VLAN, PPPoE and other non-ethernet VRF bindings and inter-VRF routes
+        use vyos.vyos.vyos_config, because vyos_interfaces and vyos_vrf cannot
+        express them yet. Everything else uses resource modules.
+      - In firewall rules, match an interface in a non-default VRF by the VRF
+        name for C(inbound_interface) and by the interface name for
+        C(outbound_interface), as the docs page explains.
+      - B(Lockout risk) - the input filter defaults to drop. Allow the
+        interface or VRF you manage the router through before running the role.
+    options:
+      vrf_firewall_vrfs:
+        type: list
+        elements: dict
+        required: true
+        description: VRFs.
+        options:
+          name:
+            type: str
+            required: true
+            description: VRF name, e.g. C(MGMT).
+          table:
+            type: int
+            required: true
+            description: Routing table id.
+          description:
+            type: str
+            description: VRF description.
+          interfaces:
+            type: list
+            elements: str
+            default: []
+            description: Member interfaces, e.g. C(eth1), C(eth2.150), C(pppoe0).
+          routes:
+            type: list
+            elements: dict
+            default: []
+            description: IPv4 static routes in this VRF.
+            options:
+              dest:
+                type: str
+                required: true
+                description: Destination prefix.
+              interface:
+                type: str
+                description: Outgoing interface.
+              vrf:
+                type: str
+                description: VRF the interface belongs to, for routes into another VRF.
+              next_hop:
+                type: str
+                description: Next-hop address (routes within this VRF only).
+      vrf_firewall_bind_to_all:
+        type: bool
+        default: true
+        description: Set C(vrf bind-to-all), as on the docs page.
+      vrf_firewall_forward_rules:
+        type: list
+        elements: dict
+        default: []
+        description: Rules for traffic between VRFs (C(firewall ipv4 forward filter)).
+        options: &rule
+          number:
+            type: int
+            required: true
+            description: Rule number.
+          action:
+            type: str
+            choices: [accept, drop, reject]
+            default: accept
+            description: Rule action.
+          description:
+            type: str
+            description: Rule description.
+          inbound_interface:
+            type: str
+            description: Inbound interface or VRF name; wildcards like C(eth2*) allowed.
+          outbound_interface:
+            type: str
+            description: Outbound interface name; wildcards allowed.
+          protocol:
+            type: str
+            description: Protocol.
+          source:
+            type: dict
+            description: Source match (C(address), C(port)).
+          destination:
+            type: dict
+            description: Destination match (C(address), C(port)).
+          log:
+            type: bool
+            default: false
+            description: Log matches.
+      vrf_firewall_forward_default_action:
+        type: str
+        choices: [accept, drop, reject]
+        default: drop
+        description: Forward filter default action.
+      vrf_firewall_input_rules:
+        type: list
+        elements: dict
+        default: []
+        description: Rules for traffic to the router itself (C(firewall ipv4 input filter)).
+        options: *rule
+      vrf_firewall_input_default_action:
+        type: str
+        choices: [accept, drop, reject]
+        default: drop
+        description: Input filter default action.
+      vrf_firewall_default_log:
+        type: bool
+        default: true
+        description: Log packets hitting the filters' default action.
+      vrf_firewall_state_policy:
+        type: dict
+        default: {established: accept, related: accept, invalid: drop}
+        description: Global state policy, connection type to action.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the vrf_firewall role
+    description: Run with C(tasks_from=verify). Checks every VRF exists with its member interfaces.
+    options:
+      vrf_firewall_vrfs:
+        type: list
+        elements: dict
+        required: true
+        description: Same value as for C(main).

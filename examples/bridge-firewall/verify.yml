@@ -1,0 +1,9 @@
+---
+- name: Check the bridges
+  hosts: bridge
+  gather_facts: false
+  tasks:
+    - name: Bridge checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.bridge_firewall
+        tasks_from: verify

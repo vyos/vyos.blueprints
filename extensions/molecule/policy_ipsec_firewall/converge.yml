@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: sites
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ipsec_policy_based
+    - vyos.blueprints.firewall
+    - vyos.blueprints.nat

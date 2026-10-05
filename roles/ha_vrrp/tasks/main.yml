@@ -21,7 +21,7 @@
   vyos.vyos.vyos_config:
     lines: "{{ _ha_vrrp_conntrack_lines }}"
   vars:
-    _ha_vrrp_conntrack_lines: "{{ lookup('ansible.builtin.template', 'conntrack_sync.j2').splitlines() | select | list }}"
+    _ha_vrrp_conntrack_lines: "{{ (lookup('ansible.builtin.template', 'conntrack_sync.j2') or '').splitlines() | select | list }}"
   register: _ha_vrrp_r_conntrack
   when:
     - _ha_vrrp_cs | length > 0
@@ -32,6 +32,6 @@
     vyos_blueprints_rendered: >-
       {{ vyos_blueprints_rendered | default([])
          + _ha_vrrp_r_vrrp.rendered | default([])
-         + ((lookup('ansible.builtin.template', 'conntrack_sync.j2').splitlines() | select | list)
+         + (((lookup('ansible.builtin.template', 'conntrack_sync.j2') or '').splitlines() | select | list)
             if _ha_vrrp_cs | length > 0 else []) }}
   when: vyos_blueprints_render_only | default(false) | bool

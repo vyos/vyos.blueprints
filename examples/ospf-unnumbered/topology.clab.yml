@@ -1,0 +1,25 @@
+name: ospf-unnumbered
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:latest}
+  nodes:
+    routerA:
+      kind: vyosnetworks_vyos
+    routerB:
+      kind: vyosnetworks_vyos
+    # shared 10.0.0.0/24 LAN, as on the docs page: a Linux bridge plus a test host
+    lan:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip link add br0 type bridge
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set br0 up
+        - ip addr add 10.0.0.10/24 dev br0
+  links:
+    - endpoints: ["routerA:eth1", "routerB:eth1"]
+    - endpoints: ["routerA:eth2", "routerB:eth2"]
+    - endpoints: ["routerA:eth3", "lan:eth1"]
+    - endpoints: ["routerB:eth3", "lan:eth2"]

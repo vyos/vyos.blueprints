@@ -1,0 +1,40 @@
+---
+- name: Put the router-id on the loopback
+  vyos.vyos.vyos_l3_interfaces:
+    config:
+      - name: lo
+        ipv4:
+          - address: "{{ bgp_unnumbered_router_id }}/32"
+    state: "{{ _bgp_unnumbered_state }}"
+  register: _bgp_unnumbered_r_lo
+
+- name: Configure the BGP process (AS, router-id, best-path)
+  vyos.vyos.vyos_bgp_global:
+    config: "{{ lookup('ansible.builtin.template', 'bgp_global.yml.j2') | from_yaml }}"
+    state: "{{ _bgp_unnumbered_state }}"
+  register: _bgp_unnumbered_r_global
+
+- name: Redistribute into each address family
+  vyos.vyos.vyos_bgp_address_family:
+    config: "{{ lookup('ansible.builtin.template', 'bgp_address_family.yml.j2') | from_yaml }}"
+    state: "{{ _bgp_unnumbered_state }}"
+  register: _bgp_unnumbered_r_af
+  when: bgp_unnumbered_redistribute | length > 0
+
+- name: Configure the peer-group and unnumbered neighbours
+  # Not expressible with vyos_bgp_global yet (interface v6only neighbours,
+  # peer-group definitions, remote-as external, multipath-relax).
+  vyos.vyos.vyos_config:
+    lines: "{{ _bgp_unnumbered_cli_lines }}"
+  register: _bgp_unnumbered_r_cli
+  when: not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_bgp_unnumbered_r_lo, _bgp_unnumbered_r_global, _bgp_unnumbered_r_af]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten
+            | unique)
+         + _bgp_unnumbered_cli_lines }}
+  when: vyos_blueprints_render_only | default(false) | bool

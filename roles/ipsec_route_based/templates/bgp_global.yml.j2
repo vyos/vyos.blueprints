@@ -1,0 +1,29 @@
+{% set b = _ipsec_route_based_bgp %}
+as_number: {{ b.asn | int }}
+{% if b.router_id is defined %}
+bgp_params:
+  router_id: {{ b.router_id | to_json }}
+{% endif %}
+neighbor:
+{% for n in b.neighbors %}
+  - address: {{ n.address | to_json }}
+    remote_as: {{ n.remote_as | int }}
+{%   if n.holdtime is defined or n.keepalive is defined %}
+    timers:
+{%     if n.holdtime is defined %}
+      holdtime: {{ n.holdtime | int }}
+{%     endif %}
+{%     if n.keepalive is defined %}
+      keepalive: {{ n.keepalive | int }}
+{%     endif %}
+{%   endif %}
+{%   if n.disable_connected_check | default(true) | bool %}
+    disable_connected_check: true
+{%   endif %}
+{%   if n.ebgp_multihop is defined %}
+    ebgp_multihop: {{ n.ebgp_multihop | int }}
+{%   endif %}
+{%   if n.update_source is defined %}
+    update_source: {{ n.update_source | to_json }}
+{%   endif %}
+{% endfor %}

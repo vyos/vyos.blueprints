@@ -1,0 +1,27 @@
+---
+- name: Read bridges and bridge firewall
+  vyos.vyos.vyos_command:
+    commands:
+      - show configuration commands
+      - show firewall bridge
+  register: _bridge_firewall_v
+
+- name: Every member interface is in its bridge
+  ansible.builtin.assert:
+    that: >-
+      _bridge_firewall_v.stdout[0] is search('set interfaces bridge ' ~ (item.0.name | regex_escape)
+      ~ ' member interface ' ~ (item.1.interface | regex_escape) ~ '\b')
+    fail_msg: "{{ item.1.interface }} is not a member of {{ item.0.name }}"
+    quiet: true
+  loop: "{{ bridge_firewall_bridges | subelements('members') }}"
+  loop_control:
+    label: "{{ item.0.name }} {{ item.1.interface }}"
+
+- name: Every bridge ruleset is active
+  ansible.builtin.assert:
+    that: _bridge_firewall_v.stdout[1] is search('name ' ~ item)
+    fail_msg: "bridge ruleset {{ item }} is not active"
+    quiet: true
+  loop: >-
+    {{ (bridge_firewall_bridges | selectattr('prerouting', 'defined') | map(attribute='name') | map('regex_replace', '$', '-pre') | list)
+       + (bridge_firewall_bridges | selectattr('forward', 'defined') | map(attribute='name') | map('regex_replace', '$', '-fwd') | list) }}

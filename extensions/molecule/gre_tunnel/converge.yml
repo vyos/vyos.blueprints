@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: gre
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.gre_tunnel

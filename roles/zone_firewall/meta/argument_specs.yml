@@ -1,0 +1,151 @@
+---
+argument_specs:
+  main:
+    short_description: Zone-based firewall (docs blueprint "Zone-Policy example")
+    description:
+      - Defines zones, one ruleset per zone-pair-direction named
+        C(<from>-<to>) for IPv4 and C(<from>-<to>-6) for IPv6, and binds the
+        rulesets to the zones, following the practices on the docs page.
+      - Every ruleset gets C(default-action drop), C(default-log) and the two
+        base rules from the page (1 accept established/related, 2 drop and log
+        invalid). Rules 1 and 2 are therefore reserved.
+      - With C(zone_firewall_all_pairs), rulesets are created for every zone
+        pair, including pairs that never communicate, so attempts are logged.
+      - Uses vyos.vyos.vyos_firewall_rules and vyos.vyos.vyos_firewall_global
+        (zone support requires a vyos.vyos release that includes it).
+      - B(Lockout risk) as the page warns - put the interface you manage the
+        router through into a zone with rules allowing SSH to the local zone
+        before running this role.
+    options:
+      zone_firewall_zones:
+        type: list
+        elements: dict
+        required: true
+        description: Zones. Exactly one may be the local zone (the router itself).
+        options:
+          name:
+            type: str
+            required: true
+            description: Zone name, e.g. C(lan).
+          interfaces:
+            type: list
+            elements: str
+            default: []
+            description: Member interfaces, e.g. C([eth0.20]). Not used for the local zone.
+          local:
+            type: bool
+            default: false
+            description: This zone is the router itself.
+          default_action:
+            type: str
+            choices: [drop, reject]
+            default: drop
+            description: Zone default action (zones cannot accept).
+          default_log:
+            type: bool
+            default: true
+            description: Log packets hitting the zone default action.
+          description:
+            type: str
+            description: Zone description.
+      zone_firewall_policies:
+        type: list
+        elements: dict
+        default: []
+        description: Rules per zone-pair-direction (traffic from C(from) to C(to)).
+        options:
+          from:
+            type: str
+            required: true
+            description: Source zone.
+          to:
+            type: str
+            required: true
+            description: Destination zone.
+          default_action:
+            type: str
+            choices: [drop, reject, accept]
+            default: drop
+            description: Ruleset default action, e.g. C(accept) for a management zone.
+          rules:
+            type: list
+            elements: dict
+            default: []
+            description: Rules added after the base rules.
+            options:
+              number:
+                type: int
+                required: true
+                description: Rule number (not 1 or 2 while base rules are on).
+              action:
+                type: str
+                choices: [accept, drop, reject]
+                default: accept
+                description: Rule action.
+              description:
+                type: str
+                description: Rule description.
+              protocol:
+                type: str
+                description:
+                  - Protocol, e.g. C(tcp), C(udp), C(tcp_udp), C(icmp).
+                  - C(icmp) becomes C(ipv6-icmp) in the IPv6 ruleset.
+              source:
+                type: dict
+                description: Source match.
+                options:
+                  address:
+                    type: str
+                    description: Address or network.
+                  port:
+                    type: str
+                    description: Port(s), e.g. C(22) or C(20,21).
+              destination:
+                type: dict
+                description: Destination match.
+                options:
+                  address:
+                    type: str
+                    description: Address or network.
+                  port:
+                    type: str
+                    description: Port(s), e.g. C(80,443).
+              family:
+                type: str
+                choices: [ipv4, ipv6, both]
+                description:
+                  - Rulesets the rule goes into. Inferred when omitted - an
+                    IPv6 address means C(ipv6), an IPv4 address C(ipv4), no
+                    address C(both).
+              log:
+                type: bool
+                description: Log matches. Defaults to C(zone_firewall_log_rules).
+      zone_firewall_ipv6:
+        type: bool
+        default: true
+        description: Also create IPv6 rulesets and bind them.
+      zone_firewall_all_pairs:
+        type: bool
+        default: true
+        description: Create a (base rules only) ruleset for every zone pair not listed.
+      zone_firewall_base_rules:
+        type: bool
+        default: true
+        description: Add the page's rules 1 (established/related) and 2 (invalid) to every ruleset.
+      zone_firewall_log_rules:
+        type: bool
+        default: true
+        description: Default for C(log) on user rules, as the page recommends.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the zone_firewall role
+    description: Run with C(tasks_from=verify). Checks every zone and its member interfaces are active.
+    options:
+      zone_firewall_zones:
+        type: list
+        elements: dict
+        required: true
+        description: Same value as for C(main).

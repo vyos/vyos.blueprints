@@ -5,11 +5,12 @@
   vars:
     _expected_file: "{{ case_dir }}/expected/{{ inventory_hostname }}.txt"
   tasks:
-    - name: Render the role
+    - name: Render the role(s)
       ansible.builtin.include_role:
-        name: "vyos.blueprints.{{ role }}"
+        name: "vyos.blueprints.{{ item }}"
       vars:
         vyos_blueprints_render_only: true
+      loop: "{{ roles.split(',') if roles | default('') | length > 0 else [role] }}"
 
     - name: Normalise rendered commands
       ansible.builtin.set_fact:

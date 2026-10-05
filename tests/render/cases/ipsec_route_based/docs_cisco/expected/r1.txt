@@ -1,0 +1,45 @@
+set interfaces vti vti1 address '10.100.100.1/30'
+set interfaces vti vti1 mtu '1438'
+set protocols ospf area '0'
+set protocols ospf area 0 network 10.100.100.0/30
+set protocols ospf area 0 network 192.168.0.0/24
+set protocols ospf area 0 network 192.168.1.0/24
+set protocols ospf interface eth1 passive
+set protocols ospf interface eth2 passive
+set protocols ospf interface vti1 network point-to-point
+set protocols ospf parameters router-id '2.2.2.2'
+set protocols static route 0.0.0.0/0
+set protocols static route 0.0.0.0/0 next-hop '10.0.1.1'
+set vpn ipsec authentication psk AUTH-PSK
+set vpn ipsec authentication psk AUTH-PSK id 10.0.1.2
+set vpn ipsec authentication psk AUTH-PSK id 10.0.2.2
+set vpn ipsec authentication psk AUTH-PSK secret '********'
+set vpn ipsec authentication psk AUTH-PSK secret-type base64
+set vpn ipsec esp-group ESP-GROUP
+set vpn ipsec esp-group ESP-GROUP lifetime 3600
+set vpn ipsec esp-group ESP-GROUP pfs disable
+set vpn ipsec esp-group ESP-GROUP proposal 10
+set vpn ipsec esp-group ESP-GROUP proposal 10 encryption aes256
+set vpn ipsec esp-group ESP-GROUP proposal 10 hash sha256
+set vpn ipsec ike-group IKE-GROUP
+set vpn ipsec ike-group IKE-GROUP close-action start
+set vpn ipsec ike-group IKE-GROUP dead-peer-detection action restart
+set vpn ipsec ike-group IKE-GROUP dead-peer-detection interval 10
+set vpn ipsec ike-group IKE-GROUP dead-peer-detection timeout 30
+set vpn ipsec ike-group IKE-GROUP key-exchange ikev1
+set vpn ipsec ike-group IKE-GROUP lifetime 28800
+set vpn ipsec ike-group IKE-GROUP proposal 10
+set vpn ipsec ike-group IKE-GROUP proposal 10 dh-group 14
+set vpn ipsec ike-group IKE-GROUP proposal 10 encryption aes128
+set vpn ipsec ike-group IKE-GROUP proposal 10 hash sha1
+set vpn ipsec options disable-route-autoinstall
+set vpn ipsec site-to-site peer CISCO
+set vpn ipsec site-to-site peer CISCO authentication local-id '10.0.1.2'
+set vpn ipsec site-to-site peer CISCO authentication mode 'pre-shared-secret'
+set vpn ipsec site-to-site peer CISCO authentication remote-id '10.0.2.2'
+set vpn ipsec site-to-site peer CISCO connection-type 'initiate'
+set vpn ipsec site-to-site peer CISCO default-esp-group 'ESP-GROUP'
+set vpn ipsec site-to-site peer CISCO ike-group 'IKE-GROUP'
+set vpn ipsec site-to-site peer CISCO local-address '10.0.1.2'
+set vpn ipsec site-to-site peer CISCO remote-address '10.0.2.2'
+set vpn ipsec site-to-site peer CISCO vti bind 'vti1'

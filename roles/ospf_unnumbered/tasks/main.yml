@@ -1,0 +1,28 @@
+---
+- name: Put the router-id on the loopback and on every unnumbered link
+  vyos.vyos.vyos_l3_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'l3_interfaces.yml.j2') | from_yaml }}"
+    state: "{{ _ospf_unnumbered_state }}"
+  register: _ospf_unnumbered_r_l3
+
+- name: Run OSPF point-to-point on the links
+  vyos.vyos.vyos_ospf_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'ospf_interfaces.yml.j2') | from_yaml }}"
+    state: "{{ _ospf_unnumbered_state }}"
+  register: _ospf_unnumbered_r_ifaces
+  no_log: "{{ ospf_unnumbered_md5_key | length > 0 }}"
+
+- name: Configure the OSPF process
+  vyos.vyos.vyos_ospfv2:
+    config: "{{ lookup('ansible.builtin.template', 'ospfv2.yml.j2') | from_yaml }}"
+    state: "{{ _ospf_unnumbered_state }}"
+  register: _ospf_unnumbered_r_ospf
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_ospf_unnumbered_r_l3, _ospf_unnumbered_r_ifaces, _ospf_unnumbered_r_ospf]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten
+            | map('regex_replace', '(md5-key) \S+', "\1 '********'")) }}
+  when: vyos_blueprints_render_only | default(false) | bool

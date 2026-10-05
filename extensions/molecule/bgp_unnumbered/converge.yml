@@ -1,0 +1,6 @@
+---
+- name: Converge
+  hosts: fabric
+  gather_facts: false
+  roles:
+    - vyos.blueprints.bgp_unnumbered

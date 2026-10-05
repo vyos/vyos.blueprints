@@ -1,0 +1,68 @@
+---
+argument_specs:
+  main:
+    short_description: OSPF unnumbered with ECMP (docs blueprint "OSPF unnumbered with ECMP")
+    description:
+      - Puts the router-id as a /32 on the loopback and on every listed link,
+        runs OSPF point-to-point over those links and redistributes connected
+        routes. Parallel links to the same neighbour give ECMP.
+      - Works for any number of routers; each router lists only its own links.
+      - LAN addressing (C(eth0) on the docs page) belongs to C(vyos.blueprints.base).
+    options:
+      ospf_unnumbered_router_id:
+        type: str
+        required: true
+        description: OSPF router-id; also used as the /32 address on C(lo) and on each link.
+      ospf_unnumbered_interfaces:
+        type: list
+        elements: str
+        required: true
+        description: Unnumbered point-to-point links, e.g. C([eth1, eth2]).
+      ospf_unnumbered_area:
+        type: str
+        default: 0.0.0.0
+        description: OSPF area.
+      ospf_unnumbered_md5_key:
+        type: str
+        default: ""
+        no_log: true
+        description: MD5 key for OSPF authentication. Empty disables authentication.
+      ospf_unnumbered_md5_key_id:
+        type: int
+        default: 1
+        description: MD5 key id.
+      ospf_unnumbered_redistribute:
+        type: list
+        elements: str
+        default: [connected]
+        description: Route types redistributed into OSPF.
+      ospf_unnumbered_group:
+        type: str
+        default: ""
+        description: Inventory group of all routers in the fabric; used only by C(verify).
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the ospf_unnumbered role
+    description:
+      - Run with C(tasks_from=verify) against all routers in the same play.
+      - Checks one Full adjacency per listed link and, with
+        C(ospf_unnumbered_group), an OSPF route to every other router-id.
+        When the group has exactly two routers, also checks one ECMP next
+        hop per link.
+    options:
+      ospf_unnumbered_router_id:
+        type: str
+        required: true
+        description: Same value as for C(main).
+      ospf_unnumbered_interfaces:
+        type: list
+        elements: str
+        required: true
+        description: Same value as for C(main).
+      ospf_unnumbered_group:
+        type: str
+        default: ""
+        description: Same value as for C(main).

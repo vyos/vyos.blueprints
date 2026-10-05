@@ -1,0 +1,7 @@
+---
+bgp_unnumbered_peer_group: fabric
+bgp_unnumbered_remote_as: external
+bgp_unnumbered_address_families: [ipv4, ipv6]
+bgp_unnumbered_redistribute: [connected]
+bgp_unnumbered_multipath_relax: true
+bgp_unnumbered_group: ""

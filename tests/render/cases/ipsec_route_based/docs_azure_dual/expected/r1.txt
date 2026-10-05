@@ -1,0 +1,69 @@
+set interfaces vti vti1 address '10.10.1.5/32'
+set interfaces vti vti1 description 'Azure Primary Tunnel'
+set interfaces vti vti1 ip adjust-mss '1350'
+set interfaces vti vti2 address '10.10.1.6/32'
+set interfaces vti vti2 description 'Azure Secondary Tunnel'
+set interfaces vti vti2 ip adjust-mss '1350'
+set protocols bgp neighbor 10.0.0.4 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp neighbor 10.0.0.4 disable-connected-check
+set protocols bgp neighbor 10.0.0.4 remote-as 65540
+set protocols bgp neighbor 10.0.0.4 timers holdtime 30
+set protocols bgp neighbor 10.0.0.4 timers keepalive 10
+set protocols bgp neighbor 10.0.0.5 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp neighbor 10.0.0.5 disable-connected-check
+set protocols bgp neighbor 10.0.0.5 remote-as 65540
+set protocols bgp neighbor 10.0.0.5 timers holdtime 30
+set protocols bgp neighbor 10.0.0.5 timers keepalive 10
+set protocols bgp system-as 64499
+set protocols static route 10.0.0.4/32
+set protocols static route 10.0.0.4/32 interface 'vti1'
+set protocols static route 10.0.0.5/32
+set protocols static route 10.0.0.5/32 interface 'vti2'
+set vpn ipsec authentication psk azure
+set vpn ipsec authentication psk azure id 198.51.100.3
+set vpn ipsec authentication psk azure id 203.0.113.2
+set vpn ipsec authentication psk azure id 203.0.113.3
+set vpn ipsec authentication psk azure secret '********'
+set vpn ipsec esp-group AZURE
+set vpn ipsec esp-group AZURE lifetime 3600
+set vpn ipsec esp-group AZURE mode tunnel
+set vpn ipsec esp-group AZURE pfs dh-group2
+set vpn ipsec esp-group AZURE proposal 1
+set vpn ipsec esp-group AZURE proposal 1 encryption aes256
+set vpn ipsec esp-group AZURE proposal 1 hash sha1
+set vpn ipsec ike-group AZURE
+set vpn ipsec ike-group AZURE dead-peer-detection action restart
+set vpn ipsec ike-group AZURE dead-peer-detection interval 15
+set vpn ipsec ike-group AZURE dead-peer-detection timeout 30
+set vpn ipsec ike-group AZURE ikev2-reauth
+set vpn ipsec ike-group AZURE key-exchange ikev2
+set vpn ipsec ike-group AZURE lifetime 28800
+set vpn ipsec ike-group AZURE proposal 1
+set vpn ipsec ike-group AZURE proposal 1 dh-group 2
+set vpn ipsec ike-group AZURE proposal 1 encryption aes256
+set vpn ipsec ike-group AZURE proposal 1 hash sha1
+set vpn ipsec interface eth0
+set vpn ipsec site-to-site peer azure-primary
+set vpn ipsec site-to-site peer azure-primary authentication local-id '198.51.100.3'
+set vpn ipsec site-to-site peer azure-primary authentication mode 'pre-shared-secret'
+set vpn ipsec site-to-site peer azure-primary authentication remote-id '203.0.113.2'
+set vpn ipsec site-to-site peer azure-primary connection-type 'initiate'
+set vpn ipsec site-to-site peer azure-primary description 'AZURE PRIMARY TUNNEL'
+set vpn ipsec site-to-site peer azure-primary ike-group 'AZURE'
+set vpn ipsec site-to-site peer azure-primary ikev2-reauth 'inherit'
+set vpn ipsec site-to-site peer azure-primary local-address '10.10.0.5'
+set vpn ipsec site-to-site peer azure-primary remote-address '203.0.113.2'
+set vpn ipsec site-to-site peer azure-primary vti bind 'vti1'
+set vpn ipsec site-to-site peer azure-primary vti esp-group 'AZURE'
+set vpn ipsec site-to-site peer azure-secondary
+set vpn ipsec site-to-site peer azure-secondary authentication local-id '198.51.100.3'
+set vpn ipsec site-to-site peer azure-secondary authentication mode 'pre-shared-secret'
+set vpn ipsec site-to-site peer azure-secondary authentication remote-id '203.0.113.3'
+set vpn ipsec site-to-site peer azure-secondary connection-type 'initiate'
+set vpn ipsec site-to-site peer azure-secondary description 'AZURE secondary TUNNEL'
+set vpn ipsec site-to-site peer azure-secondary ike-group 'AZURE'
+set vpn ipsec site-to-site peer azure-secondary ikev2-reauth 'inherit'
+set vpn ipsec site-to-site peer azure-secondary local-address '10.10.0.5'
+set vpn ipsec site-to-site peer azure-secondary remote-address '203.0.113.3'
+set vpn ipsec site-to-site peer azure-secondary vti bind 'vti2'
+set vpn ipsec site-to-site peer azure-secondary vti esp-group 'AZURE'

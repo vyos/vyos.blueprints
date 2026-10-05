@@ -1,0 +1,86 @@
+---
+# Values from docs.vyos.io/en/1.5/configexamples/azure-vpn-bgp.html, except:
+# - no NAT in the lab, so local_address is the public IP 198.51.100.3;
+# - disable-route-autoinstall is set (the page does not set it): without it
+#   IPsec installs a route for the VTI's catch-all selector that would also
+#   capture containerlab management traffic;
+# - both sides announce a LAN so the test can ping across BGP-learned routes.
+all:
+  children:
+    vyos:
+      children:
+        vpn:
+          hosts:
+            r1:
+              ansible_host: clab-bp-azure-vyos
+              base_interfaces:
+                - {name: eth1, addresses: [198.51.100.3/24]}
+                - {name: eth2, addresses: [10.10.2.1/24]}
+              ipsec_route_based_peers:
+                - name: 203.0.113.2
+                  description: AZURE PRIMARY TUNNEL
+                  psk_name: azure
+                  psk: molecule-psk
+                  local_address: 198.51.100.3
+                  remote_address: 203.0.113.2
+                  connection_type: initiate
+                  ikev2_reauth: inherit
+                  esp_group_on_vti: true
+                  vti: {interface: vti1, address: 10.10.1.5/32, description: Azure Tunnel, adjust_mss: "1350"}
+              ipsec_route_based_interfaces: [eth1]
+              ipsec_route_based_interface_routes:
+                - {dest: 10.0.0.4/32, interface: vti1}
+              ipsec_route_based_bgp:
+                asn: 64499
+                networks: [10.10.2.0/24]
+                neighbors:
+                  - {address: 10.0.0.4, remote_as: 65540, holdtime: 30, keepalive: 10, soft_reconfiguration_inbound: true}
+              ipsec_route_based_default_gateway: 198.51.100.1
+            r2:
+              ansible_host: clab-bp-azure-azure
+              base_interfaces:
+                - {name: eth1, addresses: [203.0.113.2/24]}
+                - {name: eth2, addresses: [10.0.1.1/24]}
+              ipsec_route_based_peers:
+                - name: 198.51.100.3
+                  psk_name: onprem
+                  psk: molecule-psk
+                  local_address: 203.0.113.2
+                  remote_address: 198.51.100.3
+                  connection_type: none
+                  esp_group_on_vti: true
+                  vti: {interface: vti1, address: 10.0.0.4/32}
+              ipsec_route_based_interfaces: [eth1]
+              ipsec_route_based_interface_routes:
+                - {dest: 10.10.1.5/32, interface: vti1}
+              ipsec_route_based_bgp:
+                asn: 65540
+                networks: [10.0.1.0/24]
+                neighbors:
+                  - {address: 10.10.1.5, remote_as: 64499, holdtime: 30, keepalive: 10}
+              ipsec_route_based_default_gateway: 203.0.113.1
+          vars:
+            ipsec_route_based_ike_group:
+              name: AZURE
+              key_exchange: ikev2
+              ikev2_reauth: true
+              lifetime: 28800
+              proposal_id: 1
+              dh_group: 2
+              encryption: aes256
+              hash: sha1
+              dead_peer_detection: {action: restart, interval: 15, timeout: 30}
+            ipsec_route_based_esp_group:
+              name: AZURE
+              lifetime: 3600
+              mode: tunnel
+              pfs: dh-group2
+              proposal_id: 1
+              encryption: aes256
+              hash: sha1
+            ipsec_route_based_disable_route_autoinstall: true
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

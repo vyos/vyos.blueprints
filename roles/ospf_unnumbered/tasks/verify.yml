@@ -1,0 +1,42 @@
+---
+- name: Read OSPF neighbours
+  vyos.vyos.vyos_command:
+    commands:
+      - show ip ospf neighbor
+  register: _ospf_unnumbered_v_nbr
+
+- name: One Full adjacency per unnumbered link
+  ansible.builtin.assert:
+    that: _ospf_unnumbered_v_nbr.stdout[0] is search('Full.*\s' ~ item ~ ':')
+    fail_msg: "no Full OSPF adjacency on {{ item }}"
+    quiet: true
+  loop: "{{ ospf_unnumbered_interfaces }}"
+
+- name: Read routes to the other routers
+  vyos.vyos.vyos_command:
+    commands: "{{ _ospf_unnumbered_peers | map('regex_replace', '^(.*)$', 'show ip route \\1/32') | list }}"
+  vars:
+    _ospf_unnumbered_peers: >-
+      {{ groups[ospf_unnumbered_group] | difference([inventory_hostname])
+         | map('extract', hostvars, 'ospf_unnumbered_router_id') | list }}
+  register: _ospf_unnumbered_v_routes
+  when: ospf_unnumbered_group | length > 0
+
+- name: Every other router-id is reached via OSPF
+  ansible.builtin.assert:
+    that: item is search('Known via "ospf"')
+    fail_msg: "{{ item | regex_search('Routing entry for \\S+') | default('a peer', true) }} is not learned via OSPF"
+    quiet: true
+  loop: "{{ _ospf_unnumbered_v_routes.stdout | default([]) }}"
+  loop_control:
+    label: "{{ item | regex_search('Routing entry for \\S+') | default('route', true) }}"
+  when: ospf_unnumbered_group | length > 0
+
+- name: With two routers, one ECMP next hop per link
+  ansible.builtin.assert:
+    that: _ospf_unnumbered_v_routes.stdout[0] | regex_findall('via \S+ onlink') | length == ospf_unnumbered_interfaces | length
+    fail_msg: "expected {{ ospf_unnumbered_interfaces | length }} ECMP next hops to the peer"
+    quiet: true
+  when:
+    - ospf_unnumbered_group | length > 0
+    - groups[ospf_unnumbered_group] | length == 2

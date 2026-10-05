@@ -1,0 +1,9 @@
+{% for p in ipsec_route_based_peers %}
+- name: {{ p.vti.interface }}
+{%   if p.vti.mtu is defined %}
+  mtu: {{ p.vti.mtu | int }}
+{%   endif %}
+{%   if p.vti.description is defined %}
+  description: {{ p.vti.description | to_json }}
+{%   endif %}
+{% endfor %}

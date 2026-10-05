@@ -1,0 +1,14 @@
+name: bp-bgp
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+    r2:
+      kind: vyosnetworks_vyos
+  links:
+    # two parallel links without IP addresses; BGP peers over IPv6 link-local
+    - endpoints: ["r1:eth1", "r2:eth1"]
+    - endpoints: ["r1:eth2", "r2:eth2"]

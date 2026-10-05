@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: fabric
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ospf_unnumbered

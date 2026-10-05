@@ -1,0 +1,163 @@
+---
+argument_specs:
+  main:
+    short_description: Bridges with bridge and IPv4 firewall (docs blueprint "Bridge and firewall example")
+    description:
+      - Per bridge, creates the bridge and its members, an interface group
+        C(<bridge>-ifaces), bridge-firewall rulesets C(<bridge>-pre) (prerouting)
+        and C(<bridge>-fwd) (forward) with the jump rules that select them, and
+        optionally an IPv4 ruleset C(ip-<bridge>-fwd) for routed traffic and an
+        input rule for access to the router - the structure used on the docs page.
+      - Bridges, interface groups and the bridge firewall use
+        vyos.vyos.vyos_config, because vyos.vyos has no resource modules for
+        them yet. Member descriptions and the IPv4 firewall use resource modules.
+    options:
+      bridge_firewall_bridges:
+        type: list
+        elements: dict
+        required: true
+        description: Bridges, in order; their position sets the jump rule numbers (10, 20, ... and 110, 120, ...).
+        options:
+          name:
+            type: str
+            required: true
+            description: Bridge interface, e.g. C(br1).
+          description:
+            type: str
+            description: Bridge description.
+          addresses:
+            type: list
+            elements: str
+            default: []
+            description: Bridge addresses; omit for a pure layer-2 bridge.
+          members:
+            type: list
+            elements: dict
+            required: true
+            description: Member interfaces.
+            options:
+              interface:
+                type: str
+                required: true
+                description: Member interface, e.g. C(eth3).
+              description:
+                type: str
+                description: Member interface description.
+          prerouting:
+            type: dict
+            description: Bridge ruleset C(<bridge>-pre), applied in the prerouting chain.
+            options: &bridge_ruleset
+              default_action:
+                type: str
+                choices: [accept, drop]
+                description: Ruleset default action (C(accept) for prerouting, C(drop) for forward by default).
+              rules:
+                type: list
+                elements: dict
+                default: []
+                description: Bridge firewall rules.
+                options:
+                  number:
+                    type: int
+                    required: true
+                    description: Rule number.
+                  action:
+                    type: str
+                    choices: [accept, drop]
+                    default: accept
+                    description: Rule action.
+                  description:
+                    type: str
+                    description: Rule description.
+                  ethernet_type:
+                    type: str
+                    description: Ethernet type, e.g. C(ipv4), C(ipv6), C(arp).
+                  protocol:
+                    type: str
+                    description: IP protocol, e.g. C(udp).
+                  source:
+                    type: dict
+                    description: Source match (C(address), C(port), C(mac_address)).
+                  destination:
+                    type: dict
+                    description: Destination match (C(address), C(port), C(mac_address)).
+                  inbound_interface:
+                    type: str
+                    description: Inbound bridge port, e.g. C(eth6).
+                  state:
+                    type: list
+                    elements: str
+                    default: []
+                    description: Connection states, e.g. C([new]).
+                  log:
+                    type: bool
+                    default: false
+                    description: Log matches.
+          forward:
+            type: dict
+            description: Bridge ruleset C(<bridge>-fwd), applied in the bridge forward chain.
+            options: *bridge_ruleset
+          ip_forward:
+            type: dict
+            description: IPv4 ruleset C(ip-<bridge>-fwd) for traffic routed out of the bridge.
+            options:
+              default_action:
+                type: str
+                choices: [accept, drop, reject]
+                default: drop
+                description: Ruleset default action.
+              rules:
+                type: list
+                elements: dict
+                default: []
+                description: IPv4 rules.
+                options:
+                  number:
+                    type: int
+                    required: true
+                    description: Rule number.
+                  action:
+                    type: str
+                    choices: [accept, drop, reject]
+                    default: accept
+                    description: Rule action.
+                  description:
+                    type: str
+                    description: Rule description.
+                  outbound_interface:
+                    type: str
+                    description: Outbound interface, e.g. the internet uplink.
+                  outbound_bridge:
+                    type: str
+                    description: Another bridge from this list, matched via its interface group.
+          router_access:
+            type: str
+            choices: [accept, drop]
+            description: Accept or drop IPv4 traffic from this bridge to the router itself.
+      bridge_firewall_state_rules:
+        type: bool
+        default: true
+        description: Add the page's established/related and invalid rules to the forward and input chains.
+      bridge_firewall_bridge_forward_default_action:
+        type: str
+        choices: [accept, drop]
+        default: drop
+        description: Default action of the bridge forward chain.
+      bridge_firewall_ipv4_forward_default_action:
+        type: str
+        choices: [accept, drop, reject]
+        default: drop
+        description: Default action of the IPv4 forward chain.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the bridge_firewall role
+    description: Run with C(tasks_from=verify). Checks bridge membership and that the bridge rulesets are active.
+    options:
+      bridge_firewall_bridges:
+        type: list
+        elements: dict
+        required: true
+        description: Same value as for C(main).

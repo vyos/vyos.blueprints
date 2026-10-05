@@ -1,0 +1,23 @@
+---
+- name: Read IPsec SAs
+  vyos.vyos.vyos_command:
+    commands:
+      - show vpn ipsec sa
+  register: _ipsec_policy_based_v_sa
+
+- name: The IPsec SA of every tunnel is up
+  ansible.builtin.assert:
+    that: _ipsec_policy_based_v_sa.stdout[0] is search('(?m)^' ~ (item | regex_escape) ~ '\s+up\b')
+    fail_msg: "IPsec SA {{ item }} is not up"
+    quiet: true
+  loop: "{{ _ipsec_policy_based_sa_names }}"
+  vars:
+    # SA names as VyOS shows them: <peer>-tunnel-<id>
+    _ipsec_policy_based_sa_names: >-
+      {%- set out = [] -%}
+      {%- for p in ipsec_policy_based_peers -%}
+      {%-   for t in p.tunnels -%}
+      {%-     set _ = out.append(p.name ~ '-tunnel-' ~ (t.id | default(loop.index))) -%}
+      {%-   endfor -%}
+      {%- endfor -%}
+      {{ out }}

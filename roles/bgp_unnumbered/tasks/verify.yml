@@ -1,0 +1,44 @@
+---
+- name: Read BGP sessions
+  vyos.vyos.vyos_command:
+    commands:
+      - show bgp summary
+  register: _bgp_unnumbered_v_sum
+
+- name: One established session per interface
+  # An established neighbour shows its Up/Down time followed by a prefix
+  # count; other states show their name (Active, Connect, ...) instead.
+  ansible.builtin.assert:
+    that: _bgp_unnumbered_v_sum.stdout[0] is search('(?m)^' ~ item ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+    fail_msg: "BGP session on {{ item }} is not established"
+    quiet: true
+  loop: "{{ bgp_unnumbered_interfaces }}"
+
+- name: Read routes to the other routers
+  vyos.vyos.vyos_command:
+    commands: "{{ _bgp_unnumbered_peers | map('regex_replace', '^(.*)$', 'show ip route \\1/32') | list }}"
+  vars:
+    _bgp_unnumbered_peers: >-
+      {{ groups[bgp_unnumbered_group] | difference([inventory_hostname])
+         | map('extract', hostvars, 'bgp_unnumbered_router_id') | list }}
+  register: _bgp_unnumbered_v_routes
+  when: bgp_unnumbered_group | length > 0
+
+- name: Every other router-id is reached via BGP
+  ansible.builtin.assert:
+    that: item is search('Known via "bgp"')
+    fail_msg: "{{ item | regex_search('Routing entry for \\S+') | default('a peer', true) }} is not learned via BGP"
+    quiet: true
+  loop: "{{ _bgp_unnumbered_v_routes.stdout | default([]) }}"
+  loop_control:
+    label: "{{ item | regex_search('Routing entry for \\S+') | default('route', true) }}"
+  when: bgp_unnumbered_group | length > 0
+
+- name: With two routers, one ECMP next hop per link
+  ansible.builtin.assert:
+    that: _bgp_unnumbered_v_routes.stdout[0] | regex_findall('fe80::\S+, via \S+') | length == bgp_unnumbered_interfaces | length
+    fail_msg: "expected {{ bgp_unnumbered_interfaces | length }} ECMP next hops to the peer"
+    quiet: true
+  when:
+    - bgp_unnumbered_group | length > 0
+    - groups[bgp_unnumbered_group] | length == 2

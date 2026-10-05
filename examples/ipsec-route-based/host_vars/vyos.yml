@@ -1,0 +1,20 @@
+---
+# WAN is eth1 here, eth0 on the page (containerlab uses eth0 for management)
+base_interfaces:
+  - {name: eth1, addresses: [10.0.1.2/30]}
+  - {name: eth2, addresses: [192.168.0.1/24]}
+  - {name: eth3, addresses: [192.168.1.1/24]}
+ipsec_route_based_peers:
+  - name: CISCO
+    local_address: 10.0.1.2
+    remote_address: 10.0.2.2
+    psk: dGVzdA==                      # use ansible-vault for real devices
+    psk_type: base64
+    psk_name: AUTH-PSK
+    connection_type: initiate
+    vti: {interface: vti1, address: 10.100.100.1/30, mtu: 1438}
+ipsec_route_based_ospf:
+  router_id: 2.2.2.2
+  networks: [10.100.100.0/30, 192.168.0.0/24, 192.168.1.0/24]
+  passive_interfaces: [eth2, eth3]
+ipsec_route_based_default_gateway: 10.0.1.1

@@ -1,0 +1,24 @@
+---
+_vrf_firewall_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+# Interface name prefix -> CLI interface type, for VRF bindings the resource
+# modules cannot express (VLANs, PPPoE, tunnels, ...).
+_vrf_firewall_iftypes:
+  eth: ethernet
+  bond: bonding
+  br: bridge
+  dum: dummy
+  pppoe: pppoe
+  vtun: openvpn
+  wg: wireguard
+  tun: tunnel
+  vti: vti
+# Ethernet interfaces without a VLAN go through vyos_interfaces; the rest via CLI.
+_vrf_firewall_eth_bindings: >-
+  {%- set out = [] -%}
+  {%- for v in vrf_firewall_vrfs -%}
+  {%-   for i in v.interfaces | default([]) if i is match('^eth\\d+$') -%}
+  {%-     set _ = out.append({'name': i, 'vrf': v.name}) -%}
+  {%-   endfor -%}
+  {%- endfor -%}
+  {{ out }}
+_vrf_firewall_cli_lines: "{{ (lookup('ansible.builtin.template', 'vrf_cli.j2') or '').splitlines() | select | list }}"

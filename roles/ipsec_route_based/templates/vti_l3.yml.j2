@@ -1,0 +1,5 @@
+{% for p in ipsec_route_based_peers %}
+- name: {{ p.vti.interface }}
+  ipv4:
+    - address: {{ p.vti.address | to_json }}
+{% endfor %}

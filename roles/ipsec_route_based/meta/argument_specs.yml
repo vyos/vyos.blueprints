@@ -1,0 +1,209 @@
+---
+argument_specs:
+  main:
+    short_description: Route-based site-to-site IPsec over VTI, with OSPF or BGP (Cisco, Palo Alto and Azure docs blueprints)
+    description:
+      - Configures one IKE group, one ESP group, a pre-shared key and a
+        site-to-site peer bound to a VTI per peer, with
+        C(disable-route-autoinstall) as route-based VPNs need. Optionally runs
+        OSPF over the VTIs and adds a default route towards the WAN gateway.
+      - Uses vyos.vyos resource modules only (vyos_vpn_ipsec, vyos_vpn_ipsec_s2s,
+        vyos_interfaces, vyos_l3_interfaces, vyos_ospfv2, vyos_ospf_interfaces,
+        vyos_static_routes).
+      - The far end can be any IKE peer (Cisco, Palo Alto, another VyOS, a cloud
+        gateway); match its proposals in the IKE/ESP group inputs.
+      - WAN and LAN addressing belongs to C(vyos.blueprints.base).
+    options:
+      ipsec_route_based_peers:
+        type: list
+        elements: dict
+        required: true
+        description: Remote peers, one VTI each.
+        options:
+          name:
+            type: str
+            required: true
+            description: Peer name, e.g. C(CISCO).
+          local_address:
+            type: str
+            required: true
+            description: Local WAN address used for IKE.
+          remote_address:
+            type: str
+            required: true
+            description: Peer's WAN address.
+          local_id:
+            type: str
+            description: Local IKE id. Defaults to C(local_address).
+          remote_id:
+            type: str
+            description: Remote IKE id. Defaults to C(remote_address).
+          psk:
+            type: str
+            required: true
+            no_log: true
+            description: Pre-shared key.
+          psk_type:
+            type: str
+            choices: [plaintext, base64, hex]
+            description: Encoding of C(psk). Not set when omitted (VyOS default, plaintext).
+          psk_name:
+            type: str
+            description:
+              - Name of the PSK entry. Defaults to C(<name>-PSK).
+              - Peers with the same C(psk_name) share one entry carrying all their ids (they must use the same C(psk)).
+          connection_type:
+            type: str
+            choices: [initiate, trap, none]
+            default: initiate
+            description:
+              - C(initiate) brings the tunnel up from this side (recommended by
+                the page when the far end only initiates on traffic); C(none)
+                only responds.
+          description:
+            type: str
+            description: Peer description.
+          ikev2_reauth:
+            type: str
+            choices: ['yes', 'no', inherit]
+            description: Peer-level IKEv2 re-authentication.
+          esp_group_on_vti:
+            type: bool
+            default: false
+            description: Bind the ESP group on the VTI (C(vti esp-group)) instead of C(default-esp-group), as Azure and GCP pages do.
+          vti:
+            type: dict
+            required: true
+            description: Tunnel interface for this peer.
+            options:
+              interface:
+                type: str
+                required: true
+                description: VTI name, e.g. C(vti1).
+              address:
+                type: str
+                required: true
+                description: Tunnel address in CIDR notation.
+              mtu:
+                type: int
+                description: VTI MTU, e.g. C(1438).
+              description:
+                type: str
+                description: VTI description.
+              adjust_mss:
+                type: str
+                description: TCP MSS clamping, e.g. C(1350) (configured with vyos_config; vyos_interfaces has no option for it).
+      ipsec_route_based_ike_group:
+        type: dict
+        description:
+          - IKE (phase 1) settings shared by all peers.
+          - Settings without a default here are configured only when given.
+        options:
+          name: {type: str, default: IKE-GROUP, description: Group name.}
+          proposal_id: {type: int, default: 10, description: Proposal number.}
+          key_exchange: {type: str, choices: [ikev1, ikev2], default: ikev2, description: IKE version.}
+          ikev2_reauth: {type: bool, default: false, description: Re-authenticate on IKEv2 rekey.}
+          lifetime: {type: int, description: Lifetime in seconds.}
+          dh_group: {type: int, default: 14, description: Diffie-Hellman group.}
+          encryption: {type: str, default: aes256, description: "Encryption, e.g. C(aes128)."}
+          hash: {type: str, default: sha256, description: "Hash, e.g. C(sha1)."}
+          close_action: {type: str, choices: [none, trap, start], description: Action when the peer closes the SA.}
+          dead_peer_detection:
+            type: dict
+            description: DPD settings; only the keys given are configured.
+            options:
+              action: {type: str, choices: [trap, clear, restart], description: DPD action.}
+              interval: {type: int, description: Interval in seconds.}
+              timeout: {type: int, description: Timeout in seconds.}
+      ipsec_route_based_esp_group:
+        type: dict
+        description:
+          - ESP (phase 2) settings shared by all peers.
+          - Settings without a default here are configured only when given.
+        options:
+          name: {type: str, default: ESP-GROUP, description: Group name.}
+          proposal_id: {type: int, default: 10, description: Proposal number.}
+          mode: {type: str, choices: [tunnel, transport], description: ESP mode.}
+          lifetime: {type: int, description: Lifetime in seconds.}
+          pfs: {type: str, description: PFS group or C(disable).}
+          encryption: {type: str, default: aes256, description: Encryption.}
+          hash: {type: str, default: sha256, description: Hash.}
+      ipsec_route_based_ospf:
+        type: dict
+        description: OSPF over the VTIs. Omit to configure routing yourself.
+        options:
+          router_id: {type: str, required: true, description: OSPF router-id.}
+          area: {type: str, default: "0", description: OSPF area.}
+          networks:
+            type: list
+            elements: str
+            required: true
+            description: Networks to advertise, including the VTI network(s), as on the docs page.
+          passive_interfaces:
+            type: list
+            elements: str
+            default: []
+            description: LAN interfaces that should not form adjacencies.
+      ipsec_route_based_interfaces:
+        type: list
+        elements: str
+        default: []
+        description: Interfaces IPsec listens on (C(vpn ipsec interface)), e.g. C([eth0]).
+      ipsec_route_based_disable_route_autoinstall:
+        type: bool
+        default: true
+        description: Set C(vpn ipsec options disable-route-autoinstall) (most route-based setups need it).
+      ipsec_route_based_interface_routes:
+        type: list
+        elements: dict
+        default: []
+        description: Static routes out of a VTI, e.g. to the peer's BGP listener.
+        options:
+          dest: {type: str, required: true, description: "Destination prefix, e.g. C(10.0.0.4/32)."}
+          interface: {type: str, required: true, description: "VTI, e.g. C(vti1)."}
+      ipsec_route_based_bgp:
+        type: dict
+        description: eBGP over the VTIs. Omit to configure routing yourself.
+        options:
+          asn: {type: int, required: true, description: Local AS number.}
+          router_id: {type: str, description: BGP router-id.}
+          networks: {type: list, elements: str, default: [], description: IPv4 prefixes to announce.}
+          neighbors:
+            type: list
+            elements: dict
+            required: true
+            description: BGP neighbours reached through the tunnels.
+            options:
+              address: {type: str, required: true, description: Neighbour address.}
+              remote_as: {type: int, required: true, description: Neighbour AS number.}
+              holdtime: {type: int, description: Hold time in seconds.}
+              keepalive: {type: int, description: Keepalive in seconds.}
+              disable_connected_check: {type: bool, default: true, description: Needed when the neighbour is not on the VTI subnet (cloud BGP listeners).}
+              ebgp_multihop: {type: int, description: eBGP multihop TTL.}
+              update_source: {type: str, description: Source address or interface.}
+              soft_reconfiguration_inbound: {type: bool, default: false, description: Keep received routes for soft reconfiguration.}
+      ipsec_route_based_default_gateway:
+        type: str
+        default: ""
+        description: Adds C(0.0.0.0/0) via this next hop (the WAN gateway).
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the ipsec_route_based role
+    description:
+      - Run with C(tasks_from=verify). Checks the IPsec SA of every peer is up and,
+        with OSPF, a Full adjacency on every VTI or, with BGP, every session established.
+    options:
+      ipsec_route_based_peers:
+        type: list
+        elements: dict
+        required: true
+        description: Same value as for C(main).
+      ipsec_route_based_ospf:
+        type: dict
+        description: Same value as for C(main).
+      ipsec_route_based_bgp:
+        type: dict
+        description: Same value as for C(main).

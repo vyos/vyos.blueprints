@@ -1,0 +1,12 @@
+name: bp-gre
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+    r2:
+      kind: vyosnetworks_vyos
+  links:
+    - endpoints: ["r1:eth1", "r2:eth1"]

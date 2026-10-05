@@ -1,0 +1,27 @@
+{% set esp_name = ipsec_route_based_esp_group.name | default('ESP-GROUP') %}
+peer:
+{% for p in ipsec_route_based_peers %}
+  - name: {{ p.name | to_json }}
+{%   if p.description is defined %}
+    description: {{ p.description | to_json }}
+{%   endif %}
+    authentication:
+      mode: pre-shared-secret
+      local_id: {{ p.local_id | default(p.local_address) | to_json }}
+      remote_id: {{ p.remote_id | default(p.remote_address) | to_json }}
+    connection_type: {{ p.connection_type | default('initiate') }}
+{%   if not (p.esp_group_on_vti | default(false) | bool) %}
+    default_esp_group: {{ esp_name | to_json }}
+{%   endif %}
+    ike_group: {{ ipsec_route_based_ike_group.name | default('IKE-GROUP') | to_json }}
+{%   if p.ikev2_reauth is defined %}
+    ikev2_reauth: {{ p.ikev2_reauth | to_json }}
+{%   endif %}
+    local_address: {{ p.local_address | to_json }}
+    remote_address: [{{ p.remote_address | to_json }}]
+    vti:
+      bind: {{ p.vti.interface | to_json }}
+{%   if p.esp_group_on_vti | default(false) | bool %}
+      esp_group: {{ esp_name | to_json }}
+{%   endif %}
+{% endfor %}

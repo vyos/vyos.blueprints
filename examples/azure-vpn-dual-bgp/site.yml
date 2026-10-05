@@ -1,0 +1,11 @@
+---
+- name: Redundant route-based VPN to Azure with BGP
+  hosts: onprem
+  gather_facts: false
+  roles:
+    - vyos.blueprints.ipsec_route_based
+  post_tasks:
+    - name: Show rendered commands
+      ansible.builtin.debug:
+        var: vyos_blueprints_rendered
+      when: show_rendered | default(false) | bool

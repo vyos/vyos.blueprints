@@ -1,0 +1,9 @@
+---
+- name: Check the BGP fabric
+  hosts: fabric
+  gather_facts: false
+  tasks:
+    - name: BGP checks (all routers in one play for the route checks)
+      ansible.builtin.include_role:
+        name: vyos.blueprints.bgp_unnumbered
+        tasks_from: verify

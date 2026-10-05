@@ -1,0 +1,33 @@
+---
+argument_specs:
+  main:
+    short_description: Source and destination NAT
+    description:
+      - Configures source NAT (masquerade, SNAT, exclusions such as
+        traffic into a VPN) and destination NAT (port forwarding).
+      - Rules use the rule format of vyos.vyos.vyos_nat (id, description,
+        protocol, exclude, outbound_interface / inbound_interface, source,
+        destination, translation, ...), passed through unchanged, so every
+        option of the module is available.
+      - For a simple small-office edge, C(vyos.blueprints.edge_nat) is shorter.
+    options:
+      nat_source_rules:
+        type: list
+        elements: dict
+        default: []
+        description: "Source NAT rules in vyos_nat format, e.g. C({id: 20, outbound_interface: {name: eth0}, translation: {address: masquerade}})."
+      nat_destination_rules:
+        type: list
+        elements: dict
+        default: []
+        description: Destination NAT rules in vyos_nat format.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the nat role
+    description: Run with C(tasks_from=verify). Checks every rule is installed.
+    options:
+      nat_source_rules: {type: list, elements: dict, default: [], description: Same value as for C(main).}
+      nat_destination_rules: {type: list, elements: dict, default: [], description: Same value as for C(main).}

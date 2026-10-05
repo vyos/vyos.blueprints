@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: gre
+  gather_facts: false
+  tasks:
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.gre_tunnel
+        tasks_from: verify
+
+    - name: Ping the other end through the tunnel
+      vyos.vyos.vyos_ping:
+        dest: "{{ '172.16.122.2' if inventory_hostname == 'r1' else '172.16.122.1' }}"
+        count: 3

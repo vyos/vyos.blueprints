@@ -1,0 +1,20 @@
+name: bp-ospf
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+    r2:
+      kind: vyosnetworks_vyos
+    lan:
+      kind: linux
+      image: alpine:3
+  links:
+    # two parallel unnumbered links -> ECMP, as on the docs page
+    - endpoints: ["r1:eth1", "r2:eth1"]
+    - endpoints: ["r1:eth2", "r2:eth2"]
+    # LAN side (eth0 on the docs page; eth0 is management in containerlab)
+    - endpoints: ["r1:eth3", "lan:eth1"]
+    - endpoints: ["r2:eth3", "lan:eth2"]

@@ -1,0 +1,8 @@
+- name: lo
+  ipv4:
+    - address: {{ _ospf_unnumbered_prefix | to_json }}
+{% for i in ospf_unnumbered_interfaces %}
+- name: {{ i }}
+  ipv4:
+    - address: {{ _ospf_unnumbered_prefix | to_json }}
+{% endfor %}

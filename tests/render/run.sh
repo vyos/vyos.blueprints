@@ -6,8 +6,10 @@
 #   tests/render/run.sh ha_vrrp         # cases whose "<role>/<case>" starts with this
 #   UPDATE_GOLDEN=true tests/render/run.sh edge_nat   # regenerate golden files
 #
-# A case directory may contain vars.yml (shared inputs, passed as extra vars)
-# and inventory.yml (multi-node cases; per-host inputs live there).
+# A case directory may contain vars.yml (shared inputs, passed as extra vars),
+# inventory.yml (multi-node cases; per-host inputs live there) and roles (a
+# comma-separated role list, for blueprints that combine several roles; such
+# cases live under cases/blueprints/).
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 update="${UPDATE_GOLDEN:-false}"
@@ -23,6 +25,8 @@ for case_dir in "$here"/cases/*/*/; do
   args=(-i "$inventory" "$here/render.yml"
         -e "role=$role" -e "case_dir=$case_dir" -e "update_golden=$update")
   [[ -f "$case_dir/vars.yml" ]] && args+=(-e "@$case_dir/vars.yml")
+  # Blueprints that combine roles list them, comma-separated, in a "roles" file.
+  [[ -f "$case_dir/roles" ]] && args+=(-e "roles=$(tr -d '[:space:]' < "$case_dir/roles")")
   mkdir -p "$case_dir/expected"
   echo "=== $role/$name"
   if ! ansible-playbook "${args[@]}"; then

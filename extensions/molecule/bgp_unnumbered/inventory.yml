@@ -1,0 +1,23 @@
+---
+all:
+  children:
+    vyos:
+      children:
+        fabric:
+          hosts:
+            r1:
+              ansible_host: clab-bp-bgp-r1
+              bgp_unnumbered_asn: 64496
+              bgp_unnumbered_router_id: 192.168.0.1
+            r2:
+              ansible_host: clab-bp-bgp-r2
+              bgp_unnumbered_asn: 64499
+              bgp_unnumbered_router_id: 192.168.0.2
+          vars:
+            bgp_unnumbered_interfaces: [eth1, eth2]
+            bgp_unnumbered_group: fabric
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

@@ -1,0 +1,2 @@
+---
+_ipsec_policy_based_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"

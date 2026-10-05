@@ -1,0 +1,33 @@
+---
+all:
+  children:
+    vyos:
+      hosts:
+        r1:
+          ansible_host: clab-bp-zfw-r1
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin
+        base_interfaces:
+          - {name: eth1, addresses: [172.16.10.1/24]}
+          - {name: eth2, addresses: [192.168.100.1/24]}
+          - {name: eth3, addresses: [192.168.200.1/24]}
+        zone_firewall_zones:
+          # containerlab management; keeps Ansible's SSH session working
+          - {name: mgmt, interfaces: [eth0]}
+          - {name: wan, interfaces: [eth1]}
+          - {name: lan, interfaces: [eth2]}
+          - {name: dmz, interfaces: [eth3]}
+          - {name: local, local: true}
+        zone_firewall_policies:
+          - {from: mgmt, to: local, default_action: accept}
+          - from: wan
+            to: dmz
+            rules:
+              - {number: 200, protocol: tcp, destination: {address: 192.168.200.200, port: "80,443"}}
+          - from: lan
+            to: dmz
+            rules:
+              - {number: 200, protocol: tcp, destination: {port: "80,443"}}

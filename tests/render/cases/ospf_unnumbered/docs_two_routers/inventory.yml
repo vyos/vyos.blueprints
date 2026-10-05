@@ -1,0 +1,17 @@
+---
+all:
+  children:
+    fabric:
+      hosts:
+        routerA:
+          ansible_host: 192.0.2.1
+          ospf_unnumbered_router_id: 192.168.0.1
+        routerB:
+          ansible_host: 192.0.2.2
+          ospf_unnumbered_router_id: 192.168.0.2
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_connect_timeout: 5
+    ansible_command_timeout: 5

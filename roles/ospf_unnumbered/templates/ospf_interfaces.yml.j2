@@ -1,0 +1,12 @@
+{% for i in ospf_unnumbered_interfaces %}
+- name: {{ i }}
+  address_family:
+    - afi: ipv4
+      network: point-to-point
+{%   if ospf_unnumbered_md5_key %}
+      authentication:
+        md5_key:
+          key_id: {{ ospf_unnumbered_md5_key_id | int }}
+          key: {{ ospf_unnumbered_md5_key | to_json }}
+{%   endif %}
+{% endfor %}

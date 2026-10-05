@@ -1,0 +1,15 @@
+---
+# docs.vyos.io/en/1.5/configexamples/site-2-site-cisco.html
+# Only the VyOS spoke is configured here; the Cisco FlexVPN hub is configured
+# as shown on the page (there is no lab stand-in: VyOS cannot act as a FlexVPN hub).
+all:
+  children:
+    spoke:
+      hosts:
+        vyos:
+          ansible_host: 192.0.2.10        # your router's address
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_password: vyos              # use ansible-vault for real devices

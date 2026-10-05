@@ -1,0 +1,23 @@
+---
+- name: Read the firewall
+  vyos.vyos.vyos_command:
+    commands:
+      - show firewall
+  register: _firewall_v
+
+- name: Every configured filter is active with its rules
+  ansible.builtin.assert:
+    that: >-
+      _firewall_v.stdout[0] is search((item.afi | upper | replace('V', 'v')) ~ ' Firewall "' ~ item.chain ~ ' filter"')
+    fail_msg: "{{ item.afi }} {{ item.chain }} filter is not active"
+    quiet: true
+  loop: >-
+    {%- set out = [] -%}
+    {%- for afi, filters in [('ipv4', firewall_ipv4), ('ipv6', firewall_ipv6)] -%}
+    {%-   for chain in ['input', 'forward', 'output'] if filters[chain] is defined and filters[chain] -%}
+    {%-     set _ = out.append({'afi': afi, 'chain': chain}) -%}
+    {%-   endfor -%}
+    {%- endfor -%}
+    {{ out }}
+  loop_control:
+    label: "{{ item.afi }} {{ item.chain }}"

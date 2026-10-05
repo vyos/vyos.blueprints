@@ -1,0 +1,100 @@
+set firewall group network-group LOCAL-NETS
+set firewall group network-group LOCAL-NETS network 10.1.11.0/24
+set firewall group network-group LOCAL-NETS network 10.1.12.0/24
+set firewall group network-group REMOTE-NETS
+set firewall group network-group REMOTE-NETS network 10.2.21.0/24
+set firewall group network-group REMOTE-NETS network 10.2.22.0/24
+set firewall group network-group TRUSTED
+set firewall group network-group TRUSTED network 10.1.11.0/24
+set firewall group network-group TRUSTED network 192.168.70.0/24
+set firewall group network-group TRUSTED network 198.51.100.125/32
+set firewall group network-group TRUSTED network 203.0.113.0/24
+set firewall ipv4 forward filter default-action 'drop'
+set firewall ipv4 forward filter rule 1
+set firewall ipv4 forward filter rule 1 action 'accept'
+set firewall ipv4 forward filter rule 1 state established
+set firewall ipv4 forward filter rule 1 state related
+set firewall ipv4 forward filter rule 10
+set firewall ipv4 forward filter rule 10 action 'accept'
+set firewall ipv4 forward filter rule 10 source group network-group LOCAL-NETS
+set firewall ipv4 forward filter rule 2
+set firewall ipv4 forward filter rule 2 action 'drop'
+set firewall ipv4 forward filter rule 2 state invalid
+set firewall ipv4 forward filter rule 20
+set firewall ipv4 forward filter rule 20 action 'accept'
+set firewall ipv4 forward filter rule 20 destination group network-group LOCAL-NETS
+set firewall ipv4 forward filter rule 20 source group network-group REMOTE-NETS
+set firewall ipv4 input filter default-action 'drop'
+set firewall ipv4 input filter rule 1
+set firewall ipv4 input filter rule 1 action 'accept'
+set firewall ipv4 input filter rule 1 state established
+set firewall ipv4 input filter rule 1 state related
+set firewall ipv4 input filter rule 10
+set firewall ipv4 input filter rule 10 action 'accept'
+set firewall ipv4 input filter rule 10 destination port 500,4500
+set firewall ipv4 input filter rule 10 inbound-interface name eth0
+set firewall ipv4 input filter rule 10 protocol 'udp'
+set firewall ipv4 input filter rule 15
+set firewall ipv4 input filter rule 15 action 'accept'
+set firewall ipv4 input filter rule 15 inbound-interface name eth0
+set firewall ipv4 input filter rule 15 protocol 'esp'
+set firewall ipv4 input filter rule 2
+set firewall ipv4 input filter rule 2 action 'drop'
+set firewall ipv4 input filter rule 2 state invalid
+set firewall ipv4 input filter rule 20
+set firewall ipv4 input filter rule 20 action 'accept'
+set firewall ipv4 input filter rule 20 destination port 22
+set firewall ipv4 input filter rule 20 protocol 'tcp'
+set firewall ipv4 input filter rule 20 source group network-group TRUSTED
+set firewall ipv4 input filter rule 25
+set firewall ipv4 input filter rule 25 action 'accept'
+set firewall ipv4 input filter rule 25 destination port 53
+set firewall ipv4 input filter rule 25 protocol 'udp'
+set firewall ipv4 input filter rule 25 source group network-group LOCAL-NETS
+set firewall ipv4 input filter rule 30
+set firewall ipv4 input filter rule 30 action 'accept'
+set firewall ipv4 input filter rule 30 protocol 'icmp'
+set nat source rule 10 destination group network-group REMOTE-NETS
+set nat source rule 10 exclude
+set nat source rule 10 outbound-interface name eth0
+set nat source rule 10 source group network-group LOCAL-NETS
+set nat source rule 20 outbound-interface name eth0
+set nat source rule 20 source group network-group LOCAL-NETS
+set nat source rule 20 translation address masquerade
+set protocols static route 0.0.0.0/0
+set protocols static route 0.0.0.0/0 next-hop '198.51.100.13'
+set vpn ipsec authentication psk RIGHT
+set vpn ipsec authentication psk RIGHT id 192.0.2.130
+set vpn ipsec authentication psk RIGHT id 198.51.100.14
+set vpn ipsec authentication psk RIGHT secret '********'
+set vpn ipsec esp-group ESP-GROUP
+set vpn ipsec esp-group ESP-GROUP mode tunnel
+set vpn ipsec esp-group ESP-GROUP proposal 1
+set vpn ipsec esp-group ESP-GROUP proposal 1 encryption aes256
+set vpn ipsec esp-group ESP-GROUP proposal 1 hash sha256
+set vpn ipsec ike-group IKE-GROUP
+set vpn ipsec ike-group IKE-GROUP key-exchange ikev2
+set vpn ipsec ike-group IKE-GROUP proposal 1
+set vpn ipsec ike-group IKE-GROUP proposal 1 dh-group 14
+set vpn ipsec ike-group IKE-GROUP proposal 1 encryption aes256
+set vpn ipsec ike-group IKE-GROUP proposal 1 hash sha256
+set vpn ipsec interface eth0
+set vpn ipsec site-to-site peer RIGHT
+set vpn ipsec site-to-site peer RIGHT authentication mode 'pre-shared-secret'
+set vpn ipsec site-to-site peer RIGHT connection-type 'initiate'
+set vpn ipsec site-to-site peer RIGHT default-esp-group 'ESP-GROUP'
+set vpn ipsec site-to-site peer RIGHT ike-group 'IKE-GROUP'
+set vpn ipsec site-to-site peer RIGHT local-address '198.51.100.14'
+set vpn ipsec site-to-site peer RIGHT remote-address '192.0.2.130'
+set vpn ipsec site-to-site peer RIGHT tunnel 0
+set vpn ipsec site-to-site peer RIGHT tunnel 0 local prefix '10.1.11.0/24'
+set vpn ipsec site-to-site peer RIGHT tunnel 0 remote prefix '10.2.21.0/24'
+set vpn ipsec site-to-site peer RIGHT tunnel 1
+set vpn ipsec site-to-site peer RIGHT tunnel 1 local prefix '10.1.11.0/24'
+set vpn ipsec site-to-site peer RIGHT tunnel 1 remote prefix '10.2.22.0/24'
+set vpn ipsec site-to-site peer RIGHT tunnel 2
+set vpn ipsec site-to-site peer RIGHT tunnel 2 local prefix '10.1.12.0/24'
+set vpn ipsec site-to-site peer RIGHT tunnel 2 remote prefix '10.2.21.0/24'
+set vpn ipsec site-to-site peer RIGHT tunnel 3
+set vpn ipsec site-to-site peer RIGHT tunnel 3 local prefix '10.1.12.0/24'
+set vpn ipsec site-to-site peer RIGHT tunnel 3 remote prefix '10.2.22.0/24'

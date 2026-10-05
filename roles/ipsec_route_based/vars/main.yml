@@ -1,0 +1,23 @@
+---
+_ipsec_route_based_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_ipsec_route_based_ospf: "{{ ipsec_route_based_ospf | default({}, true) }}"
+_ipsec_route_based_bgp: "{{ ipsec_route_based_bgp | default({}, true) }}"
+_ipsec_route_based_cli_lines: "{{ (lookup('ansible.builtin.template', 'vti_cli.j2') or '').splitlines() | select | list }}"
+# One PSK entry per psk_name; peers sharing a psk_name contribute all their ids.
+_ipsec_route_based_psks: >-
+  {%- set out = [] -%}
+  {%- set names = [] -%}
+  {%- for p in ipsec_route_based_peers -%}
+  {%-   set n = p.psk_name | default(p.name ~ '-PSK') -%}
+  {%-   set ids = [p.local_id | default(p.local_address), p.remote_id | default(p.remote_address)] -%}
+  {%-   if n in names -%}
+  {%-     set e = out[names.index(n)] -%}
+  {%-     for i in ids if i not in e.id -%}{%- set _ = e.id.append(i) -%}{%- endfor -%}
+  {%-   else -%}
+  {%-     set e = {'name': n, 'id': ids | unique | list, 'secret': p.psk} -%}
+  {%-     if p.psk_type is defined -%}{%- set _ = e.update({'secret_type': p.psk_type}) -%}{%- endif -%}
+  {%-     set _ = names.append(n) -%}
+  {%-     set _ = out.append(e) -%}
+  {%-   endif -%}
+  {%- endfor -%}
+  {{ out }}

@@ -1,0 +1,13 @@
+---
+- name: Check the FlexVPN spoke
+  hosts: spoke
+  gather_facts: false
+  tasks:
+    - name: Tunnel interface checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.gre_tunnel
+        tasks_from: verify
+    - name: IPsec checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ipsec_policy_based
+        tasks_from: verify

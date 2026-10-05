@@ -1,0 +1,17 @@
+---
+# IKE and IPsec parameters from the page's tables
+ipsec_route_based_ike_group:
+  name: IKE-GROUP
+  key_exchange: ikev1
+  lifetime: 28800
+  dh_group: 14
+  encryption: aes128
+  hash: sha1
+  close_action: start
+  dead_peer_detection: {action: restart, interval: 10, timeout: 30}
+ipsec_route_based_esp_group:
+  name: ESP-GROUP
+  lifetime: 3600
+  pfs: disable
+  encryption: aes256
+  hash: sha256

@@ -1,0 +1,77 @@
+---
+argument_specs:
+  main:
+    short_description: Firewall groups and base-chain filters
+    description:
+      - Configures firewall network, address and port groups and the
+        C(input), C(forward) and C(output) filters for IPv4 and IPv6.
+      - Building block used by blueprints such as "Policy-Based Site-to-Site
+        VPN and Firewall Configuration"; for zone-based designs use
+        C(vyos.blueprints.zone_firewall).
+      - Rules use the rule format of vyos.vyos.vyos_firewall_rules (number,
+        action, description, protocol, state, source, destination,
+        inbound_interface, outbound_interface, log, ...), passed through unchanged.
+      - B(Lockout risk) - a C(drop) input filter must allow the address or
+        interface you manage the router from.
+    options:
+      firewall_groups:
+        type: dict
+        default: {}
+        description: Firewall groups.
+        options:
+          network:
+            type: list
+            elements: dict
+            default: []
+            description: IPv4 network groups.
+            options:
+              name: {type: str, required: true, description: Group name.}
+              description: {type: str, description: Group description.}
+              networks: {type: list, elements: str, required: true, description: Member networks.}
+          address:
+            type: list
+            elements: dict
+            default: []
+            description: IPv4 address groups.
+            options:
+              name: {type: str, required: true, description: Group name.}
+              description: {type: str, description: Group description.}
+              addresses: {type: list, elements: str, required: true, description: Member addresses or ranges.}
+          port:
+            type: list
+            elements: dict
+            default: []
+            description: Port groups.
+            options:
+              name: {type: str, required: true, description: Group name.}
+              description: {type: str, description: Group description.}
+              ports: {type: list, elements: str, required: true, description: Member ports or ranges.}
+      firewall_ipv4:
+        type: dict
+        default: {}
+        description: IPv4 filters keyed by base chain (C(input), C(forward), C(output)).
+        options: &filters
+          input: &filter
+            type: dict
+            description: Filter for this chain.
+            options:
+              default_action: {type: str, choices: [accept, drop, reject], description: Default action.}
+              default_log: {type: bool, default: false, description: Log packets hitting the default action.}
+              rules: {type: list, elements: dict, default: [], description: Rules in vyos_firewall_rules format.}
+          forward: *filter
+          output: *filter
+      firewall_ipv6:
+        type: dict
+        default: {}
+        description: IPv6 filters keyed by base chain.
+        options: *filters
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the firewall role
+    description: Run with C(tasks_from=verify). Checks every configured filter is active with its rules.
+    options:
+      firewall_ipv4: {type: dict, default: {}, description: Same value as for C(main).}
+      firewall_ipv6: {type: dict, default: {}, description: Same value as for C(main).}

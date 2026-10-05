@@ -1,0 +1,30 @@
+---
+- name: Verify role state
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.zone_firewall
+        tasks_from: verify
+
+- name: Verify traffic between zones
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _flows:
+      - {from: lan, to: 192.168.200.200, allowed: true, why: "LAN can access DMZ resources"}
+      - {from: wan, to: 192.168.200.200, allowed: true, why: "inbound WAN connects to the DMZ host"}
+      - {from: dmz, to: 192.168.100.10, allowed: false, why: "DMZ cannot access LAN resources"}
+      - {from: wan, to: 192.168.100.10, allowed: false, why: "WAN cannot reach the LAN"}
+  tasks:
+    - name: Try HTTP across zones
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-zfw-{{ item.from }} wget -q -T 3 -O /dev/null http://{{ item.to }}/
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      register: _http
+      changed_when: false
+      failed_when: (_http.rc == 0) != item.allowed
+      loop: "{{ _flows }}"
+      loop_control:
+        label: "{{ item.from }} -> {{ item.to }} ({{ item.why }})"

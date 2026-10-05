@@ -1,0 +1,4 @@
+{# MSS clamping on VTIs: vyos_interfaces has no option for it. #}
+{% for p in ipsec_route_based_peers if p.vti.adjust_mss is defined %}
+set interfaces vti {{ p.vti.interface }} ip adjust-mss '{{ p.vti.adjust_mss }}'
+{% endfor %}

@@ -1,0 +1,37 @@
+---
+argument_specs:
+  main:
+    short_description: Tunnel interfaces (GRE and other encapsulations)
+    description:
+      - Creates C(interfaces tunnel) entries with their encapsulation,
+        endpoints, MTU and TCP MSS clamping, and addresses them.
+      - Building block used by "Site-to-Site IPSec VPN to Cisco using FlexVPN"
+        (GRE protected by IPsec); also usable for plain GRE.
+      - The tunnel itself is created with vyos.vyos.vyos_config in one commit,
+        because vyos_interfaces cannot set encapsulation or endpoints;
+        addresses use vyos_l3_interfaces.
+    options:
+      gre_tunnel_interfaces:
+        type: list
+        elements: dict
+        required: true
+        description: Tunnel interfaces.
+        options:
+          name: {type: str, required: true, description: "Interface name, e.g. C(tun1)."}
+          encapsulation: {type: str, default: gre, description: "Encapsulation, e.g. C(gre), C(gretap), C(ipip)."}
+          source_address: {type: str, description: Local endpoint address.}
+          source_interface: {type: str, description: Local endpoint interface (instead of C(source_address)).}
+          remote: {type: str, description: Remote endpoint address.}
+          mtu: {type: int, description: Interface MTU.}
+          adjust_mss: {type: str, description: "TCP MSS clamping value, e.g. C(1336) or C(clamp-mss-to-pmtu)."}
+          description: {type: str, description: Interface description.}
+          addresses: {type: list, elements: str, default: [], description: IPv4 addresses in CIDR notation.}
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the gre_tunnel role
+    description: Run with C(tasks_from=verify). Checks every tunnel interface is up.
+    options:
+      gre_tunnel_interfaces: {type: list, elements: dict, required: true, description: Same value as for C(main).}

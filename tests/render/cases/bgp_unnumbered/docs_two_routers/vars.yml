@@ -1,0 +1,3 @@
+---
+# docs.vyos.io/en/1.5/configexamples/bgp-ipv6-unnumbered.html - shared settings
+bgp_unnumbered_interfaces: [eth1, eth2]

@@ -1,0 +1,11 @@
+---
+_bridge_firewall_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_bridge_firewall_cli_lines: "{{ (lookup('ansible.builtin.template', 'bridge_cli.j2') or '').splitlines() | map('trim') | select | list }}"
+_bridge_firewall_member_descriptions: >-
+  {%- set out = [] -%}
+  {%- for b in bridge_firewall_bridges -%}
+  {%-   for m in b.members if m.description is defined -%}
+  {%-     set _ = out.append({'name': m.interface, 'description': m.description}) -%}
+  {%-   endfor -%}
+  {%- endfor -%}
+  {{ out }}

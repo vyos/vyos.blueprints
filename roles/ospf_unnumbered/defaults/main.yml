@@ -1,0 +1,6 @@
+---
+ospf_unnumbered_area: 0.0.0.0
+ospf_unnumbered_md5_key: ""
+ospf_unnumbered_md5_key_id: 1
+ospf_unnumbered_redistribute: [connected]
+ospf_unnumbered_group: ""

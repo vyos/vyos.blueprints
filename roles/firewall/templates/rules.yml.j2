@@ -1,0 +1,17 @@
+{% for afi, filters in [('ipv4', firewall_ipv4), ('ipv6', firewall_ipv6)] if filters %}
+- afi: {{ afi }}
+  rule_sets:
+{%   for chain in _firewall_filters if filters[chain] is defined and filters[chain] %}
+{%     set f = filters[chain] %}
+    - filter: {{ chain }}
+{%     if f.default_action is defined %}
+      default_action: {{ f.default_action }}
+{%     endif %}
+{%     if f.default_log | default(false) | bool %}
+      enable_default_log: true
+{%     endif %}
+{%     if f.rules | default([]) %}
+      rules: {{ f.rules | to_json }}
+{%     endif %}
+{%   endfor %}
+{% endfor %}

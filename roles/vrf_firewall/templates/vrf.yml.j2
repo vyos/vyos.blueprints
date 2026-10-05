@@ -1,0 +1,23 @@
+bind_to_all: {{ vrf_firewall_bind_to_all | bool }}
+instances:
+{% for v in vrf_firewall_vrfs %}
+  - name: {{ v.name | to_json }}
+    table_id: {{ v.table | int }}
+{%   if v.description is defined %}
+    description: {{ v.description | to_json }}
+{%   endif %}
+{%   set plain = v.routes | default([]) | rejectattr('vrf', 'defined') | list %}
+{%   if plain %}
+    protocols:
+      static:
+        - address_families:
+            - afi: ipv4
+              routes:
+{%     for r in plain %}
+                - dest: {{ r.dest | to_json }}
+                  next_hops:
+                    - {% if r.next_hop is defined %}forward_router_address: {{ r.next_hop | to_json }}{% else %}interface: {{ r.interface | to_json }}{% endif %}
+
+{%     endfor %}
+{%   endif %}
+{% endfor %}

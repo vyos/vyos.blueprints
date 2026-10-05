@@ -1,0 +1,72 @@
+{#- Bridges, interface groups and the bridge firewall: no vyos.vyos resource
+    module covers these yet. Rule numbers for the jump rules follow the page. -#}
+{%- macro bridge_rule(prefix, r) -%}
+{{ prefix }} rule {{ r.number }} action '{{ r.action | default('accept') }}'
+{%   if r.description is defined %}
+{{ prefix }} rule {{ r.number }} description '{{ r.description }}'
+{%   endif %}
+{%   for k in ['ethernet_type', 'protocol'] if r[k] is defined %}
+{{ prefix }} rule {{ r.number }} {{ k | replace('_', '-') }} '{{ r[k] }}'
+{%   endfor %}
+{%   for side in ['source', 'destination'] if r[side] is defined %}
+{%     for k in ['address', 'port', 'mac_address'] if r[side][k] is defined %}
+{{ prefix }} rule {{ r.number }} {{ side }} {{ k | replace('_', '-') }} '{{ r[side][k] }}'
+{%     endfor %}
+{%   endfor %}
+{%   if r.inbound_interface is defined %}
+{{ prefix }} rule {{ r.number }} inbound-interface name '{{ r.inbound_interface }}'
+{%   endif %}
+{%   for s in r.state | default([]) %}
+{{ prefix }} rule {{ r.number }} state '{{ s }}'
+{%   endfor %}
+{%   if r.log | default(false) | bool %}
+{{ prefix }} rule {{ r.number }} log
+{%   endif %}
+{%- endmacro -%}
+{% for b in bridge_firewall_bridges %}
+{%   set i = loop.index %}
+{%   set grp = b.name ~ '-ifaces' %}
+{%   if b.description is defined %}
+set interfaces bridge {{ b.name }} description '{{ b.description }}'
+{%   endif %}
+{%   for a in b.addresses | default([]) %}
+set interfaces bridge {{ b.name }} address '{{ a }}'
+{%   endfor %}
+{%   for m in b.members %}
+set interfaces bridge {{ b.name }} member interface {{ m.interface }}
+{%   endfor %}
+set firewall group interface-group {{ grp }} interface '{{ b.name }}'
+{%   for m in b.members %}
+set firewall group interface-group {{ grp }} interface '{{ m.interface }}'
+{%   endfor %}
+{%   if b.prerouting is defined %}
+set firewall bridge prerouting filter rule {{ i * 10 }} action 'jump'
+set firewall bridge prerouting filter rule {{ i * 10 }} description '{{ b.name }} traffic'
+set firewall bridge prerouting filter rule {{ i * 10 }} inbound-interface group '{{ grp }}'
+set firewall bridge prerouting filter rule {{ i * 10 }} jump-target '{{ b.name }}-pre'
+set firewall bridge name {{ b.name }}-pre default-action '{{ b.prerouting.default_action | default('accept') }}'
+{%     for r in b.prerouting.rules | default([]) %}
+{{ bridge_rule('set firewall bridge name ' ~ b.name ~ '-pre', r) }}
+{%     endfor %}
+{%   endif %}
+{%   if b.forward is defined %}
+set firewall bridge forward filter rule {{ 100 + i * 10 }} action 'jump'
+set firewall bridge forward filter rule {{ 100 + i * 10 }} description '{{ b.name }} traffic'
+set firewall bridge forward filter rule {{ 100 + i * 10 }} inbound-interface group '{{ grp }}'
+set firewall bridge forward filter rule {{ 100 + i * 10 }} jump-target '{{ b.name }}-fwd'
+set firewall bridge name {{ b.name }}-fwd default-action '{{ b.forward.default_action | default('drop') }}'
+{%     for r in b.forward.rules | default([]) %}
+{{ bridge_rule('set firewall bridge name ' ~ b.name ~ '-fwd', r) }}
+{%     endfor %}
+{%   endif %}
+{% endfor %}
+{% if bridge_firewall_bridges | selectattr('forward', 'defined') | list %}
+{%   if bridge_firewall_state_rules | bool %}
+set firewall bridge forward filter rule 5 action 'accept'
+set firewall bridge forward filter rule 5 state 'established'
+set firewall bridge forward filter rule 5 state 'related'
+set firewall bridge forward filter rule 10 action 'drop'
+set firewall bridge forward filter rule 10 state 'invalid'
+{%   endif %}
+set firewall bridge forward filter default-action '{{ bridge_firewall_bridge_forward_default_action }}'
+{% endif %}

@@ -1,0 +1,548 @@
+set firewall ipv4 name dmz-lan default-action 'drop'
+set firewall ipv4 name dmz-lan default-log
+set firewall ipv4 name dmz-lan rule 1
+set firewall ipv4 name dmz-lan rule 1 action 'accept'
+set firewall ipv4 name dmz-lan rule 1 state established
+set firewall ipv4 name dmz-lan rule 1 state related
+set firewall ipv4 name dmz-lan rule 2
+set firewall ipv4 name dmz-lan rule 2 action 'drop'
+set firewall ipv4 name dmz-lan rule 2 log
+set firewall ipv4 name dmz-lan rule 2 state invalid
+set firewall ipv4 name dmz-local default-action 'drop'
+set firewall ipv4 name dmz-local default-log
+set firewall ipv4 name dmz-local rule 1
+set firewall ipv4 name dmz-local rule 1 action 'accept'
+set firewall ipv4 name dmz-local rule 1 state established
+set firewall ipv4 name dmz-local rule 1 state related
+set firewall ipv4 name dmz-local rule 2
+set firewall ipv4 name dmz-local rule 2 action 'drop'
+set firewall ipv4 name dmz-local rule 2 log
+set firewall ipv4 name dmz-local rule 2 state invalid
+set firewall ipv4 name dmz-local rule 400
+set firewall ipv4 name dmz-local rule 400 action 'accept'
+set firewall ipv4 name dmz-local rule 400 destination port 123
+set firewall ipv4 name dmz-local rule 400 log
+set firewall ipv4 name dmz-local rule 400 protocol 'tcp'
+set firewall ipv4 name dmz-local rule 600
+set firewall ipv4 name dmz-local rule 600 action 'accept'
+set firewall ipv4 name dmz-local rule 600 destination port 53
+set firewall ipv4 name dmz-local rule 600 log
+set firewall ipv4 name dmz-local rule 600 protocol 'tcp'
+set firewall ipv4 name dmz-local rule 700
+set firewall ipv4 name dmz-local rule 700 action 'accept'
+set firewall ipv4 name dmz-local rule 700 destination port 67,68
+set firewall ipv4 name dmz-local rule 700 log
+set firewall ipv4 name dmz-local rule 700 protocol 'tcp'
+set firewall ipv4 name dmz-wan default-action 'drop'
+set firewall ipv4 name dmz-wan default-log
+set firewall ipv4 name dmz-wan rule 1
+set firewall ipv4 name dmz-wan rule 1 action 'accept'
+set firewall ipv4 name dmz-wan rule 1 state established
+set firewall ipv4 name dmz-wan rule 1 state related
+set firewall ipv4 name dmz-wan rule 2
+set firewall ipv4 name dmz-wan rule 2 action 'drop'
+set firewall ipv4 name dmz-wan rule 2 log
+set firewall ipv4 name dmz-wan rule 2 state invalid
+set firewall ipv4 name dmz-wan rule 200
+set firewall ipv4 name dmz-wan rule 200 action 'accept'
+set firewall ipv4 name dmz-wan rule 200 destination port 80,443
+set firewall ipv4 name dmz-wan rule 200 log
+set firewall ipv4 name dmz-wan rule 200 protocol 'tcp'
+set firewall ipv4 name dmz-wan rule 300
+set firewall ipv4 name dmz-wan rule 300 action 'accept'
+set firewall ipv4 name dmz-wan rule 300 destination port 20,21
+set firewall ipv4 name dmz-wan rule 300 log
+set firewall ipv4 name dmz-wan rule 300 protocol 'tcp'
+set firewall ipv4 name dmz-wan rule 600
+set firewall ipv4 name dmz-wan rule 600 action 'accept'
+set firewall ipv4 name dmz-wan rule 600 destination port 53
+set firewall ipv4 name dmz-wan rule 600 log
+set firewall ipv4 name dmz-wan rule 600 protocol 'tcp_udp'
+set firewall ipv4 name dmz-wan rule 800
+set firewall ipv4 name dmz-wan rule 800 action 'accept'
+set firewall ipv4 name dmz-wan rule 800 destination port 22
+set firewall ipv4 name dmz-wan rule 800 log
+set firewall ipv4 name dmz-wan rule 800 protocol 'tcp'
+set firewall ipv4 name lan-dmz default-action 'drop'
+set firewall ipv4 name lan-dmz default-log
+set firewall ipv4 name lan-dmz rule 1
+set firewall ipv4 name lan-dmz rule 1 action 'accept'
+set firewall ipv4 name lan-dmz rule 1 state established
+set firewall ipv4 name lan-dmz rule 1 state related
+set firewall ipv4 name lan-dmz rule 2
+set firewall ipv4 name lan-dmz rule 2 action 'drop'
+set firewall ipv4 name lan-dmz rule 2 log
+set firewall ipv4 name lan-dmz rule 2 state invalid
+set firewall ipv4 name lan-dmz rule 200
+set firewall ipv4 name lan-dmz rule 200 action 'accept'
+set firewall ipv4 name lan-dmz rule 200 destination port 80,443
+set firewall ipv4 name lan-dmz rule 200 log
+set firewall ipv4 name lan-dmz rule 200 protocol 'tcp'
+set firewall ipv4 name lan-dmz rule 800
+set firewall ipv4 name lan-dmz rule 800 action 'accept'
+set firewall ipv4 name lan-dmz rule 800 destination address 192.168.200.200
+set firewall ipv4 name lan-dmz rule 800 destination port 22
+set firewall ipv4 name lan-dmz rule 800 log
+set firewall ipv4 name lan-dmz rule 800 protocol 'tcp'
+set firewall ipv4 name lan-dmz rule 800 source address 192.168.100.10
+set firewall ipv4 name lan-dmz rule 900
+set firewall ipv4 name lan-dmz rule 900 action 'accept'
+set firewall ipv4 name lan-dmz rule 900 destination port 993
+set firewall ipv4 name lan-dmz rule 900 log
+set firewall ipv4 name lan-dmz rule 900 protocol 'tcp'
+set firewall ipv4 name lan-local default-action 'drop'
+set firewall ipv4 name lan-local default-log
+set firewall ipv4 name lan-local rule 1
+set firewall ipv4 name lan-local rule 1 action 'accept'
+set firewall ipv4 name lan-local rule 1 state established
+set firewall ipv4 name lan-local rule 1 state related
+set firewall ipv4 name lan-local rule 2
+set firewall ipv4 name lan-local rule 2 action 'drop'
+set firewall ipv4 name lan-local rule 2 log
+set firewall ipv4 name lan-local rule 2 state invalid
+set firewall ipv4 name lan-local rule 400
+set firewall ipv4 name lan-local rule 400 action 'accept'
+set firewall ipv4 name lan-local rule 400 destination port 123
+set firewall ipv4 name lan-local rule 400 log
+set firewall ipv4 name lan-local rule 400 protocol 'tcp'
+set firewall ipv4 name lan-local rule 600
+set firewall ipv4 name lan-local rule 600 action 'accept'
+set firewall ipv4 name lan-local rule 600 destination port 53
+set firewall ipv4 name lan-local rule 600 log
+set firewall ipv4 name lan-local rule 600 protocol 'tcp'
+set firewall ipv4 name lan-local rule 700
+set firewall ipv4 name lan-local rule 700 action 'accept'
+set firewall ipv4 name lan-local rule 700 destination port 67,68
+set firewall ipv4 name lan-local rule 700 log
+set firewall ipv4 name lan-local rule 700 protocol 'tcp'
+set firewall ipv4 name lan-local rule 800
+set firewall ipv4 name lan-local rule 800 action 'accept'
+set firewall ipv4 name lan-local rule 800 destination port 22
+set firewall ipv4 name lan-local rule 800 log
+set firewall ipv4 name lan-local rule 800 protocol 'tcp'
+set firewall ipv4 name lan-local rule 800 source address 192.168.100.10
+set firewall ipv4 name lan-wan default-action 'drop'
+set firewall ipv4 name lan-wan default-log
+set firewall ipv4 name lan-wan rule 1
+set firewall ipv4 name lan-wan rule 1 action 'accept'
+set firewall ipv4 name lan-wan rule 1 state established
+set firewall ipv4 name lan-wan rule 1 state related
+set firewall ipv4 name lan-wan rule 2
+set firewall ipv4 name lan-wan rule 2 action 'drop'
+set firewall ipv4 name lan-wan rule 2 log
+set firewall ipv4 name lan-wan rule 2 state invalid
+set firewall ipv4 name lan-wan rule 200
+set firewall ipv4 name lan-wan rule 200 action 'accept'
+set firewall ipv4 name lan-wan rule 200 destination port 80,443
+set firewall ipv4 name lan-wan rule 200 log
+set firewall ipv4 name lan-wan rule 200 protocol 'tcp'
+set firewall ipv4 name lan-wan rule 300
+set firewall ipv4 name lan-wan rule 300 action 'accept'
+set firewall ipv4 name lan-wan rule 300 destination port 20,21
+set firewall ipv4 name lan-wan rule 300 log
+set firewall ipv4 name lan-wan rule 300 protocol 'tcp'
+set firewall ipv4 name lan-wan rule 800
+set firewall ipv4 name lan-wan rule 800 action 'accept'
+set firewall ipv4 name lan-wan rule 800 destination port 22
+set firewall ipv4 name lan-wan rule 800 log
+set firewall ipv4 name lan-wan rule 800 protocol 'tcp'
+set firewall ipv4 name local-dmz default-action 'drop'
+set firewall ipv4 name local-dmz default-log
+set firewall ipv4 name local-dmz rule 1
+set firewall ipv4 name local-dmz rule 1 action 'accept'
+set firewall ipv4 name local-dmz rule 1 state established
+set firewall ipv4 name local-dmz rule 1 state related
+set firewall ipv4 name local-dmz rule 2
+set firewall ipv4 name local-dmz rule 2 action 'drop'
+set firewall ipv4 name local-dmz rule 2 log
+set firewall ipv4 name local-dmz rule 2 state invalid
+set firewall ipv4 name local-dmz rule 500
+set firewall ipv4 name local-dmz rule 500 action 'accept'
+set firewall ipv4 name local-dmz rule 500 destination port 25
+set firewall ipv4 name local-dmz rule 500 log
+set firewall ipv4 name local-dmz rule 500 protocol 'tcp'
+set firewall ipv4 name local-dmz rule 600
+set firewall ipv4 name local-dmz rule 600 action 'accept'
+set firewall ipv4 name local-dmz rule 600 destination port 53
+set firewall ipv4 name local-dmz rule 600 log
+set firewall ipv4 name local-dmz rule 600 protocol 'tcp_udp'
+set firewall ipv4 name local-dmz rule 700
+set firewall ipv4 name local-dmz rule 700 action 'accept'
+set firewall ipv4 name local-dmz rule 700 destination port 67,68
+set firewall ipv4 name local-dmz rule 700 log
+set firewall ipv4 name local-dmz rule 700 protocol 'tcp'
+set firewall ipv4 name local-lan default-action 'drop'
+set firewall ipv4 name local-lan default-log
+set firewall ipv4 name local-lan rule 1
+set firewall ipv4 name local-lan rule 1 action 'accept'
+set firewall ipv4 name local-lan rule 1 state established
+set firewall ipv4 name local-lan rule 1 state related
+set firewall ipv4 name local-lan rule 2
+set firewall ipv4 name local-lan rule 2 action 'drop'
+set firewall ipv4 name local-lan rule 2 log
+set firewall ipv4 name local-lan rule 2 state invalid
+set firewall ipv4 name local-lan rule 700
+set firewall ipv4 name local-lan rule 700 action 'accept'
+set firewall ipv4 name local-lan rule 700 destination port 67,68
+set firewall ipv4 name local-lan rule 700 log
+set firewall ipv4 name local-lan rule 700 protocol 'tcp'
+set firewall ipv4 name local-wan default-action 'drop'
+set firewall ipv4 name local-wan default-log
+set firewall ipv4 name local-wan rule 1
+set firewall ipv4 name local-wan rule 1 action 'accept'
+set firewall ipv4 name local-wan rule 1 state established
+set firewall ipv4 name local-wan rule 1 state related
+set firewall ipv4 name local-wan rule 2
+set firewall ipv4 name local-wan rule 2 action 'drop'
+set firewall ipv4 name local-wan rule 2 log
+set firewall ipv4 name local-wan rule 2 state invalid
+set firewall ipv4 name local-wan rule 200
+set firewall ipv4 name local-wan rule 200 action 'accept'
+set firewall ipv4 name local-wan rule 200 destination port 80,443
+set firewall ipv4 name local-wan rule 200 log
+set firewall ipv4 name local-wan rule 200 protocol 'tcp'
+set firewall ipv4 name local-wan rule 300
+set firewall ipv4 name local-wan rule 300 action 'accept'
+set firewall ipv4 name local-wan rule 300 destination port 20,21
+set firewall ipv4 name local-wan rule 300 log
+set firewall ipv4 name local-wan rule 300 protocol 'tcp'
+set firewall ipv4 name wan-dmz default-action 'drop'
+set firewall ipv4 name wan-dmz default-log
+set firewall ipv4 name wan-dmz rule 1
+set firewall ipv4 name wan-dmz rule 1 action 'accept'
+set firewall ipv4 name wan-dmz rule 1 state established
+set firewall ipv4 name wan-dmz rule 1 state related
+set firewall ipv4 name wan-dmz rule 2
+set firewall ipv4 name wan-dmz rule 2 action 'drop'
+set firewall ipv4 name wan-dmz rule 2 log
+set firewall ipv4 name wan-dmz rule 2 state invalid
+set firewall ipv4 name wan-dmz rule 200
+set firewall ipv4 name wan-dmz rule 200 action 'accept'
+set firewall ipv4 name wan-dmz rule 200 destination address 192.168.200.200
+set firewall ipv4 name wan-dmz rule 200 destination port 80,443
+set firewall ipv4 name wan-dmz rule 200 log
+set firewall ipv4 name wan-dmz rule 200 protocol 'tcp'
+set firewall ipv4 name wan-dmz rule 500
+set firewall ipv4 name wan-dmz rule 500 action 'accept'
+set firewall ipv4 name wan-dmz rule 500 destination address 192.168.200.200
+set firewall ipv4 name wan-dmz rule 500 destination port 25
+set firewall ipv4 name wan-dmz rule 500 log
+set firewall ipv4 name wan-dmz rule 500 protocol 'tcp'
+set firewall ipv4 name wan-dmz rule 600
+set firewall ipv4 name wan-dmz rule 600 action 'accept'
+set firewall ipv4 name wan-dmz rule 600 destination address 192.168.200.200
+set firewall ipv4 name wan-dmz rule 600 destination port 53
+set firewall ipv4 name wan-dmz rule 600 log
+set firewall ipv4 name wan-dmz rule 600 protocol 'tcp'
+set firewall ipv4 name wan-lan default-action 'drop'
+set firewall ipv4 name wan-lan default-log
+set firewall ipv4 name wan-lan rule 1
+set firewall ipv4 name wan-lan rule 1 action 'accept'
+set firewall ipv4 name wan-lan rule 1 state established
+set firewall ipv4 name wan-lan rule 1 state related
+set firewall ipv4 name wan-lan rule 2
+set firewall ipv4 name wan-lan rule 2 action 'drop'
+set firewall ipv4 name wan-lan rule 2 log
+set firewall ipv4 name wan-lan rule 2 state invalid
+set firewall ipv4 name wan-local default-action 'drop'
+set firewall ipv4 name wan-local default-log
+set firewall ipv4 name wan-local rule 1
+set firewall ipv4 name wan-local rule 1 action 'accept'
+set firewall ipv4 name wan-local rule 1 state established
+set firewall ipv4 name wan-local rule 1 state related
+set firewall ipv4 name wan-local rule 2
+set firewall ipv4 name wan-local rule 2 action 'drop'
+set firewall ipv4 name wan-local rule 2 log
+set firewall ipv4 name wan-local rule 2 state invalid
+set firewall ipv6 name dmz-lan-6 default-action 'drop'
+set firewall ipv6 name dmz-lan-6 default-log
+set firewall ipv6 name dmz-lan-6 rule 1
+set firewall ipv6 name dmz-lan-6 rule 1 action 'accept'
+set firewall ipv6 name dmz-lan-6 rule 1 state established
+set firewall ipv6 name dmz-lan-6 rule 1 state related
+set firewall ipv6 name dmz-lan-6 rule 2
+set firewall ipv6 name dmz-lan-6 rule 2 action 'drop'
+set firewall ipv6 name dmz-lan-6 rule 2 log
+set firewall ipv6 name dmz-lan-6 rule 2 state invalid
+set firewall ipv6 name dmz-local-6 default-action 'drop'
+set firewall ipv6 name dmz-local-6 default-log
+set firewall ipv6 name dmz-local-6 rule 1
+set firewall ipv6 name dmz-local-6 rule 1 action 'accept'
+set firewall ipv6 name dmz-local-6 rule 1 state established
+set firewall ipv6 name dmz-local-6 rule 1 state related
+set firewall ipv6 name dmz-local-6 rule 2
+set firewall ipv6 name dmz-local-6 rule 2 action 'drop'
+set firewall ipv6 name dmz-local-6 rule 2 log
+set firewall ipv6 name dmz-local-6 rule 2 state invalid
+set firewall ipv6 name dmz-local-6 rule 400
+set firewall ipv6 name dmz-local-6 rule 400 action 'accept'
+set firewall ipv6 name dmz-local-6 rule 400 destination port 123
+set firewall ipv6 name dmz-local-6 rule 400 log
+set firewall ipv6 name dmz-local-6 rule 400 protocol 'tcp'
+set firewall ipv6 name dmz-local-6 rule 600
+set firewall ipv6 name dmz-local-6 rule 600 action 'accept'
+set firewall ipv6 name dmz-local-6 rule 600 destination port 53
+set firewall ipv6 name dmz-local-6 rule 600 log
+set firewall ipv6 name dmz-local-6 rule 600 protocol 'tcp'
+set firewall ipv6 name dmz-local-6 rule 700
+set firewall ipv6 name dmz-local-6 rule 700 action 'accept'
+set firewall ipv6 name dmz-local-6 rule 700 destination port 67,68
+set firewall ipv6 name dmz-local-6 rule 700 log
+set firewall ipv6 name dmz-local-6 rule 700 protocol 'tcp'
+set firewall ipv6 name dmz-wan-6 default-action 'drop'
+set firewall ipv6 name dmz-wan-6 default-log
+set firewall ipv6 name dmz-wan-6 rule 1
+set firewall ipv6 name dmz-wan-6 rule 1 action 'accept'
+set firewall ipv6 name dmz-wan-6 rule 1 state established
+set firewall ipv6 name dmz-wan-6 rule 1 state related
+set firewall ipv6 name dmz-wan-6 rule 2
+set firewall ipv6 name dmz-wan-6 rule 2 action 'drop'
+set firewall ipv6 name dmz-wan-6 rule 2 log
+set firewall ipv6 name dmz-wan-6 rule 2 state invalid
+set firewall ipv6 name dmz-wan-6 rule 200
+set firewall ipv6 name dmz-wan-6 rule 200 action 'accept'
+set firewall ipv6 name dmz-wan-6 rule 200 destination port 80,443
+set firewall ipv6 name dmz-wan-6 rule 200 log
+set firewall ipv6 name dmz-wan-6 rule 200 protocol 'tcp'
+set firewall ipv6 name dmz-wan-6 rule 300
+set firewall ipv6 name dmz-wan-6 rule 300 action 'accept'
+set firewall ipv6 name dmz-wan-6 rule 300 destination port 20,21
+set firewall ipv6 name dmz-wan-6 rule 300 log
+set firewall ipv6 name dmz-wan-6 rule 300 protocol 'tcp'
+set firewall ipv6 name dmz-wan-6 rule 600
+set firewall ipv6 name dmz-wan-6 rule 600 action 'accept'
+set firewall ipv6 name dmz-wan-6 rule 600 destination port 53
+set firewall ipv6 name dmz-wan-6 rule 600 log
+set firewall ipv6 name dmz-wan-6 rule 600 protocol 'tcp_udp'
+set firewall ipv6 name dmz-wan-6 rule 800
+set firewall ipv6 name dmz-wan-6 rule 800 action 'accept'
+set firewall ipv6 name dmz-wan-6 rule 800 destination port 22
+set firewall ipv6 name dmz-wan-6 rule 800 log
+set firewall ipv6 name dmz-wan-6 rule 800 protocol 'tcp'
+set firewall ipv6 name lan-dmz-6 default-action 'drop'
+set firewall ipv6 name lan-dmz-6 default-log
+set firewall ipv6 name lan-dmz-6 rule 1
+set firewall ipv6 name lan-dmz-6 rule 1 action 'accept'
+set firewall ipv6 name lan-dmz-6 rule 1 state established
+set firewall ipv6 name lan-dmz-6 rule 1 state related
+set firewall ipv6 name lan-dmz-6 rule 2
+set firewall ipv6 name lan-dmz-6 rule 2 action 'drop'
+set firewall ipv6 name lan-dmz-6 rule 2 log
+set firewall ipv6 name lan-dmz-6 rule 2 state invalid
+set firewall ipv6 name lan-dmz-6 rule 200
+set firewall ipv6 name lan-dmz-6 rule 200 action 'accept'
+set firewall ipv6 name lan-dmz-6 rule 200 destination port 80,443
+set firewall ipv6 name lan-dmz-6 rule 200 log
+set firewall ipv6 name lan-dmz-6 rule 200 protocol 'tcp'
+set firewall ipv6 name lan-dmz-6 rule 800
+set firewall ipv6 name lan-dmz-6 rule 800 action 'accept'
+set firewall ipv6 name lan-dmz-6 rule 800 destination address 2001:db8:0:bbbb::200
+set firewall ipv6 name lan-dmz-6 rule 800 destination port 22
+set firewall ipv6 name lan-dmz-6 rule 800 log
+set firewall ipv6 name lan-dmz-6 rule 800 protocol 'tcp'
+set firewall ipv6 name lan-dmz-6 rule 800 source address 2001:db8:0:aaaa::10
+set firewall ipv6 name lan-dmz-6 rule 900
+set firewall ipv6 name lan-dmz-6 rule 900 action 'accept'
+set firewall ipv6 name lan-dmz-6 rule 900 destination port 993
+set firewall ipv6 name lan-dmz-6 rule 900 log
+set firewall ipv6 name lan-dmz-6 rule 900 protocol 'tcp'
+set firewall ipv6 name lan-local-6 default-action 'drop'
+set firewall ipv6 name lan-local-6 default-log
+set firewall ipv6 name lan-local-6 rule 1
+set firewall ipv6 name lan-local-6 rule 1 action 'accept'
+set firewall ipv6 name lan-local-6 rule 1 state established
+set firewall ipv6 name lan-local-6 rule 1 state related
+set firewall ipv6 name lan-local-6 rule 2
+set firewall ipv6 name lan-local-6 rule 2 action 'drop'
+set firewall ipv6 name lan-local-6 rule 2 log
+set firewall ipv6 name lan-local-6 rule 2 state invalid
+set firewall ipv6 name lan-local-6 rule 400
+set firewall ipv6 name lan-local-6 rule 400 action 'accept'
+set firewall ipv6 name lan-local-6 rule 400 destination port 123
+set firewall ipv6 name lan-local-6 rule 400 log
+set firewall ipv6 name lan-local-6 rule 400 protocol 'tcp'
+set firewall ipv6 name lan-local-6 rule 600
+set firewall ipv6 name lan-local-6 rule 600 action 'accept'
+set firewall ipv6 name lan-local-6 rule 600 destination port 53
+set firewall ipv6 name lan-local-6 rule 600 log
+set firewall ipv6 name lan-local-6 rule 600 protocol 'tcp'
+set firewall ipv6 name lan-local-6 rule 700
+set firewall ipv6 name lan-local-6 rule 700 action 'accept'
+set firewall ipv6 name lan-local-6 rule 700 destination port 67,68
+set firewall ipv6 name lan-local-6 rule 700 log
+set firewall ipv6 name lan-local-6 rule 700 protocol 'tcp'
+set firewall ipv6 name lan-local-6 rule 800
+set firewall ipv6 name lan-local-6 rule 800 action 'accept'
+set firewall ipv6 name lan-local-6 rule 800 destination port 22
+set firewall ipv6 name lan-local-6 rule 800 log
+set firewall ipv6 name lan-local-6 rule 800 protocol 'tcp'
+set firewall ipv6 name lan-local-6 rule 800 source address 2001:db8:0:aaaa::10
+set firewall ipv6 name lan-wan-6 default-action 'drop'
+set firewall ipv6 name lan-wan-6 default-log
+set firewall ipv6 name lan-wan-6 rule 1
+set firewall ipv6 name lan-wan-6 rule 1 action 'accept'
+set firewall ipv6 name lan-wan-6 rule 1 state established
+set firewall ipv6 name lan-wan-6 rule 1 state related
+set firewall ipv6 name lan-wan-6 rule 2
+set firewall ipv6 name lan-wan-6 rule 2 action 'drop'
+set firewall ipv6 name lan-wan-6 rule 2 log
+set firewall ipv6 name lan-wan-6 rule 2 state invalid
+set firewall ipv6 name lan-wan-6 rule 200
+set firewall ipv6 name lan-wan-6 rule 200 action 'accept'
+set firewall ipv6 name lan-wan-6 rule 200 destination port 80,443
+set firewall ipv6 name lan-wan-6 rule 200 log
+set firewall ipv6 name lan-wan-6 rule 200 protocol 'tcp'
+set firewall ipv6 name lan-wan-6 rule 300
+set firewall ipv6 name lan-wan-6 rule 300 action 'accept'
+set firewall ipv6 name lan-wan-6 rule 300 destination port 20,21
+set firewall ipv6 name lan-wan-6 rule 300 log
+set firewall ipv6 name lan-wan-6 rule 300 protocol 'tcp'
+set firewall ipv6 name lan-wan-6 rule 800
+set firewall ipv6 name lan-wan-6 rule 800 action 'accept'
+set firewall ipv6 name lan-wan-6 rule 800 destination port 22
+set firewall ipv6 name lan-wan-6 rule 800 log
+set firewall ipv6 name lan-wan-6 rule 800 protocol 'tcp'
+set firewall ipv6 name local-dmz-6 default-action 'drop'
+set firewall ipv6 name local-dmz-6 default-log
+set firewall ipv6 name local-dmz-6 rule 1
+set firewall ipv6 name local-dmz-6 rule 1 action 'accept'
+set firewall ipv6 name local-dmz-6 rule 1 state established
+set firewall ipv6 name local-dmz-6 rule 1 state related
+set firewall ipv6 name local-dmz-6 rule 2
+set firewall ipv6 name local-dmz-6 rule 2 action 'drop'
+set firewall ipv6 name local-dmz-6 rule 2 log
+set firewall ipv6 name local-dmz-6 rule 2 state invalid
+set firewall ipv6 name local-dmz-6 rule 500
+set firewall ipv6 name local-dmz-6 rule 500 action 'accept'
+set firewall ipv6 name local-dmz-6 rule 500 destination port 25
+set firewall ipv6 name local-dmz-6 rule 500 log
+set firewall ipv6 name local-dmz-6 rule 500 protocol 'tcp'
+set firewall ipv6 name local-dmz-6 rule 600
+set firewall ipv6 name local-dmz-6 rule 600 action 'accept'
+set firewall ipv6 name local-dmz-6 rule 600 destination port 53
+set firewall ipv6 name local-dmz-6 rule 600 log
+set firewall ipv6 name local-dmz-6 rule 600 protocol 'tcp_udp'
+set firewall ipv6 name local-dmz-6 rule 700
+set firewall ipv6 name local-dmz-6 rule 700 action 'accept'
+set firewall ipv6 name local-dmz-6 rule 700 destination port 67,68
+set firewall ipv6 name local-dmz-6 rule 700 log
+set firewall ipv6 name local-dmz-6 rule 700 protocol 'tcp'
+set firewall ipv6 name local-lan-6 default-action 'drop'
+set firewall ipv6 name local-lan-6 default-log
+set firewall ipv6 name local-lan-6 rule 1
+set firewall ipv6 name local-lan-6 rule 1 action 'accept'
+set firewall ipv6 name local-lan-6 rule 1 state established
+set firewall ipv6 name local-lan-6 rule 1 state related
+set firewall ipv6 name local-lan-6 rule 2
+set firewall ipv6 name local-lan-6 rule 2 action 'drop'
+set firewall ipv6 name local-lan-6 rule 2 log
+set firewall ipv6 name local-lan-6 rule 2 state invalid
+set firewall ipv6 name local-lan-6 rule 700
+set firewall ipv6 name local-lan-6 rule 700 action 'accept'
+set firewall ipv6 name local-lan-6 rule 700 destination port 67,68
+set firewall ipv6 name local-lan-6 rule 700 log
+set firewall ipv6 name local-lan-6 rule 700 protocol 'tcp'
+set firewall ipv6 name local-wan-6 default-action 'drop'
+set firewall ipv6 name local-wan-6 default-log
+set firewall ipv6 name local-wan-6 rule 1
+set firewall ipv6 name local-wan-6 rule 1 action 'accept'
+set firewall ipv6 name local-wan-6 rule 1 state established
+set firewall ipv6 name local-wan-6 rule 1 state related
+set firewall ipv6 name local-wan-6 rule 2
+set firewall ipv6 name local-wan-6 rule 2 action 'drop'
+set firewall ipv6 name local-wan-6 rule 2 log
+set firewall ipv6 name local-wan-6 rule 2 state invalid
+set firewall ipv6 name local-wan-6 rule 200
+set firewall ipv6 name local-wan-6 rule 200 action 'accept'
+set firewall ipv6 name local-wan-6 rule 200 destination port 80,443
+set firewall ipv6 name local-wan-6 rule 200 log
+set firewall ipv6 name local-wan-6 rule 200 protocol 'tcp'
+set firewall ipv6 name local-wan-6 rule 300
+set firewall ipv6 name local-wan-6 rule 300 action 'accept'
+set firewall ipv6 name local-wan-6 rule 300 destination port 20,21
+set firewall ipv6 name local-wan-6 rule 300 log
+set firewall ipv6 name local-wan-6 rule 300 protocol 'tcp'
+set firewall ipv6 name wan-dmz-6 default-action 'drop'
+set firewall ipv6 name wan-dmz-6 default-log
+set firewall ipv6 name wan-dmz-6 rule 1
+set firewall ipv6 name wan-dmz-6 rule 1 action 'accept'
+set firewall ipv6 name wan-dmz-6 rule 1 state established
+set firewall ipv6 name wan-dmz-6 rule 1 state related
+set firewall ipv6 name wan-dmz-6 rule 2
+set firewall ipv6 name wan-dmz-6 rule 2 action 'drop'
+set firewall ipv6 name wan-dmz-6 rule 2 log
+set firewall ipv6 name wan-dmz-6 rule 2 state invalid
+set firewall ipv6 name wan-dmz-6 rule 200
+set firewall ipv6 name wan-dmz-6 rule 200 action 'accept'
+set firewall ipv6 name wan-dmz-6 rule 200 destination address 2001:db8:0:bbbb::200
+set firewall ipv6 name wan-dmz-6 rule 200 destination port 80,443
+set firewall ipv6 name wan-dmz-6 rule 200 log
+set firewall ipv6 name wan-dmz-6 rule 200 protocol 'tcp'
+set firewall ipv6 name wan-dmz-6 rule 500
+set firewall ipv6 name wan-dmz-6 rule 500 action 'accept'
+set firewall ipv6 name wan-dmz-6 rule 500 destination address 2001:db8:0:bbbb::200
+set firewall ipv6 name wan-dmz-6 rule 500 destination port 25
+set firewall ipv6 name wan-dmz-6 rule 500 log
+set firewall ipv6 name wan-dmz-6 rule 500 protocol 'tcp'
+set firewall ipv6 name wan-dmz-6 rule 600
+set firewall ipv6 name wan-dmz-6 rule 600 action 'accept'
+set firewall ipv6 name wan-dmz-6 rule 600 destination address 2001:db8:0:bbbb::200
+set firewall ipv6 name wan-dmz-6 rule 600 destination port 53
+set firewall ipv6 name wan-dmz-6 rule 600 log
+set firewall ipv6 name wan-dmz-6 rule 600 protocol 'tcp'
+set firewall ipv6 name wan-lan-6 default-action 'drop'
+set firewall ipv6 name wan-lan-6 default-log
+set firewall ipv6 name wan-lan-6 rule 1
+set firewall ipv6 name wan-lan-6 rule 1 action 'accept'
+set firewall ipv6 name wan-lan-6 rule 1 state established
+set firewall ipv6 name wan-lan-6 rule 1 state related
+set firewall ipv6 name wan-lan-6 rule 2
+set firewall ipv6 name wan-lan-6 rule 2 action 'drop'
+set firewall ipv6 name wan-lan-6 rule 2 log
+set firewall ipv6 name wan-lan-6 rule 2 state invalid
+set firewall ipv6 name wan-local-6 default-action 'drop'
+set firewall ipv6 name wan-local-6 default-log
+set firewall ipv6 name wan-local-6 rule 1
+set firewall ipv6 name wan-local-6 rule 1 action 'accept'
+set firewall ipv6 name wan-local-6 rule 1 state established
+set firewall ipv6 name wan-local-6 rule 1 state related
+set firewall ipv6 name wan-local-6 rule 2
+set firewall ipv6 name wan-local-6 rule 2 action 'drop'
+set firewall ipv6 name wan-local-6 rule 2 log
+set firewall ipv6 name wan-local-6 rule 2 state invalid
+set firewall zone dmz default-action 'drop'
+set firewall zone dmz default-log
+set firewall zone dmz from lan firewall ipv6-name lan-dmz-6
+set firewall zone dmz from lan firewall name lan-dmz
+set firewall zone dmz from local firewall ipv6-name local-dmz-6
+set firewall zone dmz from local firewall name local-dmz
+set firewall zone dmz from wan firewall ipv6-name wan-dmz-6
+set firewall zone dmz from wan firewall name wan-dmz
+set firewall zone dmz member interface eth0.30
+set firewall zone lan default-action 'drop'
+set firewall zone lan default-log
+set firewall zone lan from dmz firewall ipv6-name dmz-lan-6
+set firewall zone lan from dmz firewall name dmz-lan
+set firewall zone lan from local firewall ipv6-name local-lan-6
+set firewall zone lan from local firewall name local-lan
+set firewall zone lan from wan firewall ipv6-name wan-lan-6
+set firewall zone lan from wan firewall name wan-lan
+set firewall zone lan member interface eth0.20
+set firewall zone local default-action 'drop'
+set firewall zone local default-log
+set firewall zone local from dmz firewall ipv6-name dmz-local-6
+set firewall zone local from dmz firewall name dmz-local
+set firewall zone local from lan firewall ipv6-name lan-local-6
+set firewall zone local from lan firewall name lan-local
+set firewall zone local from wan firewall ipv6-name wan-local-6
+set firewall zone local from wan firewall name wan-local
+set firewall zone local local-zone
+set firewall zone wan default-action 'drop'
+set firewall zone wan default-log
+set firewall zone wan from dmz firewall ipv6-name dmz-wan-6
+set firewall zone wan from dmz firewall name dmz-wan
+set firewall zone wan from lan firewall ipv6-name lan-wan-6
+set firewall zone wan from lan firewall name lan-wan
+set firewall zone wan from local firewall ipv6-name local-wan-6
+set firewall zone wan from local firewall name local-wan
+set firewall zone wan member interface eth0.10

@@ -1,0 +1,145 @@
+---
+argument_specs:
+  main:
+    short_description: Policy-based site-to-site IPsec (docs blueprint "Policy-based Site-to-Site VPN IPsec between VyOS and Cisco")
+    description:
+      - Configures one IKE group, one ESP group, a pre-shared key per peer and
+        site-to-site peers whose tunnels are defined by traffic selectors
+        (local and remote prefixes). Optionally adds a default route towards
+        the WAN gateway.
+      - Uses vyos.vyos resource modules only (vyos_vpn_ipsec, vyos_vpn_ipsec_s2s,
+        vyos_static_routes).
+      - The far end can be any IKE peer; match its proposals and mirror the
+        traffic selectors there.
+      - WAN and LAN addressing belongs to C(vyos.blueprints.base).
+    options:
+      ipsec_policy_based_peers:
+        type: list
+        elements: dict
+        required: true
+        description: Remote peers.
+        options:
+          name:
+            type: str
+            required: true
+            description: Peer name, e.g. C(CISCO).
+          local_address:
+            type: str
+            required: true
+            description: Local WAN address used for IKE.
+          remote_address:
+            type: str
+            required: true
+            description: Peer's WAN address.
+          local_id:
+            type: str
+            description: Local IKE id. Defaults to C(local_address).
+          remote_id:
+            type: str
+            description: Remote IKE id. Defaults to C(remote_address).
+          psk:
+            type: str
+            required: true
+            no_log: true
+            description: Pre-shared key.
+          psk_type:
+            type: str
+            choices: [plaintext, base64, hex]
+            description: Encoding of C(psk). Not set when omitted (VyOS default, plaintext).
+          psk_name:
+            type: str
+            description: Name of the PSK entry. Defaults to C(<name>-PSK).
+          connection_type:
+            type: str
+            choices: [initiate, trap, none]
+            default: initiate
+            description: C(initiate) brings the tunnels up from this side; C(none) only responds.
+          virtual_address:
+            type: str
+            description: Request a virtual IP from the peer, e.g. C(0.0.0.0) for FlexVPN.
+          authentication_ids:
+            type: bool
+            default: true
+            description: Set C(local-id)/C(remote-id) on the peer (the PSK ids are always set).
+          tunnels:
+            type: list
+            elements: dict
+            required: true
+            description: Traffic selectors, one IPsec SA each.
+            options:
+              id:
+                type: int
+                description: Tunnel number. Defaults to the position in the list (1, 2, ...).
+              local_prefix:
+                type: str
+                required: true
+                description: Local network, e.g. C(192.168.0.0/24).
+              remote_prefix:
+                type: str
+                required: true
+                description: Remote network, e.g. C(192.168.10.0/24).
+              protocol:
+                type: str
+                description: Protect only this protocol, e.g. C(gre) for GRE over IPsec.
+      ipsec_policy_based_ike_group:
+        type: dict
+        description:
+          - IKE (phase 1) settings shared by all peers.
+          - Settings without a default here are configured only when given.
+        options:
+          name: {type: str, default: IKE-GROUP, description: Group name.}
+          proposal_id: {type: int, default: 10, description: Proposal number.}
+          key_exchange: {type: str, choices: [ikev1, ikev2], default: ikev2, description: IKE version.}
+          lifetime: {type: int, description: Lifetime in seconds.}
+          dh_group: {type: int, default: 14, description: Diffie-Hellman group.}
+          encryption: {type: str, default: aes256, description: "Encryption, e.g. C(aes128)."}
+          hash: {type: str, default: sha256, description: "Hash, e.g. C(sha1)."}
+          close_action: {type: str, choices: [none, trap, start], description: Action when the peer closes the SA.}
+          dead_peer_detection:
+            type: dict
+            description: DPD settings; only the keys given are configured.
+            options:
+              action: {type: str, choices: [trap, clear, restart], description: DPD action.}
+              interval: {type: int, description: Interval in seconds.}
+              timeout: {type: int, description: Timeout in seconds.}
+      ipsec_policy_based_esp_group:
+        type: dict
+        description:
+          - ESP (phase 2) settings shared by all peers.
+          - Settings without a default here are configured only when given.
+        options:
+          name: {type: str, default: ESP-GROUP, description: Group name.}
+          proposal_id: {type: int, default: 10, description: Proposal number.}
+          mode: {type: str, choices: [tunnel, transport], description: ESP mode.}
+          lifetime: {type: int, description: Lifetime in seconds.}
+          pfs: {type: str, description: PFS group or C(disable).}
+          encryption: {type: str, default: aes256, description: Encryption.}
+          hash: {type: str, default: sha256, description: Hash.}
+      ipsec_policy_based_interfaces:
+        type: list
+        elements: str
+        default: []
+        description: Interfaces IPsec listens on (C(vpn ipsec interface)), e.g. C([eth0]).
+      ipsec_policy_based_options:
+        type: dict
+        default: {}
+        description:
+          - C(vpn ipsec options), passed through as the C(options) of vyos.vyos.vyos_vpn_ipsec.
+          - "For FlexVPN, e.g. C({flexvpn: true, virtual_ip: true, interface: tun1, disable_route_autoinstall: true})."
+      ipsec_policy_based_default_gateway:
+        type: str
+        default: ""
+        description: Adds C(0.0.0.0/0) via this next hop (the WAN gateway).
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the ipsec_policy_based role
+    description: Run with C(tasks_from=verify). Checks the IPsec SA of every tunnel of every peer is up.
+    options:
+      ipsec_policy_based_peers:
+        type: list
+        elements: dict
+        required: true
+        description: Same value as for C(main).

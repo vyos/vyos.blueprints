@@ -1,0 +1,26 @@
+---
+- name: Read VRFs
+  vyos.vyos.vyos_command:
+    commands:
+      - show vrf
+  register: _vrf_firewall_v
+
+- name: Every VRF exists
+  ansible.builtin.assert:
+    that: _vrf_firewall_v.stdout[0] is search('(?m)^\s*' ~ (item.name | regex_escape) ~ '\s')
+    fail_msg: "VRF {{ item.name }} is missing from 'show vrf'"
+    quiet: true
+  loop: "{{ vrf_firewall_vrfs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Every interface is in its VRF
+  ansible.builtin.assert:
+    that: >-
+      _vrf_firewall_v.stdout[0] is search('(?m)^\s*' ~ (item.0.name | regex_escape)
+      ~ '\s.*\b' ~ (item.1 | regex_escape) ~ '\b')
+    fail_msg: "{{ item.1 }} is not a member of VRF {{ item.0.name }}"
+    quiet: true
+  loop: "{{ vrf_firewall_vrfs | subelements('interfaces', skip_missing=true) }}"
+  loop_control:
+    label: "{{ item.0.name }} {{ item.1 }}"

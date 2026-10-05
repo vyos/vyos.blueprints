@@ -1,0 +1,14 @@
+{% set pg = bgp_unnumbered_peer_group %}
+{% set base = 'set protocols bgp' %}
+{% for afi in bgp_unnumbered_address_families %}
+{{ base }} peer-group {{ pg }} address-family {{ afi }}-unicast
+{% endfor %}
+{{ base }} peer-group {{ pg }} capability extended-nexthop
+{{ base }} peer-group {{ pg }} remote-as '{{ bgp_unnumbered_remote_as }}'
+{% for i in bgp_unnumbered_interfaces %}
+{{ base }} neighbor {{ i }} interface v6only
+{{ base }} neighbor {{ i }} interface v6only peer-group '{{ pg }}'
+{% endfor %}
+{% if bgp_unnumbered_multipath_relax | bool %}
+{{ base }} parameters bestpath as-path multipath-relax
+{% endif %}

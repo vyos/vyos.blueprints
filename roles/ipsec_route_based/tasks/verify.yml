@@ -1,0 +1,52 @@
+---
+- name: Read IPsec SAs
+  vyos.vyos.vyos_command:
+    commands:
+      - show vpn ipsec sa
+  register: _ipsec_route_based_v_sa
+
+- name: The IPsec SA of every peer is up
+  ansible.builtin.assert:
+    that: _ipsec_route_based_v_sa.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '-vti\s+up\b')
+    fail_msg: "IPsec SA {{ item.name }}-vti is not up"
+    quiet: true
+  loop: "{{ ipsec_route_based_peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Read OSPF neighbours
+  vyos.vyos.vyos_command:
+    commands:
+      - show ip ospf neighbor
+  register: _ipsec_route_based_v_ospf
+  when: ipsec_route_based_ospf | default({}, true) | length > 0
+
+- name: A Full OSPF adjacency on every VTI
+  ansible.builtin.assert:
+    that: _ipsec_route_based_v_ospf.stdout[0] is search('Full.*\s' ~ (item.vti.interface | regex_escape) ~ ':')
+    fail_msg: "no Full OSPF adjacency on {{ item.vti.interface }}"
+    quiet: true
+  loop: "{{ ipsec_route_based_peers }}"
+  loop_control:
+    label: "{{ item.vti.interface }}"
+  when: ipsec_route_based_ospf | default({}, true) | length > 0
+
+- name: Read BGP neighbours
+  vyos.vyos.vyos_command:
+    commands:
+      - show bgp summary
+  register: _ipsec_route_based_v_bgp
+  when: ipsec_route_based_bgp | default({}, true) | length > 0
+
+- name: Every BGP session is established
+  # An established neighbour shows its Up/Down time followed by a prefix count.
+  ansible.builtin.assert:
+    that: >-
+      _ipsec_route_based_v_bgp.stdout[0] is search('(?m)^' ~ (item.address | regex_escape)
+      ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+    fail_msg: "BGP session to {{ item.address }} is not established"
+    quiet: true
+  loop: "{{ (ipsec_route_based_bgp | default({}, true)).neighbors | default([]) }}"
+  loop_control:
+    label: "{{ item.address }}"
+  when: ipsec_route_based_bgp | default({}, true) | length > 0

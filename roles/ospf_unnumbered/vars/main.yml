@@ -1,0 +1,3 @@
+---
+_ospf_unnumbered_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_ospf_unnumbered_prefix: "{{ ospf_unnumbered_router_id }}/32"

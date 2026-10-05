@@ -1,0 +1,11 @@
+---
+- name: BGP IPv6 unnumbered with extended next-hop
+  hosts: fabric
+  gather_facts: false
+  roles:
+    - vyos.blueprints.bgp_unnumbered
+  post_tasks:
+    - name: Show rendered commands
+      ansible.builtin.debug:
+        var: vyos_blueprints_rendered
+      when: show_rendered | default(false) | bool

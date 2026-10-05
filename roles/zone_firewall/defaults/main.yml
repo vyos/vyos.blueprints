@@ -1,0 +1,6 @@
+---
+zone_firewall_policies: []
+zone_firewall_ipv6: true
+zone_firewall_all_pairs: true
+zone_firewall_base_rules: true
+zone_firewall_log_rules: true

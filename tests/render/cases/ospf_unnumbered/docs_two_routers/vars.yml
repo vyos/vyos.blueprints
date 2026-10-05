@@ -1,0 +1,4 @@
+---
+# docs.vyos.io/en/1.5/configexamples/ospf-unnumbered.html - shared settings
+ospf_unnumbered_interfaces: [eth1, eth2]
+ospf_unnumbered_md5_key: yourpassword

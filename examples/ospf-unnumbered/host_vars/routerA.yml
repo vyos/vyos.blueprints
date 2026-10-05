@@ -1,0 +1,5 @@
+---
+ospf_unnumbered_router_id: 192.168.0.1
+# LAN address; eth0 on the docs page, eth3 here because containerlab uses eth0 for management
+base_interfaces:
+  - {name: eth3, addresses: [10.0.0.1/24]}

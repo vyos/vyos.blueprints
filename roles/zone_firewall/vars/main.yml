@@ -1,0 +1,17 @@
+---
+_zone_firewall_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_zone_firewall_families: "{{ ['ipv4', 'ipv6'] if zone_firewall_ipv6 | bool else ['ipv4'] }}"
+_zone_firewall_names: "{{ zone_firewall_zones | map(attribute='name') | list }}"
+# Listed policies plus, with zone_firewall_all_pairs, an empty policy for every
+# other ordered zone pair, so every zone-pair-direction has a logged ruleset.
+_zone_firewall_policies: >-
+  {%- set out = zone_firewall_policies | list -%}
+  {%- if zone_firewall_all_pairs | bool -%}
+  {%-   set listed = zone_firewall_policies | map(attribute='from') | zip(zone_firewall_policies | map(attribute='to')) | map('join', '>') | list -%}
+  {%-   for a in _zone_firewall_names -%}
+  {%-     for b in _zone_firewall_names if b != a and (a ~ '>' ~ b) not in listed -%}
+  {%-       set _ = out.append({'from': a, 'to': b, 'rules': []}) -%}
+  {%-     endfor -%}
+  {%-   endfor -%}
+  {%- endif -%}
+  {{ out }}

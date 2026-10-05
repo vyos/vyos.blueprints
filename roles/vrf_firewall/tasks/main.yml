@@ -1,0 +1,60 @@
+---
+- name: Check interface names
+  ansible.builtin.assert:
+    that: item.1 is match('^(' ~ (_vrf_firewall_iftypes.keys() | join('|')) ~ ')\d+(\.\d+)?$')
+    fail_msg: >-
+      {{ item.1 }} (VRF {{ item.0.name }}) is not a supported interface name;
+      expected one of {{ _vrf_firewall_iftypes.keys() | join(', ') }} followed by a number, optionally .VLAN
+    quiet: true
+  loop: "{{ vrf_firewall_vrfs | subelements('interfaces', skip_missing=true) }}"
+  loop_control:
+    label: "{{ item.0.name }} {{ item.1 }}"
+
+- name: Create VRFs and their tables
+  vyos.vyos.vyos_vrf:
+    config: "{{ lookup('ansible.builtin.template', 'vrf.yml.j2') | from_yaml }}"
+    state: "{{ _vrf_firewall_state }}"
+  register: _vrf_firewall_r_vrf
+
+- name: Put ethernet interfaces into their VRFs
+  vyos.vyos.vyos_interfaces:
+    config: "{{ _vrf_firewall_eth_bindings }}"
+    state: "{{ _vrf_firewall_state }}"
+  register: _vrf_firewall_r_eth
+  when: _vrf_firewall_eth_bindings | length > 0
+
+- name: Bind VLAN and other interfaces, add inter-VRF routes
+  # vyos_interfaces cannot set a VRF on a VLAN, and vyos_vrf static routes
+  # cannot point into another VRF, so these go through vyos_config.
+  vyos.vyos.vyos_config:
+    lines: "{{ _vrf_firewall_cli_lines }}"
+  register: _vrf_firewall_r_cli
+  when:
+    - _vrf_firewall_cli_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Set the global state policy
+  vyos.vyos.vyos_firewall_global:
+    config:
+      state_policy: >-
+        {{ vrf_firewall_state_policy | dict2items(key_name='connection_type', value_name='action') }}
+    state: "{{ _vrf_firewall_state }}"
+  register: _vrf_firewall_r_state
+  when: vrf_firewall_state_policy | length > 0
+
+- name: Configure the forward and input filters
+  vyos.vyos.vyos_firewall_rules:
+    config: "{{ lookup('ansible.builtin.template', 'firewall_rules.yml.j2') | from_yaml }}"
+    state: "{{ _vrf_firewall_state }}"
+  register: _vrf_firewall_r_fw
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_vrf_firewall_r_vrf, _vrf_firewall_r_eth]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten)
+         + _vrf_firewall_cli_lines
+         + ([_vrf_firewall_r_state, _vrf_firewall_r_fw]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
+  when: vyos_blueprints_render_only | default(false) | bool

@@ -1,0 +1,9 @@
+---
+- name: Check the VRFs
+  hosts: router
+  gather_facts: false
+  tasks:
+    - name: VRF checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.vrf_firewall
+        tasks_from: verify

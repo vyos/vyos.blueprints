@@ -1,0 +1,22 @@
+---
+- name: Check both sites
+  hosts: sites
+  gather_facts: false
+  tasks:
+    - name: IPsec checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ipsec_policy_based
+        tasks_from: verify
+
+- name: Check firewall and NAT on LEFT
+  hosts: left
+  gather_facts: false
+  tasks:
+    - name: Firewall checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.firewall
+        tasks_from: verify
+    - name: NAT checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.nat
+        tasks_from: verify

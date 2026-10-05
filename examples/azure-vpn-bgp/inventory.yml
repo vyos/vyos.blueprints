@@ -1,0 +1,15 @@
+---
+# docs.vyos.io/en/1.5/configexamples/azure-vpn-bgp.html
+# Only the VyOS side is configured here; the Azure VNet gateway, local network
+# gateway and connection are created in Azure as the page's prerequisites describe.
+all:
+  children:
+    onprem:
+      hosts:
+        vyos:
+          ansible_host: 192.0.2.10        # your router's address
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_password: vyos              # use ansible-vault for real devices

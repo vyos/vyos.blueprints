@@ -1,0 +1,4 @@
+---
+bridge_firewall_state_rules: true
+bridge_firewall_bridge_forward_default_action: drop
+bridge_firewall_ipv4_forward_default_action: drop

@@ -1,0 +1,39 @@
+name: bp-azure2
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    vyos:
+      kind: vyosnetworks_vyos
+    # two VyOS standing in for the active-active Azure VNet gateway instances
+    azure1:
+      kind: vyosnetworks_vyos
+    azure2:
+      kind: vyosnetworks_vyos
+    isp:
+      kind: linux
+      image: alpine:3
+      exec: ["sysctl -w net.ipv4.ip_forward=1", "ip addr add 198.51.100.1/24 dev eth1", "ip addr add 203.0.113.1/24 dev eth2", "ip addr add 203.0.114.1/24 dev eth3"]
+    onprem:
+      kind: linux
+      image: alpine:3
+      exec: ["ip addr add 10.10.2.10/24 dev eth1", "ip route replace default via 10.10.2.1"]
+    # the "VNet": one host behind both gateway instances
+    vm:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip link add br0 type bridge
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set br0 up
+        - ip addr add 10.0.1.10/24 dev br0
+        - ip route replace 10.10.0.0/16 nexthop via 10.0.1.1 nexthop via 10.0.1.2
+  links:
+    - endpoints: ["vyos:eth1", "isp:eth1"]
+    - endpoints: ["azure1:eth1", "isp:eth2"]
+    - endpoints: ["azure2:eth1", "isp:eth3"]
+    - endpoints: ["vyos:eth2", "onprem:eth1"]
+    - endpoints: ["azure1:eth2", "vm:eth1"]
+    - endpoints: ["azure2:eth2", "vm:eth2"]

@@ -1,0 +1,20 @@
+{% set b = _ipsec_route_based_bgp %}
+as_number: {{ b.asn | int }}
+{% if b.networks | default([]) %}
+address_family:
+  - afi: ipv4
+    networks:
+{%   for n in b.networks %}
+      - prefix: {{ n | to_json }}
+{%   endfor %}
+{% endif %}
+{% set soft = b.neighbors | selectattr('soft_reconfiguration_inbound', 'defined') | selectattr('soft_reconfiguration_inbound') | list %}
+{% if soft %}
+neighbors:
+{%   for n in soft %}
+  - neighbor_address: {{ n.address | to_json }}
+    address_family:
+      - afi: ipv4
+        soft_reconfiguration: true
+{%   endfor %}
+{% endif %}

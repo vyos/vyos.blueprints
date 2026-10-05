@@ -1,0 +1,51 @@
+{#- Optional settings are rendered only when given. -#}
+{% set ike = ipsec_route_based_ike_group %}
+{% set esp = ipsec_route_based_esp_group %}
+{% set dpd = ike.dead_peer_detection | default({}, true) %}
+ike_group:
+  - name: {{ ike.name | default('IKE-GROUP') | to_json }}
+    key_exchange: {{ ike.key_exchange | default('ikev2') }}
+{% if ike.lifetime is defined and ike.lifetime is not none %}
+    lifetime: {{ ike.lifetime | int }}
+{% endif %}
+{% if ike.close_action is defined and ike.close_action %}
+    close_action: {{ ike.close_action }}
+{% endif %}
+{% if ike.ikev2_reauth | default(false) | bool %}
+    ikev2_reauth: true
+{% endif %}
+{% if dpd %}
+    dead_peer_detection:
+{%   for k in ['action', 'interval', 'timeout'] if dpd[k] is defined and dpd[k] is not none %}
+      {{ k }}: {{ dpd[k] }}
+{%   endfor %}
+{% endif %}
+    proposal:
+      - proposal_id: {{ ike.proposal_id | default(10) | int }}
+        dh_group: {{ ike.dh_group | default(14) | int }}
+        encryption: {{ ike.encryption | default('aes256') | to_json }}
+        hash: {{ ike.hash | default('sha256') | to_json }}
+esp_group:
+  - name: {{ esp.name | default('ESP-GROUP') | to_json }}
+{% if esp.mode is defined and esp.mode %}
+    mode: {{ esp.mode }}
+{% endif %}
+{% if esp.lifetime is defined and esp.lifetime is not none %}
+    lifetime: {{ esp.lifetime | int }}
+{% endif %}
+{% if esp.pfs is defined and esp.pfs %}
+    pfs: {{ esp.pfs | to_json }}
+{% endif %}
+    proposal:
+      - proposal_id: {{ esp.proposal_id | default(10) | int }}
+        encryption: {{ esp.encryption | default('aes256') | to_json }}
+        hash: {{ esp.hash | default('sha256') | to_json }}
+authentication:
+  psk: {{ _ipsec_route_based_psks | to_json }}
+{% if ipsec_route_based_interfaces %}
+interface: {{ ipsec_route_based_interfaces | to_json }}
+{% endif %}
+{% if ipsec_route_based_disable_route_autoinstall | bool %}
+options:
+  disable_route_autoinstall: true
+{% endif %}

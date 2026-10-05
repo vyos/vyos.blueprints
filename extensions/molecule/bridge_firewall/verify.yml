@@ -1,0 +1,37 @@
+---
+- name: Verify role state
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.bridge_firewall
+        tasks_from: verify
+
+- name: Verify the page's requirements with traffic
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _flows:
+      - {from: h1, ping: "-6 fd00:b0::2", allowed: true, why: "br0 accepts IPv6 within the bridge"}
+      - {from: h1, ping: "192.168.0.2", allowed: false, why: "br0 drops everything but IPv6"}
+      - {from: h3, ping: "10.1.1.103", allowed: true, why: "br1 accepts new IPv4 from 10.1.1.102"}
+      - {from: h4, ping: "10.1.1.102", allowed: false, why: "br1 drops other IPv4 connections"}
+      - {from: h3, ping: "10.1.1.1", allowed: true, why: "br1 may access the router"}
+      - {from: h3, ping: "203.0.113.100", allowed: true, why: "br1 may reach the internet"}
+      - {from: h3, ping: "10.2.2.5", allowed: false, why: "br1 may not reach other LANs"}
+      - {from: h5, ping: "10.2.2.7", allowed: true, why: "br2 accepts all IPv4"}
+      - {from: h5, ping: "10.2.2.1", allowed: false, why: "br2 may not access the router"}
+      - {from: h5, ping: "203.0.113.100", allowed: true, why: "br2 may reach the internet"}
+      - {from: h5, ping: "10.1.1.102", allowed: true, why: "br2 may connect to br1"}
+  tasks:
+    - name: Ping per requirement
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-bridge-{{ item.from }} ping -c 2 -W 2 {{ item.ping }}
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      register: _ping
+      changed_when: false
+      failed_when: (_ping.rc == 0) != item.allowed
+      loop: "{{ _flows }}"
+      loop_control:
+        label: "{{ item.from }} -> {{ item.ping }} ({{ item.why }})"

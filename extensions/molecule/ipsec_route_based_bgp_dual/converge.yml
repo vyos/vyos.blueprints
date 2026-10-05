@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: vpn
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ipsec_route_based

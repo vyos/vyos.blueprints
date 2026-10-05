@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: VyOS maintainers and contributors
+  description: Zone-based firewall with per zone-pair rulesets for IPv4 and IPv6
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: GenericLinux
+      versions: [all]
+  galaxy_tags: [vyos, networking, firewall, zone]
+dependencies: []

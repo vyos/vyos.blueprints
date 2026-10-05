@@ -1,0 +1,46 @@
+---
+# docs.vyos.io/en/1.5/configexamples/site-2-site-cisco.html - VyOS side
+# The page's PSK is the word "secret". Ansible masks every occurrence of a
+# no_log value, so the golden file shows the PSK line as "******** ********".
+gre_tunnel_interfaces:
+  - name: tun1
+    encapsulation: gre
+    adjust_mss: "1336"
+    mtu: 1376
+    remote: 10.1.1.6
+    source_address: 198.51.100.1
+
+ipsec_policy_based_peers:
+  - name: cisco_hub
+    psk_name: vyos_cisco_l
+    psk: secret
+    local_address: 198.51.100.1
+    remote_address: 10.1.1.6
+    local_id: vyos.net
+    remote_id: cisco.hub.net
+    connection_type: initiate
+    virtual_address: 0.0.0.0
+    tunnels:
+      - {id: 1, local_prefix: 198.51.100.1/32, remote_prefix: 10.1.1.6/32, protocol: gre}
+ipsec_policy_based_ike_group:
+  name: i1
+  key_exchange: ikev2
+  lifetime: 28800
+  proposal_id: 1
+  dh_group: 5
+  encryption: aes256
+  hash: sha256
+ipsec_policy_based_esp_group:
+  name: e1
+  lifetime: 3600
+  mode: tunnel
+  pfs: disable
+  proposal_id: 1
+  encryption: aes128
+  hash: sha256
+ipsec_policy_based_interfaces: [eth2]
+ipsec_policy_based_options:
+  disable_route_autoinstall: true
+  flexvpn: true
+  interface: tun1
+  virtual_ip: true

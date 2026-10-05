@@ -1,0 +1,22 @@
+---
+- name: Create firewall groups
+  vyos.vyos.vyos_firewall_global:
+    config: "{{ lookup('ansible.builtin.template', 'groups.yml.j2') | from_yaml }}"
+    state: "{{ _firewall_state }}"
+  register: _firewall_r_groups
+  when: firewall_groups | dict2items | map(attribute='value') | select | list | length > 0
+
+- name: Configure the input, forward and output filters
+  vyos.vyos.vyos_firewall_rules:
+    config: "{{ lookup('ansible.builtin.template', 'rules.yml.j2') | from_yaml }}"
+    state: "{{ _firewall_state }}"
+  register: _firewall_r_rules
+  when: (firewall_ipv4 | length > 0) or (firewall_ipv6 | length > 0)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_firewall_r_groups, _firewall_r_rules]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
+  when: vyos_blueprints_render_only | default(false) | bool

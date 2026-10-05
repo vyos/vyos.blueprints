@@ -1,0 +1,15 @@
+parameters:
+  router_id: {{ ospf_unnumbered_router_id | to_json }}
+areas:
+  - area_id: {{ ospf_unnumbered_area | string | to_json }}
+{% if ospf_unnumbered_md5_key %}
+    authentication: md5
+{% endif %}
+    network:
+      - address: {{ _ospf_unnumbered_prefix | to_json }}
+{% if ospf_unnumbered_redistribute %}
+redistribute:
+{%   for r in ospf_unnumbered_redistribute %}
+  - route_type: {{ r }}
+{%   endfor %}
+{% endif %}

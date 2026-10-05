@@ -1,0 +1,9 @@
+{% set o = _ipsec_route_based_ospf %}
+parameters:
+  router_id: {{ o.router_id | to_json }}
+areas:
+  - area_id: {{ o.area | default('0') | string | to_json }}
+    network:
+{% for n in o.networks %}
+      - address: {{ n | to_json }}
+{% endfor %}

@@ -1,0 +1,34 @@
+---
+- name: Configure IKE/ESP groups and pre-shared keys
+  vyos.vyos.vyos_vpn_ipsec:
+    config: "{{ lookup('ansible.builtin.template', 'vpn_ipsec.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_policy_based_state }}"
+  register: _ipsec_policy_based_r_ipsec
+  no_log: true
+
+- name: Configure the site-to-site peers and their traffic selectors
+  vyos.vyos.vyos_vpn_ipsec_s2s:
+    config: "{{ lookup('ansible.builtin.template', 'vpn_ipsec_s2s.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_policy_based_state }}"
+  register: _ipsec_policy_based_r_s2s
+
+- name: Add the default route towards the WAN gateway
+  vyos.vyos.vyos_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: 0.0.0.0/0
+                next_hops:
+                  - forward_router_address: "{{ ipsec_policy_based_default_gateway }}"
+    state: "{{ _ipsec_policy_based_state }}"
+  register: _ipsec_policy_based_r_route
+  when: ipsec_policy_based_default_gateway | length > 0
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_ipsec_policy_based_r_ipsec, _ipsec_policy_based_r_s2s, _ipsec_policy_based_r_route]
+            | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
+  when: vyos_blueprints_render_only | default(false) | bool

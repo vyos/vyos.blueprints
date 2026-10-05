@@ -1,0 +1,22 @@
+{% for t in gre_tunnel_interfaces %}
+{%   set b = 'set interfaces tunnel ' ~ t.name %}
+{{ b }} encapsulation '{{ t.encapsulation | default('gre') }}'
+{%   if t.description is defined %}
+{{ b }} description '{{ t.description }}'
+{%   endif %}
+{%   if t.adjust_mss is defined %}
+{{ b }} ip adjust-mss '{{ t.adjust_mss }}'
+{%   endif %}
+{%   if t.mtu is defined %}
+{{ b }} mtu '{{ t.mtu }}'
+{%   endif %}
+{%   if t.remote is defined %}
+{{ b }} remote '{{ t.remote }}'
+{%   endif %}
+{%   if t.source_address is defined %}
+{{ b }} source-address '{{ t.source_address }}'
+{%   endif %}
+{%   if t.source_interface is defined %}
+{{ b }} source-interface '{{ t.source_interface }}'
+{%   endif %}
+{% endfor %}
