@@ -1,0 +1,17 @@
+---
+- name: Read VPNv4 sessions
+  vyos.vyos.vyos_command:
+    commands: [show bgp ipv4 vpn summary]
+  register: _l3vpn_v
+  when: l3vpn_neighbors | length > 0
+
+- name: Every VPNv4 session is established
+  ansible.builtin.assert:
+    that: >-
+      _l3vpn_v.stdout[0] is search('(?m)^' ~ (item.address | regex_escape)
+      ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+    fail_msg: "VPNv4 session to {{ item.address }} is not established"
+    quiet: true
+  loop: "{{ l3vpn_neighbors }}"
+  loop_control:
+    label: "{{ item.address }}"

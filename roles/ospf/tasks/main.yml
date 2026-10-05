@@ -1,0 +1,34 @@
+---
+- name: Configure OSPF (skipped when there is nothing to configure)
+  when: (ospf_router_id | length > 0) or (ospf_areas | length > 0) or (ospf_interfaces | length > 0)
+  block:
+    - name: Configure the OSPF process
+      vyos.vyos.vyos_ospfv2:
+        config: "{{ lookup('ansible.builtin.template', 'ospfv2.yml.j2') | from_yaml }}"
+        state: "{{ _ospf_state }}"
+      register: _ospf_r_process
+
+    - name: Configure OSPF interfaces
+      vyos.vyos.vyos_ospf_interfaces:
+        config: "{{ lookup('ansible.builtin.template', 'ospf_interfaces.yml.j2') | from_yaml }}"
+        state: "{{ _ospf_state }}"
+      register: _ospf_r_ifaces
+      no_log: "{{ ospf_interfaces | selectattr('md5_key', 'defined') | list | length > 0 }}"
+      when: ospf_interfaces | length > 0
+
+    - name: Set export filters, adjacency logging and the import route-map
+      # vyos_ospfv2 has no options for these yet.
+      vyos.vyos.vyos_config:
+        lines: "{{ _ospf_cli_lines }}"
+      register: _ospf_r_cli
+      when:
+        - _ospf_cli_lines | length > 0
+        - not (vyos_blueprints_render_only | default(false) | bool)
+
+    - name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+      ansible.builtin.set_fact:
+        vyos_blueprints_rendered: >-
+          {{ vyos_blueprints_rendered | default([])
+             + ([_ospf_r_process, _ospf_r_ifaces] | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten)
+             + _ospf_cli_lines }}
+      when: vyos_blueprints_render_only | default(false) | bool

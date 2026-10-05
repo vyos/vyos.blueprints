@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: VyOS maintainers and contributors
+  description: MPLS L3VPN control plane - iBGP VPNv4 with route reflectors
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: GenericLinux
+      versions: [all]
+  galaxy_tags: [vyos, networking, l3vpn, mpls, bgp]
+dependencies: []

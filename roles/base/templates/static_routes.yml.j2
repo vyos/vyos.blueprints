@@ -1,0 +1,6 @@
+{% for r in base_static_routes %}
+- dest: {{ r.dest | to_json }}
+  next_hops:
+    - {% if r.next_hop is defined %}forward_router_address: {{ r.next_hop | to_json }}{% else %}interface: {{ r.interface | to_json }}{% endif %}
+
+{% endfor %}

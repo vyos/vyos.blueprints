@@ -1,0 +1,15 @@
+---
+- name: Read WAN load-balancing state
+  vyos.vyos.vyos_command:
+    commands:
+      - show wan-load-balance
+  register: _wan_load_balance_v
+
+- name: Every WAN interface is managed by the load balancer
+  ansible.builtin.assert:
+    that: _wan_load_balance_v.stdout[0] is search('Interface:\s+' ~ (item.name | regex_escape) ~ '\b')
+    fail_msg: "{{ item.name }} is not listed by 'show wan-load-balance'"
+    quiet: true
+  loop: "{{ wan_load_balance_interfaces }}"
+  loop_control:
+    label: "{{ item.name }}"

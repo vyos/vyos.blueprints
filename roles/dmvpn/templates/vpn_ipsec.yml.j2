@@ -1,0 +1,37 @@
+{% set c = _dmvpn_ipsec %}
+{% set ike = c.ike_group %}
+{% set esp = c.esp_group %}
+ike_group:
+  - name: {{ ike.name | to_json }}
+    key_exchange: {{ ike.key_exchange | default('ikev1') }}
+{% if ike.lifetime is defined %}
+    lifetime: {{ ike.lifetime | int }}
+{% endif %}
+    proposal:
+      - proposal_id: {{ ike.proposal_id | default(1) | int }}
+        dh_group: {{ ike.dh_group | int }}
+        encryption: {{ ike.encryption | to_json }}
+        hash: {{ ike.hash | to_json }}
+esp_group:
+  - name: {{ esp.name | to_json }}
+{% for k in ['mode', 'pfs'] if esp[k] is defined %}
+    {{ k }}: {{ esp[k] | to_json }}
+{% endfor %}
+{% if esp.lifetime is defined %}
+    lifetime: {{ esp.lifetime | int }}
+{% endif %}
+    proposal:
+      - proposal_id: {{ esp.proposal_id | default(1) | int }}
+        encryption: {{ esp.encryption | to_json }}
+        hash: {{ esp.hash | to_json }}
+{% if c.interfaces | default([]) %}
+interface: {{ c.interfaces | to_json }}
+{% endif %}
+profile:
+  - name: {{ c.profile.name | to_json }}
+    authentication:
+      mode: pre-shared-secret
+      pre_shared_secret: {{ c.profile.psk | to_json }}
+    bind_tunnel: {{ c.profile.bind_tunnels | to_json }}
+    esp_group: {{ esp.name | to_json }}
+    ike_group: {{ ike.name | to_json }}

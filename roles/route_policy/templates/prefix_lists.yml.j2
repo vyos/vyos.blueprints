@@ -1,0 +1,22 @@
+{% for afi in ['ipv4', 'ipv6'] if route_policy_prefix_lists | selectattr('afi', 'defined') | selectattr('afi', 'equalto', afi) | list or (afi == 'ipv4' and route_policy_prefix_lists | rejectattr('afi', 'defined') | list) %}
+- afi: {{ afi }}
+  prefix_lists:
+{%   for pl in route_policy_prefix_lists if pl.afi | default('ipv4') == afi %}
+    - name: {{ pl.name | to_json }}
+{%   if pl.description is defined %}
+      description: {{ pl.description | to_json }}
+{%   endif %}
+      entries:
+{%   for r in pl.rules %}
+        - sequence: {{ r.sequence | int }}
+          action: {{ r.action }}
+          prefix: {{ r.prefix | to_json }}
+{%     for k in ['ge', 'le'] if r[k] is defined %}
+          {{ k }}: {{ r[k] | int }}
+{%     endfor %}
+{%     if r.description is defined %}
+          description: {{ r.description | to_json }}
+{%     endif %}
+{%   endfor %}
+{%   endfor %}
+{% endfor %}

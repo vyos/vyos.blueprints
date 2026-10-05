@@ -1,0 +1,41 @@
+---
+- name: Configure NHRP on the tunnels
+  # No vyos.vyos NHRP module.
+  vyos.vyos.vyos_config:
+    lines: "{{ _dmvpn_nhrp_lines }}"
+  register: _dmvpn_r_nhrp
+  no_log: true
+  when:
+    - _dmvpn_nhrp_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Configure IPsec protection (groups, interface, profile)
+  vyos.vyos.vyos_vpn_ipsec:
+    config: "{{ lookup('ansible.builtin.template', 'vpn_ipsec.yml.j2') | from_yaml }}"
+    state: "{{ _dmvpn_state }}"
+  register: _dmvpn_r_ipsec
+  no_log: true
+  when: _dmvpn_ipsec | length > 0
+
+- name: Drop GRE that is not protected by IPsec
+  vyos.vyos.vyos_firewall_rules:
+    config:
+      - afi: ipv4
+        rule_sets:
+          - filter: output
+            rules:
+              - number: "{{ _dmvpn_gre.rule | default(10) | int }}"
+                action: drop
+                protocol: gre
+                ipsec: match-none-out
+    state: "{{ _dmvpn_state }}"
+  register: _dmvpn_r_gre
+  when: _dmvpn_gre | length > 0 or dmvpn_drop_unprotected_gre is mapping
+
+- name: Collect rendered commands with secrets masked  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + (_dmvpn_nhrp_lines | map('regex_replace', '(nhrp tunnel \S+ authentication) .*$', "\1 '********'") | list)
+         + ([_dmvpn_r_ipsec, _dmvpn_r_gre] | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
+  when: vyos_blueprints_render_only | default(false) | bool

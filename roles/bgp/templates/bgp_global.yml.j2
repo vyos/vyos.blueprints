@@ -1,0 +1,27 @@
+as_number: {{ bgp_asn | int }}
+{% if bgp_router_id %}
+bgp_params:
+  router_id: {{ bgp_router_id | to_json }}
+{% endif %}
+{% if bgp_neighbors %}
+neighbor:
+{%   for n in bgp_neighbors %}
+  - address: {{ n.address | to_json }}
+    remote_as: {{ n.remote_as | int }}
+{%     for k in ['description', 'update_source', 'password'] if n[k] is defined %}
+    {{ k }}: {{ n[k] | to_json }}
+{%     endfor %}
+{%     if n.ebgp_multihop is defined %}
+    ebgp_multihop: {{ n.ebgp_multihop | int }}
+{%     endif %}
+{%     if n.holdtime is defined or n.keepalive is defined %}
+    timers:
+{%       for k in ['holdtime', 'keepalive'] if n[k] is defined %}
+      {{ k }}: {{ n[k] | int }}
+{%       endfor %}
+{%     endif %}
+{%     if n.disable_connected_check | default(false) | bool %}
+    disable_connected_check: true
+{%     endif %}
+{%   endfor %}
+{% endif %}

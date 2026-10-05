@@ -1,0 +1,85 @@
+---
+# router1 (VM): trunk on eth1 here, eth0 on the page (containerlab uses eth0 for management)
+base_interfaces:
+  - name: eth1.50
+    addresses:
+      - 192.0.2.21/24
+  - name: eth1.100
+    addresses:
+      - 203.0.113.2/24
+  - name: eth1.201
+    addresses:
+      - 10.200.201.2/24
+ha_vrrp_priority: 200
+ha_vrrp_groups:
+  - name: int
+    vrid: 201
+    interface: eth1.201
+    address:
+      - 10.200.201.1/24
+  - name: public
+    vrid: 113
+    interface: eth1.100
+    address:
+      - 203.0.113.1/24
+ha_vrrp_local_addresses:
+  int: 10.200.201.2
+  public: 203.0.113.2
+ha_vrrp_conntrack_sync:
+  interface: eth1.201
+  accept_protocols:
+    - tcp
+    - udp
+    - icmp
+  event_listen_queue_size: 8
+  mcast_group: 224.0.0.50
+  sync_queue_size: 8
+  disable_helpers: true
+nat_source_rules:
+  - id: 10
+    outbound_interface:
+      name: eth1.50
+    source:
+      address: 10.200.201.0/24
+    destination:
+      address: '!192.0.2.0/24'
+    translation:
+      address: 203.0.113.1
+
+# --- part 2: WireGuard link to offsite1 and OSPF over it (keep the private key in ansible-vault)
+wireguard_interfaces:
+  - name: wg01
+    addresses:
+      - 10.254.60.1/30
+    description: router1-to-offsite1
+    port: 50001
+    peers:
+      - name: OFFSITE1
+        allowed_ips:
+          - 0.0.0.0/0
+        address: 203.0.113.3
+        port: 50001
+        persistent_keepalive: 15
+        public_key: GEFMOWzAyau42/HwdwfXnrfHdIISQF8YHj35rOgSZ0o=
+    private_key: '{{ vault_wg01_private_key }}'
+ospf_router_id: 10.254.60.1
+ospf_interfaces:
+  - name: wg01
+    md5_key: i360KoCwUGZvPq7e        # use ansible-vault for real devices
+    md5_key_id: 1
+    cost: 11
+    dead_interval: 5
+    hello_interval: 1
+    network: point-to-point
+    priority: 1
+    retransmit_interval: 5
+    transmit_delay: 1
+
+# --- part 3: BGP session to the provider
+bgp_router_id: 192.0.2.21
+bgp_neighbors:
+  - address: 192.0.2.11
+    remote_as: 65550
+    update_source: 192.0.2.21
+    soft_reconfiguration_inbound: true
+    route_map_export: BGPOUT

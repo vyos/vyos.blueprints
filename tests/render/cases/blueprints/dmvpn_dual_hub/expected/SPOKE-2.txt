@@ -1,0 +1,67 @@
+set firewall ipv4 output filter rule 10
+set firewall ipv4 output filter rule 10 action 'drop'
+set firewall ipv4 output filter rule 10 ipsec 'match-none-out'
+set firewall ipv4 output filter rule 10 protocol 'gre'
+set interfaces ethernet eth0 address '10.0.12.2/30'
+set interfaces ethernet eth1 address '192.168.12.1/24'
+set interfaces tunnel tun100 address '10.100.100.12/32'
+set interfaces tunnel tun100 enable-multicast
+set interfaces tunnel tun100 encapsulation 'gre'
+set interfaces tunnel tun100 ip adjust-mss '1360'
+set interfaces tunnel tun100 mtu '1436'
+set interfaces tunnel tun100 parameters ip key '42'
+set interfaces tunnel tun100 source-interface 'eth0'
+set interfaces tunnel tun101 address '10.100.101.12/32'
+set interfaces tunnel tun101 enable-multicast
+set interfaces tunnel tun101 encapsulation 'gre'
+set interfaces tunnel tun101 ip adjust-mss '1360'
+set interfaces tunnel tun101 mtu '1436'
+set interfaces tunnel tun101 parameters ip key '43'
+set interfaces tunnel tun101 source-interface 'eth0'
+set protocols nhrp tunnel tun100 authentication '********'
+set protocols nhrp tunnel tun100 holdtime '300'
+set protocols nhrp tunnel tun100 multicast '10.0.0.2'
+set protocols nhrp tunnel tun100 network-id '1'
+set protocols nhrp tunnel tun100 nhs tunnel-ip dynamic nbma '10.0.0.2'
+set protocols nhrp tunnel tun100 registration-no-unique
+set protocols nhrp tunnel tun100 shortcut
+set protocols nhrp tunnel tun101 authentication '********'
+set protocols nhrp tunnel tun101 holdtime '300'
+set protocols nhrp tunnel tun101 multicast '10.0.1.2'
+set protocols nhrp tunnel tun101 network-id '2'
+set protocols nhrp tunnel tun101 nhs tunnel-ip dynamic nbma '10.0.1.2'
+set protocols nhrp tunnel tun101 registration-no-unique
+set protocols nhrp tunnel tun101 shortcut
+set protocols ospf interface eth1 area '0'
+set protocols ospf interface tun100 area '0'
+set protocols ospf interface tun100 network point-to-multipoint
+set protocols ospf interface tun100 passive disable
+set protocols ospf interface tun101 area '0'
+set protocols ospf interface tun101 network point-to-multipoint
+set protocols ospf interface tun101 passive disable
+set protocols ospf passive-interface default
+set protocols static route 0.0.0.0/0
+set protocols static route 0.0.0.0/0 next-hop '10.0.12.1'
+set system host-name SPOKE-2
+set vpn ipsec esp-group ESP-HUB
+set vpn ipsec esp-group ESP-HUB lifetime 1800
+set vpn ipsec esp-group ESP-HUB mode transport
+set vpn ipsec esp-group ESP-HUB pfs disable
+set vpn ipsec esp-group ESP-HUB proposal 1
+set vpn ipsec esp-group ESP-HUB proposal 1 encryption aes256
+set vpn ipsec esp-group ESP-HUB proposal 1 hash sha1
+set vpn ipsec ike-group IKE-HUB
+set vpn ipsec ike-group IKE-HUB key-exchange ikev1
+set vpn ipsec ike-group IKE-HUB lifetime 3600
+set vpn ipsec ike-group IKE-HUB proposal 1
+set vpn ipsec ike-group IKE-HUB proposal 1 dh-group 2
+set vpn ipsec ike-group IKE-HUB proposal 1 encryption aes256
+set vpn ipsec ike-group IKE-HUB proposal 1 hash sha1
+set vpn ipsec interface eth0
+set vpn ipsec profile NHRPVPN
+set vpn ipsec profile NHRPVPN authentication mode pre-shared-secret
+set vpn ipsec profile NHRPVPN authentication pre-shared-secret '********'
+set vpn ipsec profile NHRPVPN bind tunnel tun100
+set vpn ipsec profile NHRPVPN bind tunnel tun101
+set vpn ipsec profile NHRPVPN esp-group ESP-HUB
+set vpn ipsec profile NHRPVPN ike-group IKE-HUB

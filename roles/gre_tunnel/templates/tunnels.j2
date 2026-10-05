@@ -4,11 +4,17 @@
 {%   if t.description is defined %}
 {{ b }} description '{{ t.description }}'
 {%   endif %}
+{%   if t.enable_multicast | default(false) | bool %}
+{{ b }} enable-multicast
+{%   endif %}
 {%   if t.adjust_mss is defined %}
 {{ b }} ip adjust-mss '{{ t.adjust_mss }}'
 {%   endif %}
 {%   if t.mtu is defined %}
 {{ b }} mtu '{{ t.mtu }}'
+{%   endif %}
+{%   if t.key is defined %}
+{{ b }} parameters ip key '{{ t.key }}'
 {%   endif %}
 {%   if t.remote is defined %}
 {{ b }} remote '{{ t.remote }}'

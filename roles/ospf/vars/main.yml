@@ -1,0 +1,3 @@
+---
+_ospf_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_ospf_cli_lines: "{{ (lookup('ansible.builtin.template', 'ospf_cli.j2') or '').splitlines() | select | list }}"

@@ -21,7 +21,9 @@ argument_specs:
           encapsulation: {type: str, default: gre, description: "Encapsulation, e.g. C(gre), C(gretap), C(ipip)."}
           source_address: {type: str, description: Local endpoint address.}
           source_interface: {type: str, description: Local endpoint interface (instead of C(source_address)).}
-          remote: {type: str, description: Remote endpoint address.}
+          remote: {type: str, description: Remote endpoint address. Omit for multipoint GRE (DMVPN).}
+          key: {type: int, description: GRE key (C(parameters ip key)).}
+          enable_multicast: {type: bool, default: false, description: Enable multicast on the tunnel (needed by NHRP/OSPF on mGRE).}
           mtu: {type: int, description: Interface MTU.}
           adjust_mss: {type: str, description: "TCP MSS clamping value, e.g. C(1336) or C(clamp-mss-to-pmtu)."}
           description: {type: str, description: Interface description.}

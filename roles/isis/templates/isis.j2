@@ -1,0 +1,44 @@
+{% if isis_net %}
+{%   set b = 'set protocols isis' %}
+{%   for i in isis_interfaces %}
+{%     if i.passive | default(false) | bool %}
+{{ b }} interface {{ i.name }} passive
+{%     endif %}
+{%     if i.network is defined %}
+{{ b }} interface {{ i.name }} network {{ i.network }}
+{%     endif %}
+{%     if i.metric is defined %}
+{{ b }} interface {{ i.name }} metric '{{ i.metric }}'
+{%     endif %}
+{%     if not (i.passive | default(false) | bool) and i.network is not defined and i.metric is not defined %}
+{{ b }} interface {{ i.name }}
+{%     endif %}
+{%   endfor %}
+{%   if isis_level %}
+{{ b }} level '{{ isis_level }}'
+{%   endif %}
+{%   if isis_log_adjacency_changes | bool %}
+{{ b }} log-adjacency-changes
+{%   endif %}
+{%   if isis_metric_style %}
+{{ b }} metric-style '{{ isis_metric_style }}'
+{%   endif %}
+{{ b }} net '{{ isis_net }}'
+{%   for r in isis_redistribute %}
+{{ b }} redistribute ipv4 {{ r.type }} {{ r.level | default('level-2') }}
+{%   endfor %}
+{%   set sr = isis_segment_routing %}
+{%   if sr.maximum_label_depth is defined %}
+{{ b }} segment-routing maximum-label-depth '{{ sr.maximum_label_depth }}'
+{%   endif %}
+{%   for blk in ['global_block', 'local_block'] if sr[blk] is defined %}
+{{ b }} segment-routing {{ blk | replace('_', '-') }} low-label-value '{{ sr[blk].low }}'
+{{ b }} segment-routing {{ blk | replace('_', '-') }} high-label-value '{{ sr[blk].high }}'
+{%   endfor %}
+{%   for p in sr.prefixes | default([]) %}
+{{ b }} segment-routing prefix {{ p.prefix }} index value '{{ p.index }}'
+{%   endfor %}
+{%   for i in isis_mpls_interfaces %}
+set protocols mpls interface '{{ i }}'
+{%   endfor %}
+{% endif %}

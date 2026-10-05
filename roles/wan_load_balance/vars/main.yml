@@ -1,0 +1,3 @@
+---
+_wan_load_balance_lines: "{{ (lookup('ansible.builtin.template', 'wan_lb.j2') or '').splitlines() | select | list }}"
+_wan_load_balance_rule_prefix: set load-balancing wan rule

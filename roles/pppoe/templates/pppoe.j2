@@ -1,0 +1,35 @@
+{% for p in pppoe_interfaces %}
+{%   set b = 'set interfaces pppoe ' ~ p.name %}
+{{ b }} authentication password '{{ p.password }}'
+{{ b }} authentication username '{{ p.username }}'
+{%   if p.service_name is defined %}
+{{ b }} service-name '{{ p.service_name }}'
+{%   endif %}
+{{ b }} source-interface '{{ p.source_interface }}'
+{%   if p.mtu is defined %}
+{{ b }} mtu '{{ p.mtu }}'
+{%   endif %}
+{%   if p.default_route_distance is defined %}
+{{ b }} default-route-distance '{{ p.default_route_distance }}'
+{%   endif %}
+{%   if p.ipv6_autoconf | default(false) | bool %}
+{{ b }} ipv6 address autoconf
+{%   endif %}
+{%   for pd in p.prefix_delegation | default([]) %}
+{%     set pb = b ~ ' dhcpv6-options pd ' ~ (pd.id | default(0)) %}
+{%     if pd.length is defined %}
+{{ pb }} length '{{ pd.length }}'
+{%     endif %}
+{%     for i in pd.interfaces %}
+{%       if i.address is defined %}
+{{ pb }} interface {{ i.name }} address '{{ i.address }}'
+{%       endif %}
+{%       if i.sla_id is defined %}
+{{ pb }} interface {{ i.name }} sla-id '{{ i.sla_id }}'
+{%       endif %}
+{%       if i.address is not defined and i.sla_id is not defined %}
+{{ pb }} interface {{ i.name }}
+{%       endif %}
+{%     endfor %}
+{%   endfor %}
+{% endfor %}

@@ -1,0 +1,60 @@
+---
+- name: Verify role state
+  hosts: routers
+  gather_facts: false
+  tasks:
+    - name: Wait for VRRP to elect a master
+      ansible.builtin.pause:
+        seconds: 15
+      run_once: true
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: "vyos.blueprints.{{ item }}"
+        tasks_from: verify
+      loop: "{{ ['bonding', 'ha_vrrp', 'nat'] if inventory_hostname == 'router2' else ['ha_vrrp', 'nat'] }}"
+
+    - name: The first router is MASTER for both groups, as on the page
+      ansible.builtin.assert:
+        that:
+          - hostvars['router1']._ha_vrrp_v_state.int == 'MASTER'
+          - hostvars['router1']._ha_vrrp_v_state.public == 'MASTER'
+        quiet: true
+      run_once: true
+
+- name: Verify NAT and failover
+  hosts: router1
+  gather_facts: false
+  vars:
+    # the upstream only routes 203.0.113.0/24 back, so this works only when
+    # 10.200.201.0/24 is translated to 203.0.113.1
+    _ping: docker exec clab-bp-hawalk-internal ping -c 3 -W 2 198.51.100.100
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+  tasks:
+    - name: Internal network reaches the internet through NAT on router1
+      ansible.builtin.command: "{{ _ping }}"
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: false
+
+    - name: Take router1 out of VRRP
+      vyos.vyos.vyos_config:
+        lines:
+          - set high-availability vrrp group int disable
+          - set high-availability vrrp group public disable
+
+    - name: Wait for router2 to take over
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Internal network still reaches the internet, now through router2
+      ansible.builtin.command: "{{ _ping }}"
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: false
+
+    - name: Put router1 back into service (no-preempt keeps router2 as MASTER)
+      vyos.vyos.vyos_config:
+        lines:
+          - delete high-availability vrrp group int disable
+          - delete high-availability vrrp group public disable

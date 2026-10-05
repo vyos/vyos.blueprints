@@ -1,0 +1,48 @@
+name: bp-ivrf
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    core:
+      kind: vyosnetworks_vyos
+    isp:
+      kind: vyosnetworks_vyos
+    # remote networks from the page, as Linux hosts: link address, a "dum0"
+    # network and a default route to the core
+    lan1:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 10.1.1.2/30 dev eth1
+        - ip -6 addr add 2001:db8::1/127 dev eth1
+        - ip link add dum0 type dummy
+        - ip link set dum0 up
+        - ip addr add 10.0.0.1/24 dev dum0
+        - ip -6 addr add 2001:db8:0:1::1/64 dev dum0
+        - ip route replace default via 10.1.1.1
+        - ip -6 route replace default via 2001:db8::
+    lan2:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 172.16.2.2/30 dev eth1
+        - ip link add dum0 type dummy
+        - ip link set dum0 up
+        - ip addr add 172.16.0.1/24 dev dum0
+        - ip route replace default via 172.16.2.1
+    mgmt:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 192.168.3.2/30 dev eth1
+        - ip link add dum0 type dummy
+        - ip link set dum0 up
+        - ip addr add 192.168.0.1/24 dev dum0
+        - ip route replace default via 192.168.3.1
+  links:
+    # Core eth1-eth4 here = eth0-eth3 on the page (containerlab uses eth0 for management)
+    - endpoints: ["core:eth1", "lan1:eth1"]
+    - endpoints: ["core:eth2", "lan2:eth1"]
+    - endpoints: ["core:eth3", "mgmt:eth1"]
+    - endpoints: ["core:eth4", "isp:eth1"]

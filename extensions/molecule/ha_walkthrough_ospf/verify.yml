@@ -1,0 +1,35 @@
+---
+- name: Verify role state
+  hosts: ospf_sites
+  gather_facts: false
+  tasks:
+    - name: Wait for WireGuard handshakes and OSPF
+      ansible.builtin.pause:
+        seconds: 30
+      run_once: true
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: "vyos.blueprints.{{ item }}"
+        tasks_from: verify
+      loop: [wireguard, ospf]
+
+- name: Verify the page's import and export filters with traffic
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _flows:
+      - {from: internal, to: 10.201.1.10, allowed: true, why: "remote 10.201.0.0/16 routes are imported"}
+      - {from: internal, to: 10.99.0.10, allowed: false, why: "routes outside 10.201.0.0/16 are filtered by PUBOSPF"}
+      - {from: remote, to: 203.0.113.10, allowed: true, why: "203.0.113.0/24 is exported (access-list 150)"}
+  tasks:
+    - name: Ping per filter
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-haospf-{{ item.from }} ping -c 2 -W 2 {{ item.to }}
+      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      register: _ping
+      changed_when: false
+      failed_when: (_ping.rc == 0) != item.allowed
+      loop: "{{ _flows }}"
+      loop_control:
+        label: "{{ item.from }} -> {{ item.to }} ({{ item.why }})"

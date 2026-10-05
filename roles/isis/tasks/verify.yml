@@ -1,0 +1,23 @@
+---
+- name: Read IS-IS adjacencies and the MPLS table
+  vyos.vyos.vyos_command:
+    commands:
+      - show isis neighbor
+      - show mpls table
+  register: _isis_v
+
+- name: An Up adjacency on every non-passive interface
+  ansible.builtin.assert:
+    that: _isis_v.stdout[0] is search('\b' ~ (item.name | regex_escape) ~ '\s.*\bUp\b')
+    fail_msg: "no Up IS-IS adjacency on {{ item.name }}"
+    quiet: true
+  loop: "{{ isis_interfaces | rejectattr('passive', 'defined') | list + isis_interfaces | selectattr('passive', 'defined') | rejectattr('passive') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Segment-routing labels are installed
+  ansible.builtin.assert:
+    that: _isis_v.stdout[1] is search('SR \(IS-IS\)')
+    fail_msg: no IS-IS segment-routing entries in the MPLS table
+    quiet: true
+  when: isis_segment_routing.prefixes | default([]) | length > 0

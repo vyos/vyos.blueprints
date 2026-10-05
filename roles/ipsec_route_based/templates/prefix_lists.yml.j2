@@ -1,0 +1,11 @@
+- afi: ipv4
+  prefix_lists:
+{% for pl in _ipsec_route_based_policy.prefix_lists %}
+    - name: {{ pl.name | to_json }}
+      entries:
+{%   for r in pl.rules %}
+        - sequence: {{ r.sequence | int }}
+          action: {{ r.action | default('permit') }}
+          prefix: {{ r.prefix | to_json }}
+{%   endfor %}
+{% endfor %}

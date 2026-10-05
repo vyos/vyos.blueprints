@@ -1,0 +1,30 @@
+name: bp-habgp
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    router1:
+      kind: vyosnetworks_vyos
+    router2:
+      kind: vyosnetworks_vyos
+    # VyOS standing in for the provider's routers 192.0.2.11 and 192.0.2.12 (AS 65550)
+    upstream:
+      kind: vyosnetworks_vyos
+    # VLAN 50 segment shared by both routers and the upstream
+    vlan50:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip link add br0 type bridge
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set eth3 master br0
+        - ip link set br0 up
+  links:
+    - endpoints: ["router1:eth1", "vlan50:eth1"]
+    - endpoints: ["router2:eth1", "vlan50:eth2"]
+    - endpoints: ["upstream:eth1", "vlan50:eth3"]
+    # public (VLAN 100) and internal (VLAN 201) networks between the routers
+    - endpoints: ["router1:eth2", "router2:eth2"]
+    - endpoints: ["router1:eth3", "router2:eth3"]

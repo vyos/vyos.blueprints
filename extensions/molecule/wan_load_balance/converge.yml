@@ -1,0 +1,7 @@
+---
+- name: Converge (example 2 - failover on interface weights)
+  hosts: vyos
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.wan_load_balance

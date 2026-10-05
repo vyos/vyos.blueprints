@@ -1,0 +1,5 @@
+---
+# Shared IS-IS settings - docs.vyos.io/en/1.5/configexamples/segment-routing-isis.html
+isis_level: level-2
+isis_log_adjacency_changes: true
+isis_metric_style: wide

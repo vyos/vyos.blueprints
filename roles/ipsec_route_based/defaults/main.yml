@@ -20,3 +20,4 @@ ipsec_route_based_interfaces: []
 ipsec_route_based_disable_route_autoinstall: true
 ipsec_route_based_interface_routes: []
 ipsec_route_based_bgp: null
+ipsec_route_based_policy: null

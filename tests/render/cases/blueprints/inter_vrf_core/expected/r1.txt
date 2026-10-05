@@ -1,0 +1,82 @@
+delete vrf bind-to-all
+set interfaces ethernet eth0 address '10.1.1.1/30'
+set interfaces ethernet eth0 address '2001:db8::/127'
+set interfaces ethernet eth0 vrf 'LAN1'
+set interfaces ethernet eth1 address '172.16.2.1/30'
+set interfaces ethernet eth1 address '2001:db8::2/127'
+set interfaces ethernet eth1 vrf 'LAN2'
+set interfaces ethernet eth2 address '192.168.3.1/30'
+set interfaces ethernet eth2 address '2001:db8::4/127'
+set interfaces ethernet eth2 vrf 'Management'
+set interfaces ethernet eth3 address '10.2.2.1/30'
+set interfaces ethernet eth3 address '2001:db8::6/127'
+set interfaces ethernet eth3 vrf 'Internet'
+set protocols bgp system-as 64496
+set system host-name r1
+set vrf name Internet protocols bgp address-family ipv4-unicast export vpn
+set vrf name Internet protocols bgp address-family ipv4-unicast import vpn
+set vrf name Internet protocols bgp address-family ipv4-unicast rd vpn export '64496:100'
+set vrf name Internet protocols bgp address-family ipv4-unicast route-target vpn export '64496:100'
+set vrf name Internet protocols bgp address-family ipv4-unicast route-target vpn import '64496:1 64496:2'
+set vrf name Internet protocols bgp address-family ipv6-unicast export vpn
+set vrf name Internet protocols bgp address-family ipv6-unicast import vpn
+set vrf name Internet protocols bgp address-family ipv6-unicast rd vpn export '64496:100'
+set vrf name Internet protocols bgp address-family ipv6-unicast route-target vpn export '64496:100'
+set vrf name Internet protocols bgp address-family ipv6-unicast route-target vpn import '64496:1 64496:2'
+set vrf name Internet protocols bgp neighbor 10.2.2.2 address-family ipv4-unicast
+set vrf name Internet protocols bgp neighbor 10.2.2.2 remote-as 64497
+set vrf name Internet protocols bgp neighbor 2001:db8::7 address-family ipv6-unicast
+set vrf name Internet protocols bgp neighbor 2001:db8::7 remote-as 64497
+set vrf name Internet protocols bgp system-as 64496
+set vrf name Internet table 104
+set vrf name LAN1 protocols bgp address-family ipv4-unicast export vpn
+set vrf name LAN1 protocols bgp address-family ipv4-unicast import vpn
+set vrf name LAN1 protocols bgp address-family ipv4-unicast rd vpn export '64496:1'
+set vrf name LAN1 protocols bgp address-family ipv4-unicast redistribute static
+set vrf name LAN1 protocols bgp address-family ipv4-unicast route-target vpn export '64496:1'
+set vrf name LAN1 protocols bgp address-family ipv4-unicast route-target vpn import '64496:100 64496:50 64496:2'
+set vrf name LAN1 protocols bgp address-family ipv6-unicast export vpn
+set vrf name LAN1 protocols bgp address-family ipv6-unicast import vpn
+set vrf name LAN1 protocols bgp address-family ipv6-unicast rd vpn export '64496:1'
+set vrf name LAN1 protocols bgp address-family ipv6-unicast redistribute static
+set vrf name LAN1 protocols bgp address-family ipv6-unicast route-target vpn export '64496:1'
+set vrf name LAN1 protocols bgp address-family ipv6-unicast route-target vpn import '64496:100 64496:50 64496:2'
+set vrf name LAN1 protocols static route 10.0.0.0/24
+set vrf name LAN1 protocols static route 10.0.0.0/24 next-hop '10.1.1.2'
+set vrf name LAN1 protocols static route6 2001:db8:0:1::/64
+set vrf name LAN1 protocols static route6 2001:db8:0:1::/64 next-hop '2001:db8::1'
+set vrf name LAN1 table 101
+set vrf name LAN2 protocols bgp address-family ipv4-unicast export vpn
+set vrf name LAN2 protocols bgp address-family ipv4-unicast import vpn
+set vrf name LAN2 protocols bgp address-family ipv4-unicast rd vpn export '64496:2'
+set vrf name LAN2 protocols bgp address-family ipv4-unicast redistribute static
+set vrf name LAN2 protocols bgp address-family ipv4-unicast route-target vpn export '64496:2'
+set vrf name LAN2 protocols bgp address-family ipv4-unicast route-target vpn import '64496:100 64496:50 64496:1'
+set vrf name LAN2 protocols bgp address-family ipv6-unicast export vpn
+set vrf name LAN2 protocols bgp address-family ipv6-unicast import vpn
+set vrf name LAN2 protocols bgp address-family ipv6-unicast rd vpn export '64496:2'
+set vrf name LAN2 protocols bgp address-family ipv6-unicast redistribute static
+set vrf name LAN2 protocols bgp address-family ipv6-unicast route-target vpn export '64496:2'
+set vrf name LAN2 protocols bgp address-family ipv6-unicast route-target vpn import '64496:100 64496:50 64496:1'
+set vrf name LAN2 protocols static route 172.16.0.0/24
+set vrf name LAN2 protocols static route 172.16.0.0/24 next-hop '172.16.2.2'
+set vrf name LAN2 protocols static route6 2001:db8:0:2::/64
+set vrf name LAN2 protocols static route6 2001:db8:0:2::/64 next-hop '2001:db8::3'
+set vrf name LAN2 table 102
+set vrf name Management protocols bgp address-family ipv4-unicast export vpn
+set vrf name Management protocols bgp address-family ipv4-unicast import vpn
+set vrf name Management protocols bgp address-family ipv4-unicast rd vpn export '64496:50'
+set vrf name Management protocols bgp address-family ipv4-unicast redistribute static
+set vrf name Management protocols bgp address-family ipv4-unicast route-target vpn export '64496:50'
+set vrf name Management protocols bgp address-family ipv4-unicast route-target vpn import '64496:1 64496:2'
+set vrf name Management protocols bgp address-family ipv6-unicast export vpn
+set vrf name Management protocols bgp address-family ipv6-unicast import vpn
+set vrf name Management protocols bgp address-family ipv6-unicast rd vpn export '64496:50'
+set vrf name Management protocols bgp address-family ipv6-unicast redistribute static
+set vrf name Management protocols bgp address-family ipv6-unicast route-target vpn export '64496:50'
+set vrf name Management protocols bgp address-family ipv6-unicast route-target vpn import '64496:1 64496:2'
+set vrf name Management protocols static route 192.168.0.0/24
+set vrf name Management protocols static route 192.168.0.0/24 next-hop '192.168.3.2'
+set vrf name Management protocols static route6 2001:db8:0:3::/64
+set vrf name Management protocols static route6 2001:db8:0:3::/64 next-hop '2001:db8::5'
+set vrf name Management table 103

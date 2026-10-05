@@ -21,3 +21,5 @@ _ipsec_route_based_psks: >-
   {%-   endif -%}
   {%- endfor -%}
   {{ out }}
+_ipsec_route_based_policy: "{{ ipsec_route_based_policy | default({}, true) }}"
+_ipsec_route_based_ike_cli_lines: "{{ (lookup('ansible.builtin.template', 'ike_cli.j2') or '').splitlines() | select | list }}"

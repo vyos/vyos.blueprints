@@ -111,6 +111,13 @@ argument_specs:
           sync_queue_size:
             type: int
             description: Sync queue size in MB.
+          event_listen_queue_size:
+            type: int
+            description: Event listen queue size in MB.
+          disable_helpers:
+            type: bool
+            default: false
+            description: Disable all conntrack helper modules (C(delete system conntrack modules)), as the HA page recommends.
       ha_vrrp_conntrack_sync_local_address:
         type: str
         default: ""

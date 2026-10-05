@@ -1,0 +1,21 @@
+---
+- name: Configure the ISP's PPPoE server in the containerlab lab (the ISP is not part of the blueprint)
+  hosts: provider
+  gather_facts: false
+  tasks:
+    - name: PPPoE server with IPv4, IPv6 and prefix delegation
+      vyos.vyos.vyos_config:
+        lines:
+          - set interfaces dummy dum0 address '2001:db8:ffff::1/128'
+          - set service pppoe-server authentication mode 'local'
+          - set service pppoe-server authentication local-users username molecule password '{{ vault_pppoe_password }}'
+          - set service pppoe-server client-ip-pool POOL4 range '100.64.0.10-100.64.0.20'
+          - set service pppoe-server default-pool 'POOL4'
+          - set service pppoe-server gateway-address '100.64.0.1'
+          - set service pppoe-server client-ipv6-pool POOL6 prefix '2001:db8:8002::/48' mask '64'
+          - set service pppoe-server client-ipv6-pool POOL6 delegate '2001:db8:8003::/48' delegation-prefix '56'
+          - set service pppoe-server default-ipv6-pool 'POOL6'
+          - set service pppoe-server ppp-options ipv6 'allow'
+          - set service pppoe-server service-name 'ISP'
+          - set service pppoe-server interface eth1
+      no_log: true

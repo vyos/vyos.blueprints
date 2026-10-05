@@ -1,0 +1,114 @@
+---
+# Values from docs.vyos.io/en/1.5/configexamples/ha.html (part 3, BGP). The
+# public and internal networks are direct links between the routers here; their
+# connected routes are what "redistribute connected" picks up.
+all:
+  children:
+    vyos:
+      children:
+        routers:
+          hosts:
+            router1:
+              ansible_host: clab-bp-habgp-router1
+              bgp_router_id: 192.0.2.21
+              bgp_neighbors:
+                - address: 192.0.2.11
+                  remote_as: 65550
+                  update_source: 192.0.2.21
+                  soft_reconfiguration_inbound: true
+                  route_map_export: BGPOUT
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 192.0.2.21/24
+                - name: eth2
+                  addresses:
+                    - 203.0.113.2/24
+                - name: eth3
+                  addresses:
+                    - 10.200.201.2/24
+            router2:
+              ansible_host: clab-bp-habgp-router2
+              bgp_router_id: 192.0.2.22
+              bgp_neighbors:
+                - address: 192.0.2.12
+                  remote_as: 65550
+                  update_source: 192.0.2.22
+                  soft_reconfiguration_inbound: true
+                  route_map_export: BGPPREPENDOUT
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 192.0.2.22/24
+                - name: eth2
+                  addresses:
+                    - 203.0.113.3/24
+                - name: eth3
+                  addresses:
+                    - 10.200.201.3/24
+          vars:
+            route_policy_prefix_lists:
+              - name: BGPOUT
+                description: BGP Export List
+                rules:
+                  - sequence: 10
+                    action: deny
+                    description: Do not advertise short masks
+                    ge: 25
+                    prefix: 0.0.0.0/0
+                  - sequence: 100
+                    action: permit
+                    description: Our network
+                    prefix: 203.0.113.0/24
+                  - sequence: 10000
+                    action: deny
+                    prefix: 0.0.0.0/0
+            route_policy_route_maps:
+              - name: BGPOUT
+                description: BGP Export Filter
+                rules:
+                  - sequence: 10
+                    action: permit
+                    match_prefix_list: BGPOUT
+                  - sequence: 10000
+                    action: deny
+              - name: BGPPREPENDOUT
+                description: BGP Export Filter
+                rules:
+                  - sequence: 10
+                    action: permit
+                    set_as_path_prepend: 65551 65551 65551
+                    match_prefix_list: BGPOUT
+                  - sequence: 10000
+                    action: deny
+            bgp_asn: 65551
+            bgp_networks:
+              - 192.0.2.0/24
+            bgp_redistribute:
+              - type: connected
+                metric: 50
+              - type: ospf
+                metric: 50
+        provider:
+          hosts:
+            upstream:
+              ansible_host: clab-bp-habgp-upstream
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 192.0.2.11/24
+                    - 192.0.2.12/24
+              bgp_asn: 65550
+              bgp_router_id: 192.0.2.11
+              bgp_neighbors:
+                - address: 192.0.2.21
+                  remote_as: 65551
+                  update_source: 192.0.2.11
+                - address: 192.0.2.22
+                  remote_as: 65551
+                  update_source: 192.0.2.12
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

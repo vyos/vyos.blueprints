@@ -1,0 +1,29 @@
+---
+# Shared by all VyOS DMVPN nodes - docs.vyos.io/en/1.5/configexamples/dmvpn-dualhub-dualcloud.html
+# WAN eth1 / LAN eth2 here = eth0 / eth1 on the page (containerlab uses eth0 for management).
+dmvpn_ipsec:
+  interfaces:
+    - eth1
+  ike_group:
+    name: IKE-HUB
+    key_exchange: ikev1
+    lifetime: 3600
+    proposal_id: 1
+    dh_group: 2
+    encryption: aes256
+    hash: sha1
+  esp_group:
+    name: ESP-HUB
+    lifetime: 1800
+    mode: transport
+    pfs: disable
+    proposal_id: 1
+    encryption: aes256
+    hash: sha1
+  profile:
+    name: NHRPVPN
+    psk: '{{ vault_dmvpn_psk }}'
+    bind_tunnels: '{{ gre_tunnel_interfaces | map(attribute=''name'') | list }}'
+dmvpn_drop_unprotected_gre:
+  rule: 10
+ospf_passive_interface_default: true

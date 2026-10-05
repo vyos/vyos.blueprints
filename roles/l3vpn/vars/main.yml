@@ -1,0 +1,3 @@
+---
+_l3vpn_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_l3vpn_lines: "{{ (lookup('ansible.builtin.template', 'l3vpn.j2') or '').splitlines() | select | list }}"

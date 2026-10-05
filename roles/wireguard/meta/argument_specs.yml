@@ -1,0 +1,47 @@
+---
+argument_specs:
+  main:
+    short_description: WireGuard interfaces and peers
+    description:
+      - Creates WireGuard interfaces with their addresses, listen port, private
+        key and peers, in VyOS 1.4+/1.5 syntax (peer C(public-key), C(address),
+        C(port)).
+      - Configured with vyos.vyos.vyos_config, because vyos.vyos has no
+        WireGuard module yet. Keys are masked in rendered output.
+      - Generate keys on the router with C(generate pki wireguard key-pair) and
+        keep the private key in ansible-vault.
+    options:
+      wireguard_interfaces:
+        type: list
+        elements: dict
+        default: []
+        description: WireGuard interfaces. Nothing is configured when empty.
+        options:
+          name: {type: str, required: true, description: "Interface name, e.g. C(wg01)."}
+          addresses: {type: list, elements: str, required: true, description: Interface addresses in CIDR notation.}
+          description: {type: str, description: Interface description.}
+          port: {type: int, description: UDP listen port.}
+          private_key: {type: str, no_log: true, description: Base64 private key of this interface.}
+          mtu: {type: int, description: Interface MTU.}
+          peers:
+            type: list
+            elements: dict
+            default: []
+            description: Peers.
+            options:
+              name: {type: str, required: true, description: "Peer name, e.g. C(OFFSITE1)."}
+              public_key: {type: str, required: true, description: Peer's base64 public key.}
+              allowed_ips: {type: list, elements: str, required: true, description: "Allowed IPs, e.g. C([0.0.0.0/0]) for a routed link."}
+              address: {type: str, description: Peer endpoint address.}
+              port: {type: int, description: Peer endpoint port.}
+              persistent_keepalive: {type: int, description: Keepalive interval in seconds.}
+              preshared_key: {type: str, no_log: true, description: Optional preshared key.}
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the wireguard role
+    description: Run with C(tasks_from=verify). Checks every WireGuard interface is up and every peer has completed a handshake.
+    options:
+      wireguard_interfaces: {type: list, elements: dict, default: [], description: Same value as for C(main).}

@@ -1,0 +1,42 @@
+---
+- name: Bring up an L2TP/PPP session from the LAC stand-in
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+  tasks:
+    - name: Dial the LNS
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-l2tp-lac sh -c 'echo "c lns" > /var/run/xl2tpd/l2tp-control'
+      become: "{{ _become }}"
+      changed_when: true
+
+    - name: Wait for the PPP interface to get an address from TEST-POOL
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-l2tp-lac ip -4 addr show ppp0
+      become: "{{ _become }}"
+      register: _ppp
+      until: _ppp.rc == 0 and _ppp.stdout is search('inet 10\.0\.0\.')
+      retries: 12
+      delay: 5
+      changed_when: false
+
+    - name: The client reaches the LNS gateway address through the PPP session
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-l2tp-lac ping -c 3 -W 2 10.0.0.1
+      become: "{{ _become }}"
+      changed_when: false
+
+- name: Verify the session on the LNS, as in the page's "Monitoring"
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.l2tp_lns
+        tasks_from: verify
+
+    - name: The RADIUS-authenticated session is active
+      ansible.builtin.assert:
+        that: _l2tp_lns_v.stdout[0] is search('test@vyos\.io.*\bactive\b')
+        quiet: true

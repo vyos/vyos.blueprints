@@ -1,0 +1,9 @@
+---
+isis_net: ""
+isis_level: ""
+isis_metric_style: ""
+isis_log_adjacency_changes: false
+isis_interfaces: []
+isis_redistribute: []
+isis_segment_routing: {}
+isis_mpls_interfaces: []

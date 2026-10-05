@@ -1,0 +1,37 @@
+{% for w in wireguard_interfaces %}
+{%   set b = 'set interfaces wireguard ' ~ w.name %}
+{%   for a in w.addresses %}
+{{ b }} address '{{ a }}'
+{%   endfor %}
+{%   if w.description is defined %}
+{{ b }} description '{{ w.description }}'
+{%   endif %}
+{%   if w.mtu is defined %}
+{{ b }} mtu '{{ w.mtu }}'
+{%   endif %}
+{%   if w.port is defined %}
+{{ b }} port '{{ w.port }}'
+{%   endif %}
+{%   if w.private_key is defined %}
+{{ b }} private-key '{{ w.private_key }}'
+{%   endif %}
+{%   for p in w.peers | default([]) %}
+{%     set pb = b ~ ' peer ' ~ p.name %}
+{%     for ip in p.allowed_ips %}
+{{ pb }} allowed-ips '{{ ip }}'
+{%     endfor %}
+{%     if p.address is defined %}
+{{ pb }} address '{{ p.address }}'
+{%     endif %}
+{%     if p.port is defined %}
+{{ pb }} port '{{ p.port }}'
+{%     endif %}
+{%     if p.persistent_keepalive is defined %}
+{{ pb }} persistent-keepalive '{{ p.persistent_keepalive }}'
+{%     endif %}
+{%     if p.preshared_key is defined %}
+{{ pb }} preshared-key '{{ p.preshared_key }}'
+{%     endif %}
+{{ pb }} public-key '{{ p.public_key }}'
+{%   endfor %}
+{% endfor %}

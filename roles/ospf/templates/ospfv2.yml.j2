@@ -1,0 +1,43 @@
+{% if ospf_router_id or ospf_abr_type %}
+parameters:
+{%   if ospf_router_id %}
+  router_id: {{ ospf_router_id | to_json }}
+{%   endif %}
+{%   if ospf_abr_type %}
+  abr_type: {{ ospf_abr_type | to_json }}
+{%   endif %}
+{% endif %}
+{% if ospf_passive_interface_default | bool %}
+passive_interface: [default]
+{% endif %}
+{% if ospf_reference_bandwidth %}
+auto_cost:
+  reference_bandwidth: {{ ospf_reference_bandwidth | int }}
+{% endif %}
+{% if ospf_areas %}
+areas:
+{%   for a in ospf_areas %}
+  - area_id: {{ a.id | string | to_json }}
+{%     if a.authentication is defined %}
+    authentication: {{ a.authentication }}
+{%     endif %}
+{%     if a.networks | default([]) %}
+    network:
+{%       for n in a.networks %}
+      - address: {{ n | to_json }}
+{%       endfor %}
+{%     endif %}
+{%   endfor %}
+{% endif %}
+{% if ospf_redistribute %}
+redistribute:
+{%   for r in ospf_redistribute %}
+  - route_type: {{ r.type }}
+{%     if r.metric is defined %}
+    metric: {{ r.metric | int }}
+{%     endif %}
+{%     if r.route_map is defined %}
+    route_map: {{ r.route_map | to_json }}
+{%     endif %}
+{%   endfor %}
+{% endif %}

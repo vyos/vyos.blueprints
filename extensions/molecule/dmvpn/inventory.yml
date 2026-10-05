@@ -1,0 +1,235 @@
+---
+# The VyOS nodes from docs.vyos.io/en/1.5/configexamples/dmvpn-dualhub-dualcloud.html
+# with WAN eth1 / LAN eth2 (eth0 / eth1 on the page).
+all:
+  children:
+    vyos:
+      children:
+        dmvpn:
+          hosts:
+            hub1:
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 10.0.0.2/30
+              base_static_routes:
+                - dest: 0.0.0.0/0
+                  next_hop: 10.0.0.1
+              gre_tunnel_interfaces:
+                - name: tun100
+                  addresses:
+                    - 10.100.100.1/32
+                  enable_multicast: true
+                  encapsulation: gre
+                  adjust_mss: '1360'
+                  mtu: 1436
+                  key: 42
+                  source_interface: eth1
+              dmvpn_nhrp_tunnels:
+                - name: tun100
+                  authentication: vyos
+                  holdtime: 300
+                  multicast: dynamic
+                  network_id: 1
+                  redirect: true
+                  registration_no_unique: true
+              ospf_interfaces:
+                - name: tun100
+                  area: '0'
+                  network: point-to-multipoint
+                  passive: false
+              ansible_host: clab-bp-dmvpn-hub1
+              base_hostname: HUB-1
+            hub2:
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 10.0.1.2/30
+              base_static_routes:
+                - dest: 0.0.0.0/0
+                  next_hop: 10.0.1.1
+              gre_tunnel_interfaces:
+                - name: tun101
+                  addresses:
+                    - 10.100.101.1/32
+                  enable_multicast: true
+                  encapsulation: gre
+                  adjust_mss: '1360'
+                  mtu: 1436
+                  key: 43
+                  source_interface: eth1
+              dmvpn_nhrp_tunnels:
+                - name: tun101
+                  authentication: vyos
+                  holdtime: 300
+                  multicast: dynamic
+                  network_id: 2
+                  redirect: true
+                  registration_no_unique: true
+              ospf_interfaces:
+                - name: tun101
+                  area: '0'
+                  network: point-to-multipoint
+                  passive: false
+              ansible_host: clab-bp-dmvpn-hub2
+              base_hostname: HUB-2
+            spoke2:
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 10.0.12.2/30
+                - name: eth2
+                  addresses:
+                    - 192.168.12.1/24
+              base_static_routes:
+                - dest: 0.0.0.0/0
+                  next_hop: 10.0.12.1
+              gre_tunnel_interfaces:
+                - name: tun100
+                  addresses:
+                    - 10.100.100.12/32
+                  enable_multicast: true
+                  encapsulation: gre
+                  adjust_mss: '1360'
+                  mtu: 1436
+                  key: 42
+                  source_interface: eth1
+                - name: tun101
+                  addresses:
+                    - 10.100.101.12/32
+                  enable_multicast: true
+                  encapsulation: gre
+                  adjust_mss: '1360'
+                  mtu: 1436
+                  key: 43
+                  source_interface: eth1
+              dmvpn_nhrp_tunnels:
+                - name: tun100
+                  authentication: vyos
+                  holdtime: 300
+                  multicast: 10.0.0.2
+                  network_id: 1
+                  nhs:
+                    - tunnel_ip: dynamic
+                      nbma: 10.0.0.2
+                  registration_no_unique: true
+                  shortcut: true
+                - name: tun101
+                  authentication: vyos
+                  holdtime: 300
+                  multicast: 10.0.1.2
+                  network_id: 2
+                  nhs:
+                    - tunnel_ip: dynamic
+                      nbma: 10.0.1.2
+                  registration_no_unique: true
+                  shortcut: true
+              ospf_interfaces:
+                - name: eth2
+                  area: '0'
+                - name: tun100
+                  area: '0'
+                  network: point-to-multipoint
+                  passive: false
+                - name: tun101
+                  area: '0'
+                  network: point-to-multipoint
+                  passive: false
+              ansible_host: clab-bp-dmvpn-spoke2
+              base_hostname: SPOKE-2
+            spoke3:
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 10.0.13.2/30
+                - name: eth2
+                  addresses:
+                    - 192.168.13.1/24
+              base_static_routes:
+                - dest: 0.0.0.0/0
+                  next_hop: 10.0.13.1
+              gre_tunnel_interfaces:
+                - name: tun100
+                  addresses:
+                    - 10.100.100.13/32
+                  enable_multicast: true
+                  encapsulation: gre
+                  adjust_mss: '1360'
+                  mtu: 1436
+                  key: 42
+                  source_interface: eth1
+                - name: tun101
+                  addresses:
+                    - 10.100.101.13/32
+                  enable_multicast: true
+                  encapsulation: gre
+                  adjust_mss: '1360'
+                  mtu: 1436
+                  key: 43
+                  source_interface: eth1
+              dmvpn_nhrp_tunnels:
+                - name: tun100
+                  authentication: vyos
+                  holdtime: 300
+                  multicast: 10.0.0.2
+                  network_id: 1
+                  nhs:
+                    - tunnel_ip: dynamic
+                      nbma: 10.0.0.2
+                  registration_no_unique: true
+                  shortcut: true
+                - name: tun101
+                  authentication: vyos
+                  holdtime: 300
+                  multicast: 10.0.1.2
+                  network_id: 2
+                  nhs:
+                    - tunnel_ip: dynamic
+                      nbma: 10.0.1.2
+                  registration_no_unique: true
+                  shortcut: true
+              ospf_interfaces:
+                - name: eth2
+                  area: '0'
+                - name: tun100
+                  area: '0'
+                  network: point-to-multipoint
+                  passive: false
+                - name: tun101
+                  area: '0'
+                  network: point-to-multipoint
+                  passive: false
+              ansible_host: clab-bp-dmvpn-spoke3
+              base_hostname: SPOKE-3
+          vars:
+            dmvpn_ipsec:
+              interfaces:
+                - eth1
+              ike_group:
+                name: IKE-HUB
+                key_exchange: ikev1
+                lifetime: 3600
+                proposal_id: 1
+                dh_group: 2
+                encryption: aes256
+                hash: sha1
+              esp_group:
+                name: ESP-HUB
+                lifetime: 1800
+                mode: transport
+                pfs: disable
+                proposal_id: 1
+                encryption: aes256
+                hash: sha1
+              profile:
+                name: NHRPVPN
+                psk: molecule-dmvpn-psk
+                bind_tunnels: '{{ gre_tunnel_interfaces | map(attribute=''name'') | list }}'
+            dmvpn_drop_unprotected_gre:
+              rule: 10
+            ospf_passive_interface_default: true
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

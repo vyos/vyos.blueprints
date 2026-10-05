@@ -1,0 +1,34 @@
+---
+base_interfaces:
+  - name: dum10
+    addresses:
+      - 10.0.0.6/32
+  - name: eth0
+    addresses:
+      - 172.16.80.2/24
+  - name: eth1
+    addresses:
+      - 172.16.130.1/24
+  - name: eth2
+    addresses:
+      - 172.16.50.2/24
+  - name: eth3
+    addresses:
+      - 172.16.60.2/24
+  - name: eth5
+    addresses:
+      - 172.16.140.1/24
+ospf_router_id: 10.0.0.6
+ospf_areas:
+  - id: '0'
+    networks:
+      - 0.0.0.0/0
+ospf_abr_type: cisco
+mpls_ldp_router_id: 10.0.0.6
+mpls_ldp_interfaces:
+  - eth0
+  - eth1
+  - eth2
+  - eth3
+  - eth5
+base_hostname: VyOS-P4

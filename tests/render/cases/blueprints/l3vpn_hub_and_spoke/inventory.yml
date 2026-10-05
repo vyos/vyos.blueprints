@@ -1,0 +1,442 @@
+---
+# docs.vyos.io/en/1.5/configexamples/l3vpn-hub-and-spoke.html - all twelve
+# routers (steps 1-4). The page's configs carry no host-name; base sets one per
+# inventory name.
+all:
+  hosts:
+    VyOS-P1:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.3/32
+        - name: eth0
+          addresses:
+            - 172.16.30.1/24
+        - name: eth1
+          addresses:
+            - 172.16.40.1/24
+        - name: eth2
+          addresses:
+            - 172.16.90.1/24
+        - name: eth3
+          addresses:
+            - 172.16.10.1/24
+        - name: eth5
+          addresses:
+            - 172.16.100.1/24
+      ospf_router_id: 10.0.0.3
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.3
+      mpls_ldp_interfaces:
+        - eth0
+        - eth1
+        - eth2
+        - eth3
+        - eth5
+      ansible_host: 192.0.2.1
+      base_hostname: VyOS-P1
+    VyOS-P2:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.4/32
+        - name: eth0
+          addresses:
+            - 172.16.30.2/24
+        - name: eth1
+          addresses:
+            - 172.16.20.1/24
+        - name: eth2
+          addresses:
+            - 172.16.120.1/24
+        - name: eth3
+          addresses:
+            - 172.16.60.1/24
+      ospf_router_id: 10.0.0.4
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.4
+      mpls_ldp_interfaces:
+        - eth0
+        - eth1
+        - eth2
+        - eth3
+      ansible_host: 192.0.2.2
+      base_hostname: VyOS-P2
+    VyOS-P3:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.5/32
+        - name: eth0
+          addresses:
+            - 172.16.110.1/24
+        - name: eth1
+          addresses:
+            - 172.16.40.2/24
+        - name: eth2
+          addresses:
+            - 172.16.50.1/24
+        - name: eth3
+          addresses:
+            - 172.16.70.1/24
+      ospf_router_id: 10.0.0.5
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.5
+      mpls_ldp_interfaces:
+        - eth0
+        - eth1
+        - eth2
+        - eth3
+      ansible_host: 192.0.2.3
+      base_hostname: VyOS-P3
+    VyOS-P4:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.6/32
+        - name: eth0
+          addresses:
+            - 172.16.80.2/24
+        - name: eth1
+          addresses:
+            - 172.16.130.1/24
+        - name: eth2
+          addresses:
+            - 172.16.50.2/24
+        - name: eth3
+          addresses:
+            - 172.16.60.2/24
+        - name: eth5
+          addresses:
+            - 172.16.140.1/24
+      ospf_router_id: 10.0.0.6
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.6
+      mpls_ldp_interfaces:
+        - eth0
+        - eth1
+        - eth2
+        - eth3
+        - eth5
+      ansible_host: 192.0.2.4
+      base_hostname: VyOS-P4
+    VyOS-PE1:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.7/32
+        - name: eth0
+          addresses:
+            - 172.16.90.2/24
+        - name: eth3
+          addresses:
+            - 10.50.50.1/24
+      ospf_router_id: 10.0.0.7
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.7
+      mpls_ldp_interfaces:
+        - eth0
+      l3vpn_asn: 65001
+      l3vpn_router_id: 10.0.0.7
+      l3vpn_peer_group: &id001
+        name: RR_VPNv4
+        remote_as: 65001
+        update_source: dum10
+      l3vpn_neighbors:
+        - address: 10.0.0.1
+          nexthop_self: true
+        - address: 10.0.0.2
+          nexthop_self: true
+      vrf_lite_asn: 65001
+      vrf_lite_vrfs:
+        - name: BLUE_SPOKE
+          table: 200
+          interfaces:
+            - eth3
+          families:
+            - ipv4
+          label_vpn_export: auto
+          networks:
+            - 10.50.50.0/24
+          rd: 10.50.50.1:1011
+          route_targets_export:
+            - 65035:1011
+          route_targets_import:
+            - 65035:1030
+          redistribute:
+            - connected
+          neighbors:
+            - address: 10.50.50.2
+              remote_as: 65035
+              as_override: true
+      ansible_host: 192.0.2.5
+      base_hostname: VyOS-PE1
+    VyOS-PE2:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.8/32
+        - name: eth0
+          addresses:
+            - 172.16.110.2/24
+        - name: eth1
+          addresses:
+            - 172.16.100.2/24
+        - name: eth2
+          addresses:
+            - 172.16.80.1/24
+        - name: eth3
+          addresses:
+            - 10.80.80.1/24
+      ospf_router_id: 10.0.0.8
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.8
+      mpls_ldp_interfaces:
+        - eth0
+        - eth1
+      l3vpn_asn: 65001
+      l3vpn_router_id: 10.0.0.8
+      l3vpn_peer_group: *id001
+      l3vpn_neighbors:
+        - address: 10.0.0.1
+          nexthop_self: true
+        - address: 10.0.0.2
+          nexthop_self: true
+      vrf_lite_asn: 65001
+      vrf_lite_vrfs:
+        - name: BLUE_HUB
+          table: 400
+          interfaces:
+            - eth3
+          families:
+            - ipv4
+          label_vpn_export: auto
+          networks:
+            - 10.80.80.0/24
+          rd: 10.80.80.1:1011
+          route_targets_export:
+            - 65035:1030
+          route_targets_import:
+            - 65035:1011
+            - 65050:2011
+            - 65035:1030
+          redistribute:
+            - connected
+          neighbors:
+            - address: 10.80.80.2
+              remote_as: 65035
+              as_override: true
+      ansible_host: 192.0.2.6
+      base_hostname: VyOS-PE2
+    VyOS-PE3:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.10/32
+        - name: eth0
+          addresses:
+            - 172.16.140.2/24
+        - name: eth3
+          addresses:
+            - 10.60.60.1/24
+      ospf_router_id: 10.0.0.10
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.10
+      mpls_ldp_interfaces:
+        - eth0
+      l3vpn_asn: 65001
+      l3vpn_router_id: 10.0.0.10
+      l3vpn_peer_group: *id001
+      l3vpn_neighbors:
+        - address: 10.0.0.1
+          nexthop_self: true
+        - address: 10.0.0.2
+          nexthop_self: true
+      vrf_lite_asn: 65001
+      vrf_lite_vrfs:
+        - name: BLUE_SPOKE
+          table: 200
+          interfaces:
+            - eth3
+          families:
+            - ipv4
+          label_vpn_export: auto
+          networks:
+            - 10.60.60.0/24
+          rd: 10.60.60.1:1011
+          route_targets_export:
+            - 65035:1011
+          route_targets_import:
+            - 65035:1030
+          redistribute:
+            - connected
+          neighbors:
+            - address: 10.60.60.2
+              remote_as: 65035
+              as_override: true
+      ansible_host: 192.0.2.7
+      base_hostname: VyOS-PE3
+    VyOS-RR1:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.1/32
+        - name: eth1
+          addresses:
+            - 172.16.20.2/24
+        - name: eth2
+          addresses:
+            - 172.16.10.2/24
+      ospf_router_id: 10.0.0.1
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.1
+      mpls_ldp_interfaces:
+        - eth1
+        - eth2
+      l3vpn_asn: 65001
+      l3vpn_router_id: 10.0.0.1
+      l3vpn_cluster_id: 10.0.0.1
+      l3vpn_peer_group: *id001
+      l3vpn_neighbors:
+        - address: 10.0.0.7
+          route_reflector_client: true
+        - address: 10.0.0.8
+          route_reflector_client: true
+        - address: 10.0.0.10
+          route_reflector_client: true
+      ansible_host: 192.0.2.8
+      base_hostname: VyOS-RR1
+    VyOS-RR2:
+      base_interfaces:
+        - name: dum10
+          addresses:
+            - 10.0.0.2/32
+        - name: eth0
+          addresses:
+            - 172.16.80.1/24
+        - name: eth1
+          addresses:
+            - 172.16.70.2/24
+      ospf_router_id: 10.0.0.2
+      ospf_areas:
+        - id: '0'
+          networks:
+            - 0.0.0.0/0
+      ospf_abr_type: cisco
+      mpls_ldp_router_id: 10.0.0.2
+      mpls_ldp_interfaces:
+        - eth0
+        - eth1
+      l3vpn_asn: 65001
+      l3vpn_router_id: 10.0.0.2
+      l3vpn_cluster_id: 10.0.0.1
+      l3vpn_peer_group: *id001
+      l3vpn_neighbors:
+        - address: 10.0.0.7
+          route_reflector_client: true
+        - address: 10.0.0.8
+          route_reflector_client: true
+        - address: 10.0.0.10
+          route_reflector_client: true
+      ansible_host: 192.0.2.9
+      base_hostname: VyOS-RR2
+    VyOS-CE1-SPOKE:
+      base_interfaces:
+        - name: dum20
+          addresses:
+            - 10.0.0.80/32
+        - name: eth0
+          addresses:
+            - 10.50.50.2/24
+      bgp_asn: 65035
+      bgp_router_id: 10.50.50.2
+      bgp_networks:
+        - 10.0.0.80/32
+      bgp_log_neighbor_changes: true
+      bgp_neighbors:
+        - address: 10.50.50.1
+          remote_as: 65001
+          ebgp_multihop: 2
+          update_source: eth0
+      ansible_host: 192.0.2.10
+      base_hostname: VyOS-CE1-SPOKE
+    VyOS-CE1-HUB:
+      base_interfaces:
+        - name: dum20
+          addresses:
+            - 10.0.0.100/32
+        - name: eth0
+          addresses:
+            - 10.80.80.2/24
+      bgp_asn: 65035
+      bgp_router_id: 10.80.80.2
+      bgp_networks:
+        - 10.0.0.100/32
+      bgp_log_neighbor_changes: true
+      bgp_neighbors:
+        - address: 10.80.80.1
+          remote_as: 65001
+          ebgp_multihop: 2
+          update_source: eth0
+      bgp_redistribute:
+        - type: connected
+      ansible_host: 192.0.2.11
+      base_hostname: VyOS-CE1-HUB
+    VyOS-CE2-SPOKE:
+      base_interfaces:
+        - name: dum20
+          addresses:
+            - 10.0.0.90/32
+        - name: eth0
+          addresses:
+            - 10.60.60.2/24
+      bgp_asn: 65035
+      bgp_router_id: 10.60.60.2
+      bgp_networks:
+        - 10.0.0.90/32
+      bgp_log_neighbor_changes: true
+      bgp_neighbors:
+        - address: 10.60.60.1
+          remote_as: 65001
+          ebgp_multihop: 2
+          update_source: eth0
+      ansible_host: 192.0.2.12
+      base_hostname: VyOS-CE2-SPOKE
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_connect_timeout: 5
+    ansible_command_timeout: 5

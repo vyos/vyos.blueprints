@@ -1,0 +1,49 @@
+set interfaces wireguard wg01 address '10.254.60.1/30'
+set interfaces wireguard wg01 description 'router1-to-offsite1'
+set interfaces wireguard wg01 peer OFFSITE1 address '203.0.113.3'
+set interfaces wireguard wg01 peer OFFSITE1 allowed-ips '0.0.0.0/0'
+set interfaces wireguard wg01 peer OFFSITE1 persistent-keepalive '15'
+set interfaces wireguard wg01 peer OFFSITE1 port '50001'
+set interfaces wireguard wg01 peer OFFSITE1 public-key 'GEFMOWzAyau42/HwdwfXnrfHdIISQF8YHj35rOgSZ0o='
+set interfaces wireguard wg01 port '50001'
+set policy access-list 100 description 'Inbound OSPF Routes from Peers'
+set policy access-list 100 rule 10 action 'deny'
+set policy access-list 100 rule 10 destination any
+set policy access-list 100 rule 10 source inverse-mask '0.0.255.255'
+set policy access-list 100 rule 10 source network '10.201.0.0'
+set policy access-list 100 rule 100 action 'permit'
+set policy access-list 100 rule 100 destination any
+set policy access-list 100 rule 100 source any
+set policy access-list 150 description 'Outbound OSPF Redistribution'
+set policy access-list 150 rule 10 action 'permit'
+set policy access-list 150 rule 10 destination any
+set policy access-list 150 rule 10 source inverse-mask '0.0.0.255'
+set policy access-list 150 rule 10 source network '10.200.201.0'
+set policy access-list 150 rule 100 action 'deny'
+set policy access-list 150 rule 100 destination any
+set policy access-list 150 rule 100 source any
+set policy access-list 150 rule 20 action 'permit'
+set policy access-list 150 rule 20 destination any
+set policy access-list 150 rule 20 source inverse-mask '0.0.0.255'
+set policy access-list 150 rule 20 source network '203.0.113.0'
+set policy route-map PUBOSPF rule 100 action deny
+set policy route-map PUBOSPF rule 100 match ip address access-list 100
+set policy route-map PUBOSPF rule 500 action permit
+set protocols ospf access-list 150 export 'connected'
+set protocols ospf area '0.0.0.0'
+set protocols ospf area 0.0.0.0 authentication md5
+set protocols ospf area 0.0.0.0 network 10.254.60.0/24
+set protocols ospf auto-cost reference-bandwidth '10000'
+set protocols ospf interface wg01 authentication md5 key-id 1 md5-key ********
+set protocols ospf interface wg01 cost 11
+set protocols ospf interface wg01 dead-interval 5
+set protocols ospf interface wg01 hello-interval 1
+set protocols ospf interface wg01 network point-to-point
+set protocols ospf interface wg01 priority 1
+set protocols ospf interface wg01 retransmit-interval 5
+set protocols ospf interface wg01 transmit-delay 1
+set protocols ospf log-adjacency-changes
+set protocols ospf parameters abr-type 'cisco'
+set protocols ospf parameters router-id '10.254.60.1'
+set protocols ospf redistribute connected
+set system ip protocol ospf route-map 'PUBOSPF'

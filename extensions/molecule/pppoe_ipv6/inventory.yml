@@ -1,0 +1,67 @@
+---
+# Values from docs.vyos.io/en/1.5/configexamples/pppoe-ipv6-basic.html with
+# interfaces shifted by one. The lab ISP delegates a /56, so the PD request
+# sets length 56 and sla-id 0 (the page assumes the ISP hands out a /64).
+all:
+  children:
+    vyos:
+      children:
+        home:
+          hosts:
+            r1:
+              pppoe_interfaces:
+                - name: pppoe0
+                  source_interface: eth1
+                  username: molecule
+                  password: molecule-ppp
+                  service_name: ISP
+                  ipv6_autoconf: true
+                  prefix_delegation:
+                    - id: 0
+                      length: 56
+                      interfaces:
+                        - {name: eth2, address: '100', sla_id: 0}
+              router_advert_interfaces:
+                - name: eth2
+                  link_mtu: 1492
+                  name_servers: ['2001:db8::53']
+                  prefixes:
+                    - {prefix: '::/64', valid_lifetime: 172800}
+              firewall_ipv6:
+                names:
+                  WAN_IN:
+                    default_action: drop
+                    rules:
+                      - number: 10
+                        action: accept
+                        state: {established: true, related: true}
+                      - {number: 20, action: accept, protocol: icmpv6}
+                  WAN_LOCAL:
+                    default_action: drop
+                    rules:
+                      - number: 10
+                        action: accept
+                        state: {established: true, related: true}
+                      - {number: 20, action: accept, protocol: icmpv6}
+                      - number: 30
+                        action: accept
+                        protocol: udp
+                        source: {port: '547'}
+                        destination: {port: '546'}
+                forward:
+                  rules:
+                    - number: 10
+                      action: jump
+                      jump_target: WAN_IN
+                      inbound_interface: {name: pppoe0}
+                input:
+                  rules:
+                    - number: 10
+                      action: jump
+                      jump_target: WAN_LOCAL
+                      inbound_interface: {name: pppoe0}
+              ansible_host: clab-bp-pppoe-r1
+        provider:
+          hosts:
+            isp: {ansible_host: clab-bp-pppoe-isp}
+      vars: {ansible_network_os: vyos.vyos.vyos, ansible_connection: ansible.netcommon.network_cli, ansible_user: admin, ansible_password: admin}

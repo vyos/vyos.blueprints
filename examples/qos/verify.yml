@@ -1,0 +1,9 @@
+---
+- name: Check QoS
+  hosts: qos
+  gather_facts: false
+  tasks:
+    - name: QoS checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.qos
+        tasks_from: verify

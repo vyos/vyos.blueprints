@@ -1,0 +1,7 @@
+---
+_l2tp_lns_auth: "{{ l2tp_lns_authentication | default({}, true) }}"
+_l2tp_lns_lines: "{{ (lookup('ansible.builtin.template', 'l2tp.j2') or '').splitlines() | select | list }}"
+_l2tp_lns_mask_patterns:
+  - "(radius server \\S+ key) .*$"
+  - "(lns shared-secret) .*$"
+  - "(local-users username \\S+ password) .*$"

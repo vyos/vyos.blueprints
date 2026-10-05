@@ -1,0 +1,75 @@
+---
+all:
+  hosts:
+    edge1:
+      ansible_host: 192.0.2.1
+      ipsec_route_based_peers:
+        - name: gcp-ha-vpn-0
+          description: Google Cloud HA VPN tunnel 0
+          psk_name: gcp-ha-vpn-0
+          psk: example-gcp-ha-vpn-psk-0
+          local_address: 198.51.100.10
+          remote_address: 203.0.113.10
+          connection_type: initiate
+          esp_group_on_vti: true
+          vti:
+            interface: vti10
+            address: 169.254.10.1/30
+            description: Google Cloud HA VPN tunnel 0
+            adjust_mss: '1350'
+      ipsec_route_based_interface_routes:
+        - dest: 169.254.10.2/32
+          interface: vti10
+      ipsec_route_based_bgp:
+        asn: 65010
+        router_id: 10.80.0.11
+        networks:
+          - 10.80.0.0/24
+        neighbors:
+          - address: 169.254.10.2
+            remote_as: 64514
+            holdtime: 30
+            keepalive: 10
+            disable_connected_check: true
+            soft_reconfiguration_inbound: true
+            route_map_import: GCP-IN
+            route_map_export: GCP-OUT
+    edge2:
+      ansible_host: 192.0.2.2
+      ipsec_route_based_peers:
+        - name: gcp-ha-vpn-1
+          description: Google Cloud HA VPN tunnel 1
+          psk_name: gcp-ha-vpn-1
+          psk: example-gcp-ha-vpn-psk-1
+          local_address: 198.51.100.11
+          remote_address: 203.0.113.11
+          connection_type: initiate
+          esp_group_on_vti: true
+          vti:
+            interface: vti11
+            address: 169.254.10.5/30
+            description: Google Cloud HA VPN tunnel 1
+            adjust_mss: '1350'
+      ipsec_route_based_interface_routes:
+        - dest: 169.254.10.6/32
+          interface: vti11
+      ipsec_route_based_bgp:
+        asn: 65010
+        router_id: 10.80.0.12
+        networks:
+          - 10.80.0.0/24
+        neighbors:
+          - address: 169.254.10.6
+            remote_as: 64514
+            holdtime: 30
+            keepalive: 10
+            disable_connected_check: true
+            soft_reconfiguration_inbound: true
+            route_map_import: GCP-IN
+            route_map_export: GCP-OUT
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_connect_timeout: 5
+    ansible_command_timeout: 5

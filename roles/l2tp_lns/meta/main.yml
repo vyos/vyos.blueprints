@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: VyOS maintainers and contributors
+  description: L2TP network server (LNS) for PPP sessions from a LAC, with RADIUS or local authentication
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: GenericLinux
+      versions: [all]
+  galaxy_tags: [vyos, networking, l2tp, pppoe, radius]
+dependencies: []

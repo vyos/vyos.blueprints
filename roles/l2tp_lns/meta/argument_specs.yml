@@ -1,0 +1,61 @@
+---
+argument_specs:
+  main:
+    short_description: L2TP network server (docs blueprint "PPPoE over L2TP")
+    description:
+      - Terminates PPP sessions tunnelled over L2TP from a LAC (for example
+        PPPoE subscribers forwarded by a Cisco LAC) - authentication (RADIUS
+        or local users), client address pools, gateway address, the LAC's
+        tunnel host-name and shared secret, name servers and PPP options.
+      - Configured with vyos.vyos.vyos_config, because vyos.vyos has no L2TP
+        module. Keys, the shared secret and local passwords are masked in
+        rendered output.
+      - Masquerading the client pool belongs to C(vyos.blueprints.nat); the
+        default route to C(vyos.blueprints.base).
+    options:
+      l2tp_lns_authentication:
+        type: dict
+        description: Authentication. Nothing is configured when unset.
+        options:
+          mode: {type: str, choices: [radius, local], required: true, description: Authentication mode.}
+          radius_servers:
+            type: list
+            elements: dict
+            default: []
+            description: RADIUS servers (mode radius).
+            options:
+              address: {type: str, required: true, description: Server address.}
+              key: {type: str, required: true, no_log: true, description: Shared secret.}
+          local_users:
+            type: list
+            elements: dict
+            default: []
+            description: Local users (mode local).
+            options:
+              username: {type: str, required: true, description: User name.}
+              password: {type: str, required: true, no_log: true, description: Password.}
+      l2tp_lns_pools:
+        type: list
+        elements: dict
+        default: []
+        description: Client IPv4 address pools.
+        options:
+          name: {type: str, required: true, description: Pool name.}
+          range: {type: str, required: true, description: "Address range or prefix, e.g. C(10.0.0.2-10.0.0.100)."}
+      l2tp_lns_default_pool: {type: str, default: "", description: Default pool name.}
+      l2tp_lns_gateway_address: {type: str, default: "", description: Server-side address of the PPP sessions.}
+      l2tp_lns_lac_host_name: {type: str, default: "", description: "Host name the LAC presents (C(local name) on a Cisco LAC)."}
+      l2tp_lns_shared_secret: {type: str, default: "", no_log: true, description: "L2TP tunnel password (C(l2tp tunnel password) on a Cisco LAC)."}
+      l2tp_lns_name_servers: {type: list, elements: str, default: [], description: DNS servers handed to clients.}
+      l2tp_lns_ppp_options:
+        type: dict
+        default: {}
+        description: "PPP options, e.g. C({disable_ccp: true}) as the page requires; keys map to C(ppp-options <key>)."
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the l2tp_lns role
+    description: Run with C(tasks_from=verify). Checks the L2TP server is running and lists its sessions.
+    options: {}

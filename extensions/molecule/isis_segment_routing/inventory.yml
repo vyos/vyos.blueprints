@@ -1,0 +1,70 @@
+---
+# P1/P2 from docs.vyos.io/en/1.5/configexamples/segment-routing-isis.html; P3 is
+# a VyOS stand-in for the page's XRv-P3 with its values (NET .0003, SID index 3).
+# P1/P2 eth3 lead to routers outside this part of the page and are left out.
+all:
+  children:
+    vyos:
+      children:
+        p_routers:
+          hosts:
+            P1-VyOS:
+              ansible_host: clab-bp-isis-p1
+              base_hostname: P1-VyOS
+              base_interfaces:
+                - name: dum0
+                  addresses: [192.0.2.1/32]
+                - name: eth1
+                  mtu: 8000
+                  addresses: [192.0.2.5/30]
+              isis_net: 49.0000.0000.0000.0001.00
+              isis_interfaces:
+                - {name: dum0, passive: true}
+                - {name: eth1, network: point-to-point}
+              isis_segment_routing:
+                maximum_label_depth: 8
+                prefixes:
+                  - {prefix: 192.0.2.1/32, index: 1}
+              isis_mpls_interfaces: [eth1]
+            P2-VyOS:
+              ansible_host: clab-bp-isis-p2
+              base_hostname: P2-VyOS
+              base_interfaces:
+                - name: dum0
+                  addresses: [192.0.2.2/32]
+                - name: eth2
+                  mtu: 8000
+                  addresses: [192.0.2.17/30]
+              isis_net: 49.0000.0000.0000.0002.00
+              isis_interfaces:
+                - {name: dum0, passive: true}
+                - {name: eth2, network: point-to-point}
+              isis_segment_routing:
+                maximum_label_depth: 8
+                prefixes:
+                  - {prefix: 192.0.2.2/32, index: 2}
+              isis_mpls_interfaces: [eth2]
+            P3:
+              ansible_host: clab-bp-isis-p3
+              base_hostname: P3
+              base_interfaces:
+                - name: dum0
+                  addresses: [192.0.2.3/32]
+                - name: eth1
+                  mtu: 8000
+                  addresses: [192.0.2.6/30]
+                - name: eth2
+                  mtu: 8000
+                  addresses: [192.0.2.18/30]
+              isis_net: 49.0000.0000.0000.0003.00
+              isis_interfaces:
+                - {name: dum0, passive: true}
+                - {name: eth1, network: point-to-point}
+                - {name: eth2, network: point-to-point}
+              isis_segment_routing:
+                maximum_label_depth: 8
+                prefixes:
+                  - {prefix: 192.0.2.3/32, index: 3}
+              isis_mpls_interfaces: [eth1, eth2]
+          vars: {isis_level: level-2, isis_log_adjacency_changes: true, isis_metric_style: wide}
+      vars: {ansible_network_os: vyos.vyos.vyos, ansible_connection: ansible.netcommon.network_cli, ansible_user: admin, ansible_password: admin}

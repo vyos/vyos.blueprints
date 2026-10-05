@@ -1,0 +1,23 @@
+---
+- name: Read NHRP and IPsec state
+  vyos.vyos.vyos_command:
+    commands:
+      - show ip nhrp nhs
+      - show vpn ipsec sa
+  register: _dmvpn_v
+
+- name: Spokes are registered with every NHS
+  ansible.builtin.assert:
+    that: _dmvpn_v.stdout[0] is search((item.0.name | regex_escape) ~ '.*' ~ (item.1.nbma | regex_escape))
+    fail_msg: "{{ item.0.name }} is not registered with NHS {{ item.1.nbma }}"
+    quiet: true
+  loop: "{{ dmvpn_nhrp_tunnels | subelements('nhs', skip_missing=true) }}"
+  loop_control:
+    label: "{{ item.0.name }} -> {{ item.1.nbma }}"
+
+- name: An IPsec SA is up for every protected tunnel
+  ansible.builtin.assert:
+    that: _dmvpn_v.stdout[1] is search('dmvpn-\S+-' ~ (item | regex_escape) ~ '-child\s+up')
+    fail_msg: "no IPsec SA up for {{ item }}"
+    quiet: true
+  loop: "{{ (dmvpn_ipsec | default({}, true)).profile.bind_tunnels | default([]) }}"

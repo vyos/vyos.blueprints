@@ -1,0 +1,20 @@
+---
+- name: Read OSPF neighbours
+  vyos.vyos.vyos_command:
+    commands:
+      - show ip ospf neighbor
+  register: _ospf_v
+
+- name: A Full adjacency on every non-passive interface
+  ansible.builtin.assert:
+    that: _ospf_v.stdout[0] is search('Full.*\s' ~ (item.name | regex_escape) ~ ':')
+    fail_msg: "no Full OSPF adjacency on {{ item.name }}"
+    quiet: true
+  # Interfaces that form adjacencies: explicitly non-passive ones, plus (without
+  # passive-interface default) those not marked passive.
+  loop: >-
+    {{ (ospf_interfaces | selectattr('passive', 'defined') | rejectattr('passive') | list)
+       + ([] if ospf_passive_interface_default | default(false) | bool
+          else ospf_interfaces | rejectattr('passive', 'defined') | list) }}
+  loop_control:
+    label: "{{ item.name }}"

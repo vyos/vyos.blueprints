@@ -1,0 +1,4 @@
+{# Route-map descriptions: vyos_route_maps has no option for them. #}
+{% for rm in route_policy_route_maps if rm.description is defined %}
+set policy route-map {{ rm.name }} description '{{ rm.description }}'
+{% endfor %}

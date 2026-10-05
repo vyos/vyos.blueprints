@@ -1,0 +1,44 @@
+---
+# The LNS from docs.vyos.io/en/1.5/configexamples/lac-lns.html; eth1 here is
+# eth0 on the page. The lab has no upstream router, so the default route is left out.
+all:
+  children:
+    vyos:
+      hosts:
+        lns:
+          base_hostname: vyos
+          base_interfaces:
+            - name: eth1
+              addresses:
+                - 192.168.139.100/24
+          base_static_routes: []
+          nat_source_rules:
+            - id: 100
+              outbound_interface:
+                name: eth1
+              source:
+                address: 10.0.0.0/24
+              translation:
+                address: masquerade
+          l2tp_lns_authentication:
+            mode: radius
+            radius_servers:
+              - address: 192.168.139.110
+                key: radiustest
+          l2tp_lns_pools:
+            - name: TEST-POOL
+              range: 10.0.0.2-10.0.0.100
+          l2tp_lns_default_pool: TEST-POOL
+          l2tp_lns_gateway_address: 10.0.0.1
+          l2tp_lns_lac_host_name: LAC
+          l2tp_lns_shared_secret: test123
+          l2tp_lns_name_servers:
+            - 8.8.8.8
+          l2tp_lns_ppp_options:
+            disable_ccp: true
+          ansible_host: clab-bp-l2tp-lns
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

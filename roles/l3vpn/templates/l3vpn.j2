@@ -1,0 +1,29 @@
+{# Peer-group definition and VPNv4 neighbour options: not expressible with the BGP
+   modules yet. log-neighbor-changes is set here too: vyos_bgp_global renders
+   "no-client-to-client-reflection" whenever log_neighbor_changes is set, which
+   would break route reflection. #}
+{% set b = 'set protocols bgp' %}
+{% if l3vpn_log_neighbor_changes | bool %}
+{{ b }} parameters log-neighbor-changes
+{% endif %}
+{% set pg = l3vpn_peer_group | default({}, true) %}
+{% for n in l3vpn_neighbors %}
+{%   if n.route_reflector_client | default(false) | bool %}
+{{ b }} neighbor {{ n.address }} address-family ipv4-vpn route-reflector-client
+{%   endif %}
+{%   if n.nexthop_self | default(false) | bool %}
+{{ b }} neighbor {{ n.address }} address-family ipv4-vpn nexthop-self
+{%   endif %}
+{%   if not (n.route_reflector_client | default(false) | bool) and not (n.nexthop_self | default(false) | bool) %}
+{{ b }} neighbor {{ n.address }} address-family ipv4-vpn
+{%   endif %}
+{%   if pg %}
+{{ b }} neighbor {{ n.address }} peer-group '{{ pg.name }}'
+{%   endif %}
+{% endfor %}
+{% if pg %}
+{{ b }} peer-group {{ pg.name }} remote-as '{{ pg.remote_as }}'
+{%   if pg.update_source is defined %}
+{{ b }} peer-group {{ pg.name }} update-source '{{ pg.update_source }}'
+{%   endif %}
+{% endif %}

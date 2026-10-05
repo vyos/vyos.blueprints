@@ -1,0 +1,4 @@
+---
+vrf_lite_asn: null
+vrf_lite_vrfs: []
+vrf_lite_bind_to_all: false

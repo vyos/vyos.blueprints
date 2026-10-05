@@ -1,0 +1,25 @@
+set load-balancing wan interface-health eth0 failure-count '5'
+set load-balancing wan interface-health eth0 nexthop '11.22.33.1'
+set load-balancing wan interface-health eth0 test 10 target '33.44.55.66'
+set load-balancing wan interface-health eth0 test 10 type 'ping'
+set load-balancing wan interface-health eth0 test 20 target '44.55.66.77'
+set load-balancing wan interface-health eth0 test 20 type 'ping'
+set load-balancing wan interface-health eth1 failure-count '4'
+set load-balancing wan interface-health eth1 nexthop '22.33.44.1'
+set load-balancing wan interface-health eth1 test 10 target '55.66.77.88'
+set load-balancing wan interface-health eth1 test 10 type 'ping'
+set load-balancing wan interface-health eth1 test 20 target '66.77.88.99'
+set load-balancing wan interface-health eth1 test 20 type 'ping'
+set load-balancing wan rule 10 failover
+set load-balancing wan rule 10 inbound-interface 'eth2'
+set load-balancing wan rule 10 interface eth0 weight '10'
+set load-balancing wan rule 10 interface eth1 weight '1'
+set protocols static route 33.44.55.66/32
+set protocols static route 33.44.55.66/32 next-hop '11.22.33.1'
+set protocols static route 44.55.66.77/32
+set protocols static route 44.55.66.77/32 next-hop '11.22.33.1'
+set protocols static route 55.66.77.88/32
+set protocols static route 55.66.77.88/32 next-hop '22.33.44.1'
+set protocols static route 66.77.88.99/32
+set protocols static route 66.77.88.99/32 next-hop '22.33.44.1'
+set system host-name r1

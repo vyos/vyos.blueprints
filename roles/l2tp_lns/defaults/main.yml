@@ -1,0 +1,9 @@
+---
+l2tp_lns_authentication: null
+l2tp_lns_pools: []
+l2tp_lns_default_pool: ""
+l2tp_lns_gateway_address: ""
+l2tp_lns_lac_host_name: ""
+l2tp_lns_shared_secret: ""
+l2tp_lns_name_servers: []
+l2tp_lns_ppp_options: {}

@@ -1,0 +1,75 @@
+---
+# router2 (hardware): LACP bond0 of eth1/eth2 here, eth0/eth1 on the page
+base_interfaces:
+  - name: bond0.50
+    addresses:
+      - 192.0.2.22/24
+  - name: bond0.100
+    addresses:
+      - 203.0.113.3/24
+  - name: bond0.201
+    addresses:
+      - 10.200.201.3/24
+ha_vrrp_priority: 100
+ha_vrrp_groups:
+  - name: int
+    vrid: 201
+    interface: bond0.201
+    address:
+      - 10.200.201.1/24
+  - name: public
+    vrid: 113
+    interface: bond0.100
+    address:
+      - 203.0.113.1/24
+ha_vrrp_local_addresses:
+  int: 10.200.201.3
+  public: 203.0.113.3
+ha_vrrp_conntrack_sync:
+  interface: bond0.201
+  accept_protocols:
+    - tcp
+    - udp
+    - icmp
+  event_listen_queue_size: 8
+  mcast_group: 224.0.0.50
+  sync_queue_size: 8
+  disable_helpers: true
+nat_source_rules:
+  - id: 10
+    outbound_interface:
+      name: bond0.50
+    source:
+      address: 10.200.201.0/24
+    destination:
+      address: '!192.0.2.0/24'
+    translation:
+      address: 203.0.113.1
+bonding_interfaces:
+  - name: bond0
+    description: Switch Port-Channel
+    hash_policy: layer2
+    members:
+      - eth1
+      - eth2
+    mode: 802.3ad
+
+# --- part 2: as described in "Duplicate configuration", give router2 its own
+# WireGuard link(s) to the offsite routers (a different /30 from 10.254.60.0/24
+# per link) with the same OSPF interface settings, and a unique router-id, e.g.:
+# wireguard_interfaces:
+#   - name: wg01
+#     addresses: [10.254.60.5/30]
+#     ...
+# ospf_router_id: 10.254.60.5
+# ospf_interfaces: [...]
+
+# --- part 3: BGP session to the provider, exporting with the AS-path prepend
+# (the page: "identical, but use BGPPREPENDOUT"; peer per the Example Network)
+bgp_router_id: 192.0.2.22
+bgp_neighbors:
+  - address: 192.0.2.12
+    remote_as: 65550
+    update_source: 192.0.2.22
+    soft_reconfiguration_inbound: true
+    route_map_export: BGPPREPENDOUT

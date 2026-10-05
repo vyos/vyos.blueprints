@@ -1,0 +1,17 @@
+---
+# docs.vyos.io/en/1.5/configexamples/segment-routing-isis.html
+all:
+  children:
+    p_routers:
+      hosts:
+        P1-VyOS:
+          ansible_host: clab-isis-segment-routing-p1   # your router's address
+        P2-VyOS:
+          ansible_host: clab-isis-segment-routing-p2
+        P3:
+          ansible_host: clab-isis-segment-routing-p3   # lab only, see host_vars/P3.yml
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: admin
+    ansible_password: admin                         # use ansible-vault for real devices

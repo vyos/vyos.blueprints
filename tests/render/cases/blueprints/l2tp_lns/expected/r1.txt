@@ -1,0 +1,16 @@
+set interfaces ethernet eth0 address '192.168.139.100/24'
+set nat source rule 100 outbound-interface name eth0
+set nat source rule 100 source address 10.0.0.0/24
+set nat source rule 100 translation address masquerade
+set protocols static route 0.0.0.0/0
+set protocols static route 0.0.0.0/0 next-hop '192.168.139.2'
+set system host-name vyos
+set vpn l2tp remote-access authentication mode 'radius'
+set vpn l2tp remote-access authentication radius server 192.168.139.110 key '********'
+set vpn l2tp remote-access client-ip-pool TEST-POOL range '10.0.0.2-10.0.0.100'
+set vpn l2tp remote-access default-pool 'TEST-POOL'
+set vpn l2tp remote-access gateway-address '10.0.0.1'
+set vpn l2tp remote-access lns host-name 'LAC'
+set vpn l2tp remote-access lns shared-secret '********'
+set vpn l2tp remote-access name-server '8.8.8.8'
+set vpn l2tp remote-access ppp-options disable-ccp

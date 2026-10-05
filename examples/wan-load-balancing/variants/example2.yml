@@ -1,0 +1,11 @@
+---
+# Example 2: failover based on interface weights
+wan_load_balance_rules:
+  - number: 10
+    failover: true
+    inbound_interface: eth3
+    interfaces:
+      - name: eth1
+        weight: 10
+      - name: eth2
+        weight: 1

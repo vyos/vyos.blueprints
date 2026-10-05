@@ -1,0 +1,7 @@
+---
+l3vpn_asn: null
+l3vpn_router_id: ""
+l3vpn_cluster_id: ""
+l3vpn_log_neighbor_changes: true
+l3vpn_peer_group: null
+l3vpn_neighbors: []

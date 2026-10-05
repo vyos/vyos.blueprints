@@ -1,0 +1,18 @@
+---
+# docs.vyos.io/en/1.5/configexamples/gcp-ha-vpn-bgp.html
+# Only the two VyOS edge peers are configured here; the HA VPN gateway, Cloud
+# Router, external VPN gateway and tunnels are created in Google Cloud as the
+# page describes.
+all:
+  children:
+    edges:
+      hosts:
+        edge1:
+          ansible_host: 198.51.100.10     # your edge 1 address
+        edge2:
+          ansible_host: 198.51.100.11     # your edge 2 address
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_password: vyos              # use ansible-vault for real devices

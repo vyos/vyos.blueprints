@@ -1,0 +1,45 @@
+# EXPERIMENTAL: needs the ppp and l2tp_ppp kernel modules on the container host;
+# the xl2tpd and FreeRADIUS setup below is lab scaffolding.
+name: bp-l2tp
+topology:
+  nodes:
+    lns:
+      kind: vyosnetworks_vyos
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+    # 192.168.139.0/24 segment shared by the LNS, the LAC and the RADIUS server
+    sw:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip link add br0 type bridge
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set eth3 master br0
+        - ip link set br0 up
+    radius:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 192.168.139.110/24 dev eth1
+        - apk add --no-cache freeradius
+        - sh -c 'printf "client lns {\n  ipaddr = 192.168.139.100\n  secret = radiustest\n}\n" >> /etc/raddb/clients.conf'
+        - sh -c 'sed -i "1i test@vyos.io Cleartext-Password := \"test\"" /etc/raddb/mods-config/files/authorize'
+        - radiusd
+    # stands in for the page's Cisco LAC and the Windows PPPoE client
+    lac:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 192.168.139.101/24 dev eth1
+        - apk add --no-cache xl2tpd ppp
+        - mkdir -p /var/run/xl2tpd /etc/ppp/peers
+        - sh -c 'printf "[lac lns]\nlns = 192.168.139.100\nhostname = LAC\nchallenge = yes\npppoptfile = /etc/ppp/options.l2tp\nlength bit = yes\n" > /etc/xl2tpd/xl2tpd.conf'
+        - sh -c 'printf "* LAC test123\nLAC * test123\n" > /etc/xl2tpd/l2tp-secrets && chmod 600 /etc/xl2tpd/l2tp-secrets'
+        - sh -c 'printf "name test@vyos.io\nnoauth\nnoccp\nrefuse-eap\nrequire-chap\nnodefaultroute\nmtu 1400\nmru 1400\n" > /etc/ppp/options.l2tp'
+        - sh -c 'printf "test@vyos.io * test *\n" > /etc/ppp/chap-secrets && chmod 600 /etc/ppp/chap-secrets'
+        - xl2tpd
+  links:
+    # LNS eth1 here = eth0 on the page (containerlab uses eth0 for management)
+    - endpoints: ["lns:eth1", "sw:eth1"]
+    - endpoints: ["radius:eth1", "sw:eth2"]
+    - endpoints: ["lac:eth1", "sw:eth3"]

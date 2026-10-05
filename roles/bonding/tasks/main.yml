@@ -1,0 +1,21 @@
+---
+- name: Create bonding interfaces
+  vyos.vyos.vyos_lag_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'lag.yml.j2') | from_yaml }}"
+    state: "{{ _bonding_state }}"
+  register: _bonding_r_lag
+  when: bonding_interfaces | length > 0
+
+- name: Set bond descriptions
+  vyos.vyos.vyos_interfaces:
+    config: "{{ lookup('ansible.builtin.template', 'descriptions.yml.j2') | from_yaml }}"
+    state: "{{ _bonding_state }}"
+  register: _bonding_r_desc
+  when: bonding_interfaces | selectattr('description', 'defined') | list | length > 0
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + ([_bonding_r_lag, _bonding_r_desc] | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
+  when: vyos_blueprints_render_only | default(false) | bool

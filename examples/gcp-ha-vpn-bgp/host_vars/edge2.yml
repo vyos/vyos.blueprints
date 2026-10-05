@@ -1,0 +1,32 @@
+---
+ipsec_route_based_peers:
+  - name: gcp-ha-vpn-1
+    description: Google Cloud HA VPN tunnel 1
+    psk_name: gcp-ha-vpn-1
+    psk: example-gcp-ha-vpn-psk-1   # use ansible-vault; high-entropy in production
+    local_address: 198.51.100.11
+    remote_address: 203.0.113.11
+    connection_type: initiate
+    esp_group_on_vti: true
+    vti:
+      interface: vti11
+      address: 169.254.10.5/30
+      description: Google Cloud HA VPN tunnel 1
+      adjust_mss: '1350'
+ipsec_route_based_interface_routes:
+  - dest: 169.254.10.6/32
+    interface: vti11
+ipsec_route_based_bgp:
+  asn: 65010
+  router_id: 10.80.0.12
+  networks:
+    - 10.80.0.0/24
+  neighbors:
+    - address: 169.254.10.6
+      remote_as: 64514
+      holdtime: 30
+      keepalive: 10
+      disable_connected_check: true
+      soft_reconfiguration_inbound: true
+      route_map_import: GCP-IN
+      route_map_export: GCP-OUT

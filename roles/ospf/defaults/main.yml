@@ -1,0 +1,11 @@
+---
+ospf_router_id: ""
+ospf_areas: []
+ospf_interfaces: []
+ospf_redistribute: []
+ospf_redistribute_access_lists: {}
+ospf_reference_bandwidth: null
+ospf_abr_type: ""
+ospf_log_adjacency_changes: false
+ospf_import_route_map: ""
+ospf_passive_interface_default: false

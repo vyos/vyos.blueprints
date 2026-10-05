@@ -1,0 +1,9 @@
+---
+# docs.vyos.io/en/1.5/configexamples/ha.html - Basic Setup, VRRP, NAT and
+# conntrack-sync (part 1 of the page). router1 is a VM trunked on eth0,
+# router2 hardware with an LACP bond0; the page uses the same commands with
+# eth0 replaced by bond0 on router2.
+ha_vrrp_pair_group: routers
+ha_vrrp_sync_group: {name: sync, members: [int]}
+base_static_routes:
+  - {dest: 0.0.0.0/0, next_hop: 192.0.2.11}

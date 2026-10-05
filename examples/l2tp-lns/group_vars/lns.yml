@@ -1,0 +1,38 @@
+---
+# The LNS - docs.vyos.io/en/1.5/configexamples/lac-lns.html
+# eth1 here is eth0 on the page (containerlab uses eth0 for management).
+# Keep the RADIUS key and the L2TP tunnel secret in ansible-vault; the tunnel
+# secret must match "l2tp tunnel password" and the host name "local name" on
+# the LAC.
+base_hostname: vyos
+base_interfaces:
+  - name: eth1
+    addresses:
+      - 192.168.139.100/24
+base_static_routes:
+  - dest: 0.0.0.0/0
+    next_hop: 192.168.139.2
+nat_source_rules:
+  - id: 100
+    outbound_interface:
+      name: eth1
+    source:
+      address: 10.0.0.0/24
+    translation:
+      address: masquerade
+l2tp_lns_authentication:
+  mode: radius
+  radius_servers:
+    - address: 192.168.139.110
+      key: '{{ vault_radius_key }}'
+l2tp_lns_pools:
+  - name: TEST-POOL
+    range: 10.0.0.2-10.0.0.100
+l2tp_lns_default_pool: TEST-POOL
+l2tp_lns_gateway_address: 10.0.0.1
+l2tp_lns_lac_host_name: LAC
+l2tp_lns_shared_secret: '{{ vault_l2tp_tunnel_secret }}'
+l2tp_lns_name_servers:
+  - 8.8.8.8
+l2tp_lns_ppp_options:
+  disable_ccp: true

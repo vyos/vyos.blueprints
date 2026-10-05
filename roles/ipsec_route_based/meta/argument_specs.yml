@@ -107,6 +107,7 @@ argument_specs:
           dh_group: {type: int, default: 14, description: Diffie-Hellman group.}
           encryption: {type: str, default: aes256, description: "Encryption, e.g. C(aes128)."}
           hash: {type: str, default: sha256, description: "Hash, e.g. C(sha1)."}
+          prf: {type: str, description: "PRF, e.g. C(prfsha256) (set with vyos_config; vyos_vpn_ipsec does not render it)."}
           close_action: {type: str, choices: [none, trap, start], description: Action when the peer closes the SA.}
           dead_peer_detection:
             type: dict
@@ -182,6 +183,44 @@ argument_specs:
               ebgp_multihop: {type: int, description: eBGP multihop TTL.}
               update_source: {type: str, description: Source address or interface.}
               soft_reconfiguration_inbound: {type: bool, default: false, description: Keep received routes for soft reconfiguration.}
+              route_map_import: {type: str, description: Route-map applied to routes received from this neighbour.}
+              route_map_export: {type: str, description: Route-map applied to routes sent to this neighbour.}
+      ipsec_route_based_policy:
+        type: dict
+        description: Prefix-lists and route-maps for the BGP import/export policy.
+        options:
+          prefix_lists:
+            type: list
+            elements: dict
+            default: []
+            description: IPv4 prefix-lists.
+            options:
+              name: {type: str, required: true, description: Prefix-list name.}
+              rules:
+                type: list
+                elements: dict
+                required: true
+                description: Rules.
+                options:
+                  sequence: {type: int, required: true, description: Rule number.}
+                  action: {type: str, choices: [permit, deny], default: permit, description: Rule action.}
+                  prefix: {type: str, required: true, description: Prefix to match.}
+          route_maps:
+            type: list
+            elements: dict
+            default: []
+            description: Route-maps.
+            options:
+              name: {type: str, required: true, description: Route-map name.}
+              rules:
+                type: list
+                elements: dict
+                required: true
+                description: Rules.
+                options:
+                  sequence: {type: int, required: true, description: Rule number.}
+                  action: {type: str, choices: [permit, deny], default: permit, description: Rule action.}
+                  prefix_list: {type: str, description: Match this prefix-list.}
       ipsec_route_based_default_gateway:
         type: str
         default: ""

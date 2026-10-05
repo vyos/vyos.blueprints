@@ -1,0 +1,63 @@
+---
+base_interfaces:
+  - name: eth1
+    addresses:
+      - 10.0.12.2/30
+  - name: eth2
+    addresses:
+      - 192.168.12.1/24
+base_static_routes:
+  - dest: 0.0.0.0/0
+    next_hop: 10.0.12.1
+gre_tunnel_interfaces:
+  - name: tun100
+    addresses:
+      - 10.100.100.12/32
+    enable_multicast: true
+    encapsulation: gre
+    adjust_mss: '1360'
+    mtu: 1436
+    key: 42
+    source_interface: eth1
+  - name: tun101
+    addresses:
+      - 10.100.101.12/32
+    enable_multicast: true
+    encapsulation: gre
+    adjust_mss: '1360'
+    mtu: 1436
+    key: 43
+    source_interface: eth1
+dmvpn_nhrp_tunnels:
+  - name: tun100
+    authentication: '{{ vault_nhrp_authentication }}'
+    holdtime: 300
+    multicast: 10.0.0.2
+    network_id: 1
+    nhs:
+      - tunnel_ip: dynamic
+        nbma: 10.0.0.2
+    registration_no_unique: true
+    shortcut: true
+  - name: tun101
+    authentication: '{{ vault_nhrp_authentication }}'
+    holdtime: 300
+    multicast: 10.0.1.2
+    network_id: 2
+    nhs:
+      - tunnel_ip: dynamic
+        nbma: 10.0.1.2
+    registration_no_unique: true
+    shortcut: true
+ospf_interfaces:
+  - name: eth2
+    area: '0'
+  - name: tun100
+    area: '0'
+    network: point-to-multipoint
+    passive: false
+  - name: tun101
+    area: '0'
+    network: point-to-multipoint
+    passive: false
+base_hostname: SPOKE-2

@@ -1,0 +1,4 @@
+---
+_route_policy_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_route_policy_cli_lines: "{{ (lookup('ansible.builtin.template', 'access_lists.j2') or '').splitlines() | select | list }}"
+_route_policy_desc_lines: "{{ (lookup('ansible.builtin.template', 'route_map_descriptions.j2') or '').splitlines() | select | list }}"

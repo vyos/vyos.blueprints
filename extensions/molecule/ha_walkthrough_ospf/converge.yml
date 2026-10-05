@@ -1,0 +1,49 @@
+---
+- name: Generate lab WireGuard keys on the routers (cached for the idempotence run)
+  hosts: ospf_sites
+  gather_facts: false
+  vars:
+    _key_file: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/wg-{{ inventory_hostname }}.json"
+  tasks:
+    - name: Look for a cached key pair
+      ansible.builtin.stat:
+        path: "{{ _key_file }}"
+      delegate_to: localhost
+      register: _cached
+
+    - name: Generate a key pair on the router
+      vyos.vyos.vyos_command:
+        commands: [generate pki wireguard key-pair]
+      register: _gen
+      no_log: true
+      when: not _cached.stat.exists
+
+    - name: Cache the key pair
+      ansible.builtin.copy:
+        content: >-
+          {{ {'private': _gen.stdout[0] | regex_search('Private key: (\S+)', '\1') | first,
+              'public': _gen.stdout[0] | regex_search('Public key: (\S+)', '\1') | first} | to_json }}
+        dest: "{{ _key_file }}"
+        mode: "0600"
+      delegate_to: localhost
+      no_log: true
+      when: not _cached.stat.exists
+
+    - name: Load the key pair
+      ansible.builtin.set_fact:
+        _lab_wg_key: "{{ lookup('ansible.builtin.file', _key_file) | from_json }}"
+      no_log: true
+
+    - name: Share all key pairs with every host
+      ansible.builtin.set_fact:
+        _lab_wg_keys: "{{ dict(ansible_play_hosts | zip(ansible_play_hosts | map('extract', hostvars, '_lab_wg_key'))) }}"
+      no_log: true
+
+- name: Converge
+  hosts: ospf_sites
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.wireguard
+    - vyos.blueprints.route_policy
+    - vyos.blueprints.ospf

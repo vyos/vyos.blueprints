@@ -1,0 +1,75 @@
+---
+- name: Verify failover
+  hosts: r1
+  gather_facts: false
+  vars:
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+    _ping: docker exec clab-bp-wanlb-lan ping -c 3 -W 2 198.51.100.100
+  tasks:
+    - name: Wait for the first health checks
+      ansible.builtin.pause:
+        seconds: 30
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.wan_load_balance
+        tasks_from: verify
+
+    - name: The LAN reaches the internet while both ISPs are healthy
+      ansible.builtin.command: "{{ _ping }}"
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: false
+
+    - name: Fail the primary ISP (its health targets and the internet address disappear)
+      ansible.builtin.shell:
+        cmd: >-
+          for a in 33.44.55.66 44.55.66.77 198.51.100.100;
+          do docker exec clab-bp-wanlb-isp1 ip addr del $a/32 dev lo; done
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: true
+
+    - name: Wait until the primary is out of the pool (failure-count 5)
+      ansible.builtin.pause:
+        seconds: 75
+
+    - name: The LAN still reaches the internet, now through the secondary ISP
+      ansible.builtin.command: "{{ _ping }}"
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: false
+
+- name: Verify that switching designs prunes stale rule settings
+  hosts: r1
+  gather_facts: false
+  tasks:
+    - name: Apply example 3 (failover by rule order) on the same router
+      ansible.builtin.include_role:
+        name: vyos.blueprints.wan_load_balance
+      vars:
+        wan_load_balance_rules: "{{ example3_rules }}"
+
+    - name: Read the configuration
+      vyos.vyos.vyos_command:
+        commands: [show configuration commands]
+      register: _cfg
+
+    - name: Only example 3's rule settings remain
+      ansible.builtin.assert:
+        that:
+          - _cfg.stdout[0] is not search('load-balancing wan rule \d+ failover')
+          - _cfg.stdout[0] is not search('load-balancing wan rule \d+ interface \S+ weight')
+          - _cfg.stdout[0] is search('load-balancing wan rule 20 interface eth2')
+        quiet: true
+
+    - name: Applying example 3 again changes nothing
+      ansible.builtin.include_role:
+        name: vyos.blueprints.wan_load_balance
+      vars:
+        wan_load_balance_rules: "{{ example3_rules }}"
+
+    - name: The repeated run was idempotent
+      ansible.builtin.assert:
+        that: not _wan_load_balance_r_cli.changed
+        quiet: true

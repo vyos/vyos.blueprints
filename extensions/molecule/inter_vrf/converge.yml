@@ -1,0 +1,32 @@
+---
+- name: Converge the core router
+  hosts: cores
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.vrf_lite
+
+- name: Configure the ISP router as on the page (lab scaffolding, not part of the blueprint)
+  hosts: provider
+  gather_facts: false
+  tasks:
+    - name: Apply the page's ISP configuration (eth1 instead of eth3)
+      vyos.vyos.vyos_config:
+        lines:
+          - set interfaces dummy dum0 address '192.0.2.1/24'
+          - set interfaces dummy dum0 address '2001:db8:1::1/48'
+          - set interfaces dummy dum1 address '198.51.100.1/24'
+          - set interfaces dummy dum1 address '2001:db8:2::1/48'
+          - set interfaces dummy dum2 address '203.0.113.1/24'
+          - set interfaces dummy dum2 address '2001:db8:3::1/48'
+          - set interfaces ethernet eth1 address '10.2.2.2/30'
+          - set interfaces ethernet eth1 address '2001:db8::7/127'
+          - set protocols bgp address-family ipv4-unicast redistribute connected
+          - set protocols bgp address-family ipv6-unicast redistribute connected
+          - set protocols bgp system-as '64497'
+          - set protocols bgp neighbor 10.2.2.1 address-family ipv4-unicast default-originate
+          - set protocols bgp neighbor 10.2.2.1 remote-as '64496'
+          - set protocols bgp neighbor 2001:db8::6 address-family ipv6-unicast default-originate
+          - set protocols bgp neighbor 2001:db8::6 remote-as '64496'
+          - set protocols static route 0.0.0.0/0 next-hop 10.2.2.1
+          - set protocols static route6 ::/0 next-hop 2001:db8::6

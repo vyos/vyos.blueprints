@@ -1,0 +1,20 @@
+{% for i in ospf_interfaces %}
+- name: {{ i.name }}
+  address_family:
+    - afi: ipv4
+{%   for k in ['network'] if i[k] is defined %}
+      {{ k }}: {{ i[k] | to_json }}
+{%   endfor %}
+{%   for k in ['cost', 'priority', 'hello_interval', 'dead_interval', 'retransmit_interval', 'transmit_delay'] if i[k] is defined %}
+      {{ k }}: {{ i[k] | int }}
+{%   endfor %}
+{%   if i.passive is defined and i.passive | bool %}
+      passive: true
+{%   endif %}
+{%   if i.md5_key is defined %}
+      authentication:
+        md5_key:
+          key_id: {{ i.md5_key_id | default(1) | int }}
+          key: {{ i.md5_key | to_json }}
+{%   endif %}
+{% endfor %}

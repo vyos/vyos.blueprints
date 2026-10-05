@@ -1,0 +1,12 @@
+---
+- name: QoS - DSCP marking and shaping
+  hosts: qos
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base   # addresses and static routes
+    - vyos.blueprints.qos    # shaper policies, DSCP re-marking, attachment
+  post_tasks:
+    - name: Show rendered commands
+      ansible.builtin.debug:
+        var: vyos_blueprints_rendered
+      when: show_rendered | default(false) | bool

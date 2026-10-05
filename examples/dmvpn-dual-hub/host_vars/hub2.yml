@@ -1,0 +1,32 @@
+---
+base_interfaces:
+  - name: eth1
+    addresses:
+      - 10.0.1.2/30
+base_static_routes:
+  - dest: 0.0.0.0/0
+    next_hop: 10.0.1.1
+gre_tunnel_interfaces:
+  - name: tun101
+    addresses:
+      - 10.100.101.1/32
+    enable_multicast: true
+    encapsulation: gre
+    adjust_mss: '1360'
+    mtu: 1436
+    key: 43
+    source_interface: eth1
+dmvpn_nhrp_tunnels:
+  - name: tun101
+    authentication: '{{ vault_nhrp_authentication }}'
+    holdtime: 300
+    multicast: dynamic
+    network_id: 2
+    redirect: true
+    registration_no_unique: true
+ospf_interfaces:
+  - name: tun101
+    area: '0'
+    network: point-to-multipoint
+    passive: false
+base_hostname: HUB-2

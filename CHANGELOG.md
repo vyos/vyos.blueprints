@@ -16,3 +16,15 @@
 - Render-only preview mode (`vyos_blueprints_render_only`).
 - Offline render tests and containerlab-based Molecule scenarios.
 - `ipsec_route_based`: peers sharing a `psk_name` share one PSK entry with all their ids (docs blueprint "Route-Based Redundant Site-to-Site VPN to Azure").
+- `ipsec_route_based`: IKE PRF, BGP prefix-lists and route-maps with per-neighbour import/export (docs blueprint "Route-Based Site-to-Site VPN to Google Cloud HA VPN").
+- New role `bonding`; `base` gains static routes; `ha_vrrp` conntrack-sync gains event-listen-queue-size and disabling conntrack helpers (docs blueprint "High Availability Walkthrough", part 1).
+- New roles `wireguard`, `route_policy` and `ospf` (docs blueprint "High Availability Walkthrough", part 2).
+- New role `bgp`; `route_policy` sets route-map descriptions (docs blueprint "High Availability Walkthrough", part 3).
+- New role `vrf_lite`; `route_policy` gains IPv6 prefix-lists and route-map IPv6 matches (docs blueprint "Inter-VRF Routing over VRF Lite").
+- New role `wan_load_balance`, the first role that removes settings it owns (load-balancing rules) when they leave the inputs (docs blueprint "WAN Load Balancer examples").
+- New roles `pppoe` and `router_advert`; `firewall` gains named rulesets (docs blueprint "PPPoE IPv6 Basic Setup for Home Network").
+- New role `qos` (docs blueprint "QoS example").
+- New role `isis` (docs blueprint "Segment-routing IS-IS example").
+- New roles `mpls_ldp` and `l3vpn`; `vrf_lite` gains `label vpn export`, VRF networks and CE `as-override`; `bgp` gains log-neighbor-changes (docs blueprint "L3VPN for Hub-and-Spoke connectivity with VyOS").
+- New role `l2tp_lns` (docs blueprint "PPPoE over L2TP"); its Molecule scenario is experimental.
+- New role `dmvpn`; `gre_tunnel` gains GRE key and enable-multicast; `ospf` gains interface area, `passive disable`, `passive-interface default` and an optional router-id (docs blueprint "DMVPN Dual HUB Dual Cloud").

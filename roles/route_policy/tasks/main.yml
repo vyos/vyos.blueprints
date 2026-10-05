@@ -1,0 +1,40 @@
+---
+- name: Create access-lists
+  # No vyos.vyos access-list module yet. Created first: route-maps may match them.
+  vyos.vyos.vyos_config:
+    lines: "{{ _route_policy_cli_lines }}"
+  register: _route_policy_r_acl
+  when:
+    - _route_policy_cli_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Create prefix-lists
+  vyos.vyos.vyos_prefix_lists:
+    config: "{{ lookup('ansible.builtin.template', 'prefix_lists.yml.j2') | from_yaml }}"
+    state: "{{ _route_policy_state }}"
+  register: _route_policy_r_pl
+  when: route_policy_prefix_lists | length > 0
+
+- name: Create route-maps
+  vyos.vyos.vyos_route_maps:
+    config: "{{ lookup('ansible.builtin.template', 'route_maps.yml.j2') | from_yaml }}"
+    state: "{{ _route_policy_state }}"
+  register: _route_policy_r_rm
+  when: route_policy_route_maps | length > 0
+
+- name: Set route-map descriptions
+  # vyos_route_maps has no route-map description option.
+  vyos.vyos.vyos_config:
+    lines: "{{ _route_policy_desc_lines }}"
+  register: _route_policy_r_desc
+  when:
+    - _route_policy_desc_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([]) + _route_policy_cli_lines
+         + ([_route_policy_r_pl, _route_policy_r_rm] | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten)
+         + _route_policy_desc_lines }}
+  when: vyos_blueprints_render_only | default(false) | bool

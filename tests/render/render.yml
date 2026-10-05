@@ -10,7 +10,7 @@
         name: "vyos.blueprints.{{ item }}"
       vars:
         vyos_blueprints_render_only: true
-      loop: "{{ roles.split(',') if roles | default('') | length > 0 else [role] }}"
+      loop: "{{ render_roles.split(',') if render_roles | default('') | length > 0 else [role] }}"
 
     - name: Normalise rendered commands
       ansible.builtin.set_fact:

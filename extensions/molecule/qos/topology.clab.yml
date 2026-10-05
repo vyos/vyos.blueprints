@@ -1,0 +1,32 @@
+name: bp-qos
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    vyos3:
+      kind: vyosnetworks_vyos
+    vyos2:
+      kind: vyosnetworks_vyos
+    # one host holding the page's four VPC addresses
+    vpcs:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 172.17.1.2/24 dev eth1
+        - ip addr add 172.17.1.3/24 dev eth1
+        - ip addr add 172.17.1.4/24 dev eth1
+        - ip addr add 172.17.1.40/24 dev eth1
+        - ip route replace default via 172.17.1.1
+    sink:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 10.9.9.10/24 dev eth1
+        - ip route replace default via 10.9.9.1
+        - apk add --no-cache tcpdump
+  links:
+    # interfaces shifted by one (containerlab uses eth0 for management)
+    - endpoints: ["vyos3:eth1", "vyos2:eth1"]
+    - endpoints: ["vyos3:eth2", "vpcs:eth1"]
+    - endpoints: ["vyos2:eth3", "sink:eth1"]

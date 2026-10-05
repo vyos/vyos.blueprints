@@ -36,10 +36,20 @@
   register: _base_r_syslog
   when: base_syslog_hosts | length > 0
 
+- name: Add static routes
+  vyos.vyos.vyos_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes: "{{ lookup('ansible.builtin.template', 'static_routes.yml.j2') | from_yaml }}"
+    state: "{{ _base_state }}"
+  register: _base_r_routes
+  when: base_static_routes | length > 0
+
 - name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
   ansible.builtin.set_fact:
     vyos_blueprints_rendered: >-
       {{ vyos_blueprints_rendered | default([])
-         + ([_base_r_hostname, _base_r_interfaces, _base_r_l3, _base_r_ntp, _base_r_syslog]
+         + ([_base_r_hostname, _base_r_interfaces, _base_r_l3, _base_r_ntp, _base_r_syslog, _base_r_routes]
             | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten) }}
   when: vyos_blueprints_render_only | default(false) | bool

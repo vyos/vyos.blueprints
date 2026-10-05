@@ -1,0 +1,23 @@
+set interfaces wireguard wg01 address '10.254.60.2/30'
+set interfaces wireguard wg01 description 'offsite1-to-router1'
+set interfaces wireguard wg01 peer ROUTER1 address '192.0.2.21'
+set interfaces wireguard wg01 peer ROUTER1 allowed-ips '0.0.0.0/0'
+set interfaces wireguard wg01 peer ROUTER1 persistent-keepalive '15'
+set interfaces wireguard wg01 peer ROUTER1 port '50001'
+set interfaces wireguard wg01 peer ROUTER1 public-key 'CKwMV3ZaLntMule2Kd3G7UyVBR7zE8/qoZgLb82EE2Q='
+set interfaces wireguard wg01 port '50001'
+set protocols ospf area '0.0.0.0'
+set protocols ospf area 0.0.0.0 authentication md5
+set protocols ospf area 0.0.0.0 network 10.254.60.0/24
+set protocols ospf auto-cost reference-bandwidth '10000'
+set protocols ospf interface wg01 authentication md5 key-id 1 md5-key ********
+set protocols ospf interface wg01 cost 11
+set protocols ospf interface wg01 dead-interval 5
+set protocols ospf interface wg01 hello-interval 1
+set protocols ospf interface wg01 network point-to-point
+set protocols ospf interface wg01 priority 1
+set protocols ospf interface wg01 retransmit-interval 5
+set protocols ospf interface wg01 transmit-delay 1
+set protocols ospf log-adjacency-changes
+set protocols ospf parameters abr-type 'cisco'
+set protocols ospf parameters router-id '10.254.60.2'

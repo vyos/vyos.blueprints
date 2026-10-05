@@ -1,0 +1,20 @@
+{% for i in router_advert_interfaces %}
+{%   set b = 'set service router-advert interface ' ~ i.name %}
+{%   if i.link_mtu is defined %}
+{{ b }} link-mtu '{{ i.link_mtu }}'
+{%   endif %}
+{%   for ns in i.name_servers | default([]) %}
+{{ b }} name-server '{{ ns }}'
+{%   endfor %}
+{%   for p in i.prefixes | default([]) %}
+{%     if p.valid_lifetime is defined %}
+{{ b }} prefix {{ p.prefix }} valid-lifetime '{{ p.valid_lifetime }}'
+{%     endif %}
+{%     if p.preferred_lifetime is defined %}
+{{ b }} prefix {{ p.prefix }} preferred-lifetime '{{ p.preferred_lifetime }}'
+{%     endif %}
+{%     if p.valid_lifetime is not defined and p.preferred_lifetime is not defined %}
+{{ b }} prefix {{ p.prefix }}
+{%     endif %}
+{%   endfor %}
+{% endfor %}

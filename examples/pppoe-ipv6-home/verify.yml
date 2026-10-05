@@ -1,0 +1,13 @@
+---
+- name: Check the home router
+  hosts: home
+  gather_facts: false
+  tasks:
+    - name: PPPoE checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.pppoe
+        tasks_from: verify
+    - name: Firewall checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.firewall
+        tasks_from: verify

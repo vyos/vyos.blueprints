@@ -1,0 +1,4 @@
+{% for b in bonding_interfaces if b.description is defined %}
+- name: {{ b.name }}
+  description: {{ b.description | to_json }}
+{% endfor %}

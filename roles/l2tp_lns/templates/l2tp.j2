@@ -1,0 +1,36 @@
+{% set a = _l2tp_lns_auth %}
+{% if a %}
+{%   set b = 'set vpn l2tp remote-access' %}
+{{ b }} authentication mode '{{ a.mode }}'
+{%   for s in a.radius_servers | default([]) %}
+{{ b }} authentication radius server {{ s.address }} key '{{ s.key }}'
+{%   endfor %}
+{%   for u in a.local_users | default([]) %}
+{{ b }} authentication local-users username {{ u.username }} password '{{ u.password }}'
+{%   endfor %}
+{%   for p in l2tp_lns_pools %}
+{{ b }} client-ip-pool {{ p.name }} range '{{ p.range }}'
+{%   endfor %}
+{%   if l2tp_lns_default_pool %}
+{{ b }} default-pool '{{ l2tp_lns_default_pool }}'
+{%   endif %}
+{%   if l2tp_lns_gateway_address %}
+{{ b }} gateway-address '{{ l2tp_lns_gateway_address }}'
+{%   endif %}
+{%   if l2tp_lns_lac_host_name %}
+{{ b }} lns host-name '{{ l2tp_lns_lac_host_name }}'
+{%   endif %}
+{%   if l2tp_lns_shared_secret %}
+{{ b }} lns shared-secret '{{ l2tp_lns_shared_secret }}'
+{%   endif %}
+{%   for ns in l2tp_lns_name_servers %}
+{{ b }} name-server '{{ ns }}'
+{%   endfor %}
+{%   for k, v in l2tp_lns_ppp_options.items() %}
+{%     if v is sameas true %}
+{{ b }} ppp-options {{ k | replace('_', '-') }}
+{%     elif v is not sameas false %}
+{{ b }} ppp-options {{ k | replace('_', '-') }} '{{ v }}'
+{%     endif %}
+{%   endfor %}
+{% endif %}

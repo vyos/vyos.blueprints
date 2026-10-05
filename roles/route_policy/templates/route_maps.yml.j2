@@ -1,0 +1,28 @@
+{% for rm in route_policy_route_maps %}
+- route_map: {{ rm.name | to_json }}
+  entries:
+{%   for r in rm.rules %}
+    - sequence: {{ r.sequence | int }}
+      action: {{ r.action }}
+{%     if r.description is defined %}
+      description: {{ r.description | to_json }}
+{%     endif %}
+{%     if r.match_prefix_list is defined or r.match_access_list is defined %}
+      match:
+        ip:
+          address:
+            list_type: {{ 'prefix-list' if r.match_prefix_list is defined else 'access-list' }}
+            value: {{ (r.match_prefix_list | default(r.match_access_list)) | string | to_json }}
+{%     elif r.match_prefix_list6 is defined %}
+      match:
+        ipv6:
+          address:
+            list_type: prefix-list
+            value: {{ r.match_prefix_list6 | to_json }}
+{%     endif %}
+{%     if r.set_as_path_prepend is defined %}
+      set:
+        as_path_prepend: {{ r.set_as_path_prepend | to_json }}
+{%     endif %}
+{%   endfor %}
+{% endfor %}

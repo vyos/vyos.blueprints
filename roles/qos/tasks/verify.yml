@@ -1,0 +1,15 @@
+---
+- name: Read QoS state
+  vyos.vyos.vyos_command:
+    commands: [show qos]
+  register: _qos_v
+  when: qos_interfaces | length > 0
+
+- name: Every attached policy is active on its interface
+  ansible.builtin.assert:
+    that: _qos_v.stdout[0] is search('\b' ~ (item.name | regex_escape) ~ '\b')
+    fail_msg: "no QoS policy active on {{ item.name }}"
+    quiet: true
+  loop: "{{ qos_interfaces }}"
+  loop_control:
+    label: "{{ item.name }}"

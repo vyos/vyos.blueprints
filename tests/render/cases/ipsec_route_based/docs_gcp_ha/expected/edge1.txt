@@ -1,0 +1,63 @@
+set interfaces vti vti10 address '169.254.10.1/30'
+set interfaces vti vti10 description 'Google Cloud HA VPN tunnel 0'
+set interfaces vti vti10 ip adjust-mss '1350'
+set policy prefix-list GCP-IN
+set policy prefix-list GCP-IN rule 10
+set policy prefix-list GCP-IN rule 10 action 'permit'
+set policy prefix-list GCP-IN rule 10 prefix '10.70.0.0/20'
+set policy prefix-list GCP-OUT
+set policy prefix-list GCP-OUT rule 10
+set policy prefix-list GCP-OUT rule 10 action 'permit'
+set policy prefix-list GCP-OUT rule 10 prefix '10.80.0.0/24'
+set policy route-map GCP-IN rule 10 action permit
+set policy route-map GCP-IN rule 10 match ip address prefix-list GCP-IN
+set policy route-map GCP-IN rule 20 action deny
+set policy route-map GCP-OUT rule 10 action permit
+set policy route-map GCP-OUT rule 10 match ip address prefix-list GCP-OUT
+set policy route-map GCP-OUT rule 20 action deny
+set protocols bgp address-family ipv4-unicast network 10.80.0.0/24
+set protocols bgp neighbor 169.254.10.2 address-family ipv4-unicast route-map export GCP-OUT
+set protocols bgp neighbor 169.254.10.2 address-family ipv4-unicast route-map import GCP-IN
+set protocols bgp neighbor 169.254.10.2 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp neighbor 169.254.10.2 disable-connected-check
+set protocols bgp neighbor 169.254.10.2 remote-as 64514
+set protocols bgp neighbor 169.254.10.2 timers holdtime 30
+set protocols bgp neighbor 169.254.10.2 timers keepalive 10
+set protocols bgp parameters router-id 10.80.0.11
+set protocols bgp system-as 65010
+set protocols static route 169.254.10.2/32
+set protocols static route 169.254.10.2/32 interface 'vti10'
+set vpn ipsec authentication psk gcp-ha-vpn-0
+set vpn ipsec authentication psk gcp-ha-vpn-0 id 198.51.100.10
+set vpn ipsec authentication psk gcp-ha-vpn-0 id 203.0.113.10
+set vpn ipsec authentication psk gcp-ha-vpn-0 secret '********'
+set vpn ipsec esp-group GCP-ESP
+set vpn ipsec esp-group GCP-ESP lifetime 10800
+set vpn ipsec esp-group GCP-ESP mode tunnel
+set vpn ipsec esp-group GCP-ESP pfs dh-group14
+set vpn ipsec esp-group GCP-ESP proposal 10
+set vpn ipsec esp-group GCP-ESP proposal 10 encryption aes256
+set vpn ipsec esp-group GCP-ESP proposal 10 hash sha256
+set vpn ipsec ike-group GCP-IKE
+set vpn ipsec ike-group GCP-IKE dead-peer-detection action restart
+set vpn ipsec ike-group GCP-IKE dead-peer-detection interval 30
+set vpn ipsec ike-group GCP-IKE key-exchange ikev2
+set vpn ipsec ike-group GCP-IKE lifetime 36000
+set vpn ipsec ike-group GCP-IKE proposal 10
+set vpn ipsec ike-group GCP-IKE proposal 10 dh-group 14
+set vpn ipsec ike-group GCP-IKE proposal 10 encryption aes256
+set vpn ipsec ike-group GCP-IKE proposal 10 hash sha256
+set vpn ipsec ike-group GCP-IKE proposal 10 prf 'prfsha256'
+set vpn ipsec interface eth0
+set vpn ipsec options disable-route-autoinstall
+set vpn ipsec site-to-site peer gcp-ha-vpn-0
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 authentication local-id '198.51.100.10'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 authentication mode 'pre-shared-secret'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 authentication remote-id '203.0.113.10'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 connection-type 'initiate'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 description 'Google Cloud HA VPN tunnel 0'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 ike-group 'GCP-IKE'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 local-address '198.51.100.10'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 remote-address '203.0.113.10'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 vti bind 'vti10'
+set vpn ipsec site-to-site peer gcp-ha-vpn-0 vti esp-group 'GCP-ESP'

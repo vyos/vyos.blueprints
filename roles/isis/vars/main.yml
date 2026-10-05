@@ -1,0 +1,2 @@
+---
+_isis_lines: "{{ (lookup('ansible.builtin.template', 'isis.j2') or '').splitlines() | select | list }}"

@@ -1,0 +1,32 @@
+name: bp-l3vpn
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    rr1:
+      kind: vyosnetworks_vyos
+    p1:
+      kind: vyosnetworks_vyos
+    pe1:
+      kind: vyosnetworks_vyos
+    pe2:
+      kind: vyosnetworks_vyos
+    pe3:
+      kind: vyosnetworks_vyos
+    ce1:
+      kind: vyosnetworks_vyos
+    cehub:
+      kind: vyosnetworks_vyos
+    ce2:
+      kind: vyosnetworks_vyos
+  links:
+    # reduced core: one P router joins the RR and all PEs (the page has 4 P and 2 RR)
+    - endpoints: ["p1:eth1", "pe1:eth1"]   # 172.16.91.0/24
+    - endpoints: ["p1:eth2", "pe2:eth1"]   # 172.16.92.0/24
+    - endpoints: ["p1:eth3", "pe3:eth1"]   # 172.16.93.0/24
+    - endpoints: ["p1:eth4", "rr1:eth1"]   # 172.16.94.0/24
+    # PE-CE links (eth3 on the PEs and eth0 on the CEs on the page)
+    - endpoints: ["pe1:eth2", "ce1:eth1"]
+    - endpoints: ["pe2:eth2", "cehub:eth1"]
+    - endpoints: ["pe3:eth2", "ce2:eth1"]

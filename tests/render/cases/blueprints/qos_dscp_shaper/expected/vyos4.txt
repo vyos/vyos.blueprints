@@ -1,0 +1,15 @@
+set interfaces ethernet eth0 address '10.2.1.100/24'
+set protocols static route 0.0.0.0/0
+set protocols static route 0.0.0.0/0 next-hop '10.2.1.1'
+set qos interface eth0 egress 'vyos4'
+set qos policy shaper vyos4 class 10 bandwidth '100%'
+set qos policy shaper vyos4 class 10 burst '15k'
+set qos policy shaper vyos4 class 10 match ALL ether protocol 'all'
+set qos policy shaper vyos4 class 10 queue-type 'fair-queue'
+set qos policy shaper vyos4 class 10 set-dscp 'CS4'
+set qos policy shaper vyos4 default bandwidth '10%'
+set qos policy shaper vyos4 default burst '15k'
+set qos policy shaper vyos4 default ceiling '100%'
+set qos policy shaper vyos4 default priority '7'
+set qos policy shaper vyos4 default queue-type 'fair-queue'
+set system host-name vyos4

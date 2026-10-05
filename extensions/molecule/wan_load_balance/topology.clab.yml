@@ -1,0 +1,32 @@
+name: bp-wanlb
+topology:
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+    # each ISP answers its two health-check targets and a shared "internet" address
+    isp1:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 11.22.33.1/24 dev eth1
+        - ip addr add 33.44.55.66/32 dev lo
+        - ip addr add 44.55.66.77/32 dev lo
+        - ip addr add 198.51.100.100/32 dev lo
+    isp2:
+      kind: linux
+      image: alpine:3
+      exec:
+        - ip addr add 22.33.44.1/24 dev eth1
+        - ip addr add 55.66.77.88/32 dev lo
+        - ip addr add 66.77.88.99/32 dev lo
+        - ip addr add 198.51.100.100/32 dev lo
+    lan:
+      kind: linux
+      image: alpine:3
+      exec: ["ip addr add 10.0.0.10/24 dev eth1", "ip route replace default via 10.0.0.1"]
+  links:
+    # page eth0/eth1/eth2 = eth1/eth2/eth3 here (containerlab uses eth0 for management)
+    - endpoints: ["r1:eth1", "isp1:eth1"]
+    - endpoints: ["r1:eth2", "isp2:eth1"]
+    - endpoints: ["r1:eth3", "lan:eth1"]

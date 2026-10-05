@@ -1,5 +1,8 @@
 {% set c = _ha_vrrp_cs %}
 {% set base = 'set service conntrack-sync' %}
+{% if c.disable_helpers | default(false) | bool %}
+delete system conntrack modules
+{% endif %}
 {{ base }} failover-mechanism vrrp sync-group '{{ _ha_vrrp_sync_group_name }}'
 {% if _ha_vrrp_conntrack_peer %}
 {{ base }} interface {{ c.interface }} peer '{{ _ha_vrrp_conntrack_peer }}'
@@ -12,6 +15,9 @@
 {% for p in c.accept_protocols | default(['tcp', 'udp', 'icmp']) %}
 {{ base }} accept-protocol '{{ p }}'
 {% endfor %}
+{% if c.event_listen_queue_size is defined %}
+{{ base }} event-listen-queue-size '{{ c.event_listen_queue_size }}'
+{% endif %}
 {% if c.sync_queue_size is defined %}
 {{ base }} sync-queue-size '{{ c.sync_queue_size }}'
 {% endif %}

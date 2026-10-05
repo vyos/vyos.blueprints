@@ -1,0 +1,14 @@
+---
+# docs.vyos.io/en/1.5/configexamples/lac-lns.html - VyOS is the LNS; the LAC
+# (Cisco on the page) and the RADIUS server are configured separately.
+all:
+  children:
+    lns:
+      hosts:
+        lns1:
+          ansible_host: clab-l2tp-lns-lns   # your router's address
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: admin
+    ansible_password: admin               # use ansible-vault for real devices

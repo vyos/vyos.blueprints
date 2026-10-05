@@ -1,0 +1,19 @@
+name: pppoe-ipv6-home
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:latest}
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+    # VyOS PPPoE server standing in for the ISP (needs PPP kernel support on the host)
+    isp:
+      kind: vyosnetworks_vyos
+    pc:
+      kind: linux
+      image: alpine:3
+      exec: ["sysctl -w net.ipv6.conf.eth1.accept_ra=1", "ip link set eth1 up"]
+  links:
+    # WAN eth1 / LAN eth2 here = eth0 / eth1 on the page (containerlab uses eth0 for management)
+    - endpoints: ["r1:eth1", "isp:eth1"]
+    - endpoints: ["r1:eth2", "pc:eth1"]

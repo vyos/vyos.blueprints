@@ -1,0 +1,15 @@
+---
+# docs.vyos.io/en/1.5/configexamples/ha.html
+all:
+  children:
+    routers:
+      hosts:
+        router1:
+          ansible_host: clab-ha-walkthrough-router1   # your router's address
+        router2:
+          ansible_host: clab-ha-walkthrough-router2
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: admin
+    ansible_password: admin                        # use ansible-vault for real devices

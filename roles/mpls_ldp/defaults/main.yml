@@ -1,0 +1,4 @@
+---
+mpls_ldp_router_id: ""
+mpls_ldp_transport_address: ""
+mpls_ldp_interfaces: []

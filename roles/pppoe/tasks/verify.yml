@@ -1,0 +1,14 @@
+---
+- name: Read PPPoE interfaces
+  vyos.vyos.vyos_command:
+    commands: [show interfaces]
+  register: _pppoe_v
+
+- name: Every PPPoE session is up with an IPv4 address
+  ansible.builtin.assert:
+    that: _pppoe_v.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '\s+\d+\.\d+\.\d+\.\d+/\d+\s+u/u')
+    fail_msg: "{{ item.name }} is not up with an IPv4 address"
+    quiet: true
+  loop: "{{ pppoe_interfaces }}"
+  loop_control:
+    label: "{{ item.name }}"

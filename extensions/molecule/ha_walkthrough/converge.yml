@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: routers
+  gather_facts: false
+  roles:
+    - vyos.blueprints.bonding
+    - vyos.blueprints.base
+    - vyos.blueprints.ha_vrrp
+    - vyos.blueprints.nat

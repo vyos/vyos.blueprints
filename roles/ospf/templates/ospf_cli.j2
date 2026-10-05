@@ -1,0 +1,20 @@
+{# Not expressible with the OSPF modules yet: interface area, "passive disable"
+   (vyos_ospf_interfaces renders nothing for passive: false), the access-list
+   export filters, bare log-adjacency-changes and the import route-map. #}
+{% for i in ospf_interfaces %}
+{%   if i.area is defined %}
+set protocols ospf interface {{ i.name }} area '{{ i.area }}'
+{%   endif %}
+{%   if i.passive is defined and not (i.passive | bool) %}
+set protocols ospf interface {{ i.name }} passive disable
+{%   endif %}
+{% endfor %}
+{% if ospf_log_adjacency_changes | bool %}
+set protocols ospf log-adjacency-changes
+{% endif %}
+{% for rtype, acl in ospf_redistribute_access_lists.items() %}
+set protocols ospf access-list {{ acl }} export '{{ rtype }}'
+{% endfor %}
+{% if ospf_import_route_map %}
+set system ip protocol ospf route-map '{{ ospf_import_route_map }}'
+{% endif %}

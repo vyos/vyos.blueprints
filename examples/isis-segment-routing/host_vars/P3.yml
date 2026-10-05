@@ -1,0 +1,31 @@
+---
+# Lab only: VyOS stand-in for the page's Cisco XRv-P3 (configure the real P3 as on the page)
+base_hostname: P3
+base_interfaces:
+  - name: dum0
+    addresses:
+      - 192.0.2.3/32
+  - name: eth1
+    mtu: 8000
+    addresses:
+      - 192.0.2.6/30
+  - name: eth2
+    mtu: 8000
+    addresses:
+      - 192.0.2.18/30
+isis_net: 49.0000.0000.0000.0003.00
+isis_interfaces:
+  - name: dum0
+    passive: true
+  - name: eth1
+    network: point-to-point
+  - name: eth2
+    network: point-to-point
+isis_segment_routing:
+  maximum_label_depth: 8
+  prefixes:
+    - prefix: 192.0.2.3/32
+      index: 3
+isis_mpls_interfaces:
+  - eth1
+  - eth2

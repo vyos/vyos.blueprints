@@ -1,0 +1,6 @@
+---
+# docs.vyos.io/en/1.5/configexamples/segment-routing-isis.html - shared by
+# VyOS-P1 and VyOS-P2 (XRv-P3 is the Cisco side of the page)
+isis_level: level-2
+isis_log_adjacency_changes: true
+isis_metric_style: wide

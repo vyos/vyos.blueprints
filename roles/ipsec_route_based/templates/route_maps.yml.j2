@@ -1,0 +1,15 @@
+{% for rm in _ipsec_route_based_policy.route_maps %}
+- route_map: {{ rm.name | to_json }}
+  entries:
+{%   for r in rm.rules %}
+    - sequence: {{ r.sequence | int }}
+      action: {{ r.action | default('permit') }}
+{%     if r.prefix_list is defined %}
+      match:
+        ip:
+          address:
+            list_type: prefix-list
+            value: {{ r.prefix_list | to_json }}
+{%     endif %}
+{%   endfor %}
+{% endfor %}

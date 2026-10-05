@@ -1,0 +1,5 @@
+---
+_dmvpn_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_dmvpn_ipsec: "{{ dmvpn_ipsec | default({}, true) }}"
+_dmvpn_gre: "{{ dmvpn_drop_unprotected_gre | default({}, true) }}"
+_dmvpn_nhrp_lines: "{{ (lookup('ansible.builtin.template', 'nhrp.j2') or '').splitlines() | select | list }}"

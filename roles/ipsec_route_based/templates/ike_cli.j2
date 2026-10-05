@@ -1,0 +1,5 @@
+{# IKE PRF: vyos_vpn_ipsec accepts "prf" but does not render it, so it is set here. #}
+{% set ike = ipsec_route_based_ike_group %}
+{% if ike.prf is defined and ike.prf %}
+set vpn ipsec ike-group {{ ike.name | default('IKE-GROUP') }} proposal {{ ike.proposal_id | default(10) }} prf '{{ ike.prf }}'
+{% endif %}

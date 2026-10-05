@@ -1,0 +1,9 @@
+---
+- name: Check the core router
+  hosts: core
+  gather_facts: false
+  tasks:
+    - name: VRF and VRF BGP checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.vrf_lite
+        tasks_from: verify

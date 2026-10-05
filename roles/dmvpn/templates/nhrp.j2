@@ -1,0 +1,19 @@
+{% for t in dmvpn_nhrp_tunnels %}
+{%   set b = 'set protocols nhrp tunnel ' ~ t.name %}
+{%   if t.authentication is defined %}
+{{ b }} authentication '{{ t.authentication }}'
+{%   endif %}
+{%   if t.holdtime is defined %}
+{{ b }} holdtime '{{ t.holdtime }}'
+{%   endif %}
+{%   if t.multicast is defined %}
+{{ b }} multicast '{{ t.multicast }}'
+{%   endif %}
+{{ b }} network-id '{{ t.network_id }}'
+{%   for n in t.nhs | default([]) %}
+{{ b }} nhs tunnel-ip {{ n.tunnel_ip | default('dynamic') }} nbma '{{ n.nbma }}'
+{%   endfor %}
+{%   for flag in ['redirect', 'registration_no_unique', 'shortcut'] if t[flag] | default(false) | bool %}
+{{ b }} {{ flag | replace('_', '-') }}
+{%   endfor %}
+{% endfor %}

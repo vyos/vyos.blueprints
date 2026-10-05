@@ -1,0 +1,26 @@
+---
+- name: Configure WireGuard interfaces and peers
+  # No vyos.vyos WireGuard module yet.
+  vyos.vyos.vyos_config:
+    lines: "{{ _wireguard_cli_lines }}"
+  register: _wireguard_r_cli
+  no_log: true
+  when:
+    - _wireguard_cli_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands with keys masked  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + _wireguard_masked }}"
+  vars:
+    _wireguard_masked: >-
+      {%- set out = [] -%}
+      {%- for line in _wireguard_cli_lines -%}
+      {%-   set ns = namespace(l=line) -%}
+      {%-   for p in _wireguard_mask_patterns -%}
+      {%-     set ns.l = ns.l | regex_replace(p, "\\1 '********'") -%}
+      {%-   endfor -%}
+      {%-   set _ = out.append(ns.l) -%}
+      {%- endfor -%}
+      {{ out }}
+  when: vyos_blueprints_render_only | default(false) | bool

@@ -1,0 +1,17 @@
+set interfaces dummy dum0 address '192.0.2.2/32'
+set interfaces ethernet eth2 address '192.0.2.17/30'
+set interfaces ethernet eth2 mtu '8000'
+set interfaces ethernet eth3 address '192.0.2.26/30'
+set interfaces ethernet eth3 mtu '8000'
+set protocols isis interface dum0 passive
+set protocols isis interface eth2 network point-to-point
+set protocols isis interface eth3 network point-to-point
+set protocols isis level 'level-2'
+set protocols isis log-adjacency-changes
+set protocols isis metric-style 'wide'
+set protocols isis net '49.0000.0000.0000.0002.00'
+set protocols isis segment-routing maximum-label-depth '8'
+set protocols isis segment-routing prefix 192.0.2.2/32 index value '2'
+set protocols mpls interface 'eth2'
+set protocols mpls interface 'eth3'
+set system host-name P2-VyOS

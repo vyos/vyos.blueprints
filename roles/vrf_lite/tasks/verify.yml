@@ -1,0 +1,27 @@
+---
+- name: Read VRFs and VRF BGP sessions
+  vyos.vyos.vyos_command:
+    commands: >-
+      {{ ['show vrf'] + (vrf_lite_vrfs | selectattr('neighbors', 'defined') | selectattr('neighbors')
+         | map(attribute='name') | map('regex_replace', '^(.*)$', 'show bgp vrf \1 summary') | list) }}
+  register: _vrf_lite_v
+
+- name: Every VRF exists
+  ansible.builtin.assert:
+    that: _vrf_lite_v.stdout[0] is search('(?m)^\s*' ~ (item.name | regex_escape) ~ '\s')
+    fail_msg: "VRF {{ item.name }} is missing"
+    quiet: true
+  loop: "{{ vrf_lite_vrfs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Every VRF BGP session is established
+  ansible.builtin.assert:
+    that: >-
+      _vrf_lite_v.stdout[1:] | join('\n') is search('(?m)^' ~ (item.1.address | regex_escape)
+      ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+    fail_msg: "BGP session to {{ item.1.address }} in VRF {{ item.0.name }} is not established"
+    quiet: true
+  loop: "{{ vrf_lite_vrfs | subelements('neighbors', skip_missing=true) }}"
+  loop_control:
+    label: "{{ item.0.name }} {{ item.1.address }}"

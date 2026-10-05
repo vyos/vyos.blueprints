@@ -1,0 +1,9 @@
+---
+- name: Check WAN load balancing
+  hosts: wan
+  gather_facts: false
+  tasks:
+    - name: Load-balancer checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.wan_load_balance
+        tasks_from: verify

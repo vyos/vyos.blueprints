@@ -1,0 +1,45 @@
+---
+argument_specs:
+  main:
+    short_description: L3VPN control plane (docs blueprint "L3VPN for Hub-and-Spoke connectivity with VyOS")
+    description:
+      - iBGP sessions carrying VPNv4 routes between PEs and route reflectors,
+        using a peer-group, with C(route-reflector-client) on RRs and
+        C(nexthop-self) on PEs.
+      - The PE VRFs (RD, route targets, C(label vpn export), CE neighbours)
+        belong to C(vyos.blueprints.vrf_lite); the IGP to
+        C(vyos.blueprints.ospf); label switching to C(vyos.blueprints.mpls_ldp).
+      - The BGP process (AS, router-id, cluster-id, neighbour logging) uses
+        vyos.vyos.vyos_bgp_global; the peer-group and the VPNv4 neighbour
+        options use vyos.vyos.vyos_config, because the BGP modules cannot
+        express them yet.
+    options:
+      l3vpn_asn: {type: int, description: Provider AS. Nothing is configured when unset.}
+      l3vpn_router_id: {type: str, default: "", description: BGP router-id (the loopback).}
+      l3vpn_cluster_id: {type: str, default: "", description: Route-reflector cluster-id (RRs only).}
+      l3vpn_log_neighbor_changes: {type: bool, default: true, description: Log neighbour changes.}
+      l3vpn_peer_group:
+        type: dict
+        description: Peer-group shared by the VPNv4 sessions.
+        options:
+          name: {type: str, required: true, description: "Peer-group name, e.g. C(RR_VPNv4)."}
+          remote_as: {type: int, required: true, description: Remote AS (the provider AS for iBGP).}
+          update_source: {type: str, description: "Source interface or address, e.g. C(dum10)."}
+      l3vpn_neighbors:
+        type: list
+        elements: dict
+        default: []
+        description: VPNv4 neighbours (RRs on a PE, PEs on an RR).
+        options:
+          address: {type: str, required: true, description: Neighbour loopback.}
+          route_reflector_client: {type: bool, default: false, description: Treat as route-reflector client (on RRs).}
+          nexthop_self: {type: bool, default: false, description: Set next-hop self for VPNv4 routes (on PEs).}
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the l3vpn role
+    description: Run with C(tasks_from=verify). Checks every VPNv4 session is established.
+    options:
+      l3vpn_neighbors: {type: list, elements: dict, default: [], description: Same value as for C(main).}

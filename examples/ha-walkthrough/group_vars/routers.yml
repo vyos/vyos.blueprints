@@ -1,0 +1,120 @@
+---
+# Shared by both routers - docs.vyos.io/en/1.5/configexamples/ha.html
+
+# --- VRRP, conntrack-sync and the temporary default route (part 1)
+ha_vrrp_pair_group: routers
+ha_vrrp_sync_group:
+  name: sync
+  members:
+    - int
+base_static_routes:
+  - dest: 0.0.0.0/0
+    next_hop: 192.0.2.11
+
+# --- OSPF over WireGuard - filters and OSPF settings (part 2)
+route_policy_access_lists:
+  - number: 150
+    description: Outbound OSPF Redistribution
+    rules:
+      - number: 10
+        action: permit
+        destination:
+          any: true
+        source:
+          network: 10.200.201.0
+          inverse_mask: 0.0.0.255
+      - number: 20
+        action: permit
+        destination:
+          any: true
+        source:
+          network: 203.0.113.0
+          inverse_mask: 0.0.0.255
+      - number: 100
+        action: deny
+        destination:
+          any: true
+        source:
+          any: true
+  - number: 100
+    description: Inbound OSPF Routes from Peers
+    rules:
+      - number: 10
+        action: deny
+        destination:
+          any: true
+        source:
+          network: 10.201.0.0
+          inverse_mask: 0.0.255.255
+      - number: 100
+        action: permit
+        destination:
+          any: true
+        source:
+          any: true
+ospf_areas:
+  - id: 0.0.0.0
+    authentication: md5
+    networks:
+      - 10.254.60.0/24
+ospf_reference_bandwidth: 10000
+ospf_log_adjacency_changes: true
+ospf_abr_type: cisco
+ospf_redistribute:
+  - type: connected
+ospf_redistribute_access_lists:
+  connected: 150
+ospf_import_route_map: PUBOSPF
+
+# --- Route policy for OSPF import (PUBOSPF) and BGP export (BGPOUT, BGPPREPENDOUT)
+route_policy_prefix_lists:
+  - name: BGPOUT
+    description: BGP Export List
+    rules:
+      - sequence: 10
+        action: deny
+        description: Do not advertise short masks
+        ge: 25
+        prefix: 0.0.0.0/0
+      - sequence: 100
+        action: permit
+        description: Our network
+        prefix: 203.0.113.0/24
+      - sequence: 10000
+        action: deny
+        prefix: 0.0.0.0/0
+route_policy_route_maps:
+  - name: PUBOSPF
+    rules:
+      - sequence: 100
+        action: deny
+        match_access_list: '100'
+      - sequence: 500
+        action: permit
+  - name: BGPOUT
+    description: BGP Export Filter
+    rules:
+      - sequence: 10
+        action: permit
+        match_prefix_list: BGPOUT
+      - sequence: 10000
+        action: deny
+  - name: BGPPREPENDOUT
+    description: BGP Export Filter
+    rules:
+      - sequence: 10
+        action: permit
+        set_as_path_prepend: 65551 65551 65551
+        match_prefix_list: BGPOUT
+      - sequence: 10000
+        action: deny
+
+# --- BGP (part 3)
+bgp_asn: 65551
+bgp_networks:
+  - 192.0.2.0/24
+bgp_redistribute:
+  - type: connected
+    metric: 50
+  - type: ospf
+    metric: 50

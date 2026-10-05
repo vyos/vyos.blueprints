@@ -1,0 +1,17 @@
+---
+# docs.vyos.io/en/1.5/configexamples/inter-vrf-routing-vrf-lite.html
+all:
+  children:
+    core:
+      hosts:
+        core1:
+          ansible_host: clab-inter-vrf-core   # your router's address
+    provider:
+      hosts:
+        isp:
+          ansible_host: clab-inter-vrf-isp    # lab only, see isp.yml
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: admin
+    ansible_password: admin                 # use ansible-vault for real devices

@@ -1,0 +1,2 @@
+---
+_mpls_ldp_lines: "{{ (lookup('ansible.builtin.template', 'ldp.j2') or '').splitlines() | select | list }}"

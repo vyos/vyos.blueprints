@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: p_routers
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.isis

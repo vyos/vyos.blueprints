@@ -1,0 +1,48 @@
+{% set b = 'set load-balancing wan' %}
+{% for i in wan_load_balance_interfaces %}
+{%   set h = b ~ ' interface-health ' ~ i.name %}
+{%   if i.failure_count is defined %}
+{{ h }} failure-count '{{ i.failure_count }}'
+{%   endif %}
+{%   if i.success_count is defined %}
+{{ h }} success-count '{{ i.success_count }}'
+{%   endif %}
+{%   if i.nexthop is defined %}
+{{ h }} nexthop '{{ i.nexthop }}'
+{%   endif %}
+{%   for t in i.tests | default([]) %}
+{{ h }} test {{ t.id }} type '{{ t.type | default('ping') }}'
+{{ h }} test {{ t.id }} target '{{ t.target }}'
+{%   endfor %}
+{% endfor %}
+{% if wan_load_balance_disable_source_nat | bool %}
+{{ b }} disable-source-nat
+{% endif %}
+{% for r in wan_load_balance_rules %}
+{%   set rb = b ~ ' rule ' ~ r.number %}
+{%   if r.description is defined %}
+{{ rb }} description '{{ r.description }}'
+{%   endif %}
+{%   if r.exclude | default(false) | bool %}
+{{ rb }} exclude
+{%   endif %}
+{%   if r.failover | default(false) | bool %}
+{{ rb }} failover
+{%   endif %}
+{{ rb }} inbound-interface '{{ r.inbound_interface }}'
+{%   for i in r.interfaces | default([]) %}
+{%     if i.weight is defined %}
+{{ rb }} interface {{ i.name }} weight '{{ i.weight }}'
+{%     else %}
+{{ rb }} interface {{ i.name }}
+{%     endif %}
+{%   endfor %}
+{%   if r.protocol is defined %}
+{{ rb }} protocol '{{ r.protocol }}'
+{%   endif %}
+{%   for side in ['source', 'destination'] if r[side] is defined %}
+{%     for k in ['address', 'port'] if r[side][k] is defined %}
+{{ rb }} {{ side }} {{ k }} '{{ r[side][k] }}'
+{%     endfor %}
+{%   endfor %}
+{% endfor %}

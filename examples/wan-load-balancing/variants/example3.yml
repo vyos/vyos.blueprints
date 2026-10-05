@@ -1,0 +1,11 @@
+---
+# Example 3: failover based on rule order
+wan_load_balance_rules:
+  - number: 10
+    inbound_interface: eth3
+    interfaces:
+      - name: eth1
+  - number: 20
+    inbound_interface: eth3
+    interfaces:
+      - name: eth2

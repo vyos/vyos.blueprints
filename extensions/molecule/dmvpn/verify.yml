@@ -1,0 +1,38 @@
+---
+- name: Verify registrations, IPsec and OSPF
+  hosts: dmvpn
+  gather_facts: false
+  tasks:
+    - name: Wait for NHRP registration, IPsec and OSPF
+      ansible.builtin.pause:
+        seconds: 60
+      run_once: true
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: "vyos.blueprints.{{ item }}"
+        tasks_from: verify
+      loop: [dmvpn, ospf]
+
+- name: Verify spoke-to-spoke traffic and the DMVPN phase 3 shortcut
+  hosts: spoke2
+  gather_facts: false
+  vars:
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+  tasks:
+    - name: PC2 reaches PC3 (first via a hub, then directly)
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-dmvpn-pc2 ping -c 10 -i 0.5 -W 2 192.168.13.2
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: false
+
+    - name: Read NHRP shortcuts on Spoke-2
+      vyos.vyos.vyos_command:
+        commands: [show ip nhrp shortcut]
+      register: _shortcut
+
+    - name: Spoke-2 holds a shortcut to Spoke-3's LAN, as on the page
+      ansible.builtin.assert:
+        that: _shortcut.stdout[0] is search('192\.168\.13\.0/24\s+10\.100\.10[01]\.13')
+        quiet: true

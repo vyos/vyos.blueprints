@@ -1,0 +1,18 @@
+---
+- name: Read WireGuard state
+  vyos.vyos.vyos_command:
+    commands: "{{ wireguard_interfaces | map(attribute='name') | map('regex_replace', '^(.*)$', 'show interfaces wireguard \\1') | list }}"
+  register: _wireguard_v
+  when: wireguard_interfaces | length > 0
+
+- name: Every WireGuard interface is up and every peer has a handshake
+  ansible.builtin.assert:
+    that:
+      - _wireguard_v.stdout[idx] is search('state UP|,UP|\bup\b')
+      - _wireguard_v.stdout[idx] is search('latest handshake')
+    fail_msg: "{{ item.name }} is down or has not completed a handshake"
+    quiet: true
+  loop: "{{ wireguard_interfaces }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name }}"

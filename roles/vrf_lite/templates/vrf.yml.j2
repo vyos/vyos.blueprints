@@ -1,0 +1,34 @@
+bind_to_all: {{ vrf_lite_bind_to_all | bool }}
+instances:
+{% for v in vrf_lite_vrfs %}
+  - name: {{ v.name | to_json }}
+    table_id: {{ v.table | int }}
+{%   if v.description is defined %}
+    description: {{ v.description | to_json }}
+{%   endif %}
+{%   set r4 = v.routes | default([]) | rejectattr('dest', 'search', ':') | list %}
+{%   set r6 = v.routes | default([]) | selectattr('dest', 'search', ':') | list %}
+{%   if r4 or r6 or v.neighbors | default([]) %}
+    protocols:
+{%     if r4 or r6 %}
+      static:
+        - address_families:
+{%       for afi, rs in [('ipv4', r4), ('ipv6', r6)] if rs %}
+            - afi: {{ afi }}
+              routes:
+{%         for r in rs %}
+                - dest: {{ r.dest | to_json }}
+                  next_hops: [{forward_router_address: {{ r.next_hop | to_json }}}]
+{%         endfor %}
+{%       endfor %}
+{%     endif %}
+{%     if v.neighbors | default([]) %}
+      bgp:
+        as_number: {{ vrf_lite_asn | int }}
+        neighbor:
+{%       for n in v.neighbors %}
+          - {address: {{ n.address | to_json }}, remote_as: {{ n.remote_as | int }}}
+{%       endfor %}
+{%     endif %}
+{%   endif %}
+{% endfor %}

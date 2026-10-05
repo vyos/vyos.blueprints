@@ -1,0 +1,13 @@
+---
+- name: Read LDP neighbours
+  vyos.vyos.vyos_command:
+    commands: [show mpls ldp neighbor]
+  register: _mpls_ldp_v
+  when: mpls_ldp_interfaces | length > 0
+
+- name: LDP has an OPERATIONAL neighbour
+  ansible.builtin.assert:
+    that: _mpls_ldp_v.stdout[0] is search('OPERATIONAL')
+    fail_msg: no OPERATIONAL LDP neighbour
+    quiet: true
+  when: mpls_ldp_interfaces | length > 0

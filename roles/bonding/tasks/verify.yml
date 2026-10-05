@@ -1,0 +1,15 @@
+---
+- name: Read interfaces
+  vyos.vyos.vyos_command:
+    commands:
+      - show interfaces
+  register: _bonding_v
+
+- name: Every bond is up
+  ansible.builtin.assert:
+    that: _bonding_v.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '\s.*\bu/u\b')
+    fail_msg: "{{ item.name }} is not up"
+    quiet: true
+  loop: "{{ bonding_interfaces }}"
+  loop_control:
+    label: "{{ item.name }}"

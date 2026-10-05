@@ -1,0 +1,36 @@
+delete vrf bind-to-all
+set interfaces dummy dum10 address '10.0.0.10/32'
+set interfaces ethernet eth0 address '172.16.140.2/24'
+set interfaces ethernet eth3 address '10.60.60.1/24'
+set interfaces ethernet eth3 vrf 'BLUE_SPOKE'
+set protocols bgp neighbor 10.0.0.1 address-family ipv4-vpn nexthop-self
+set protocols bgp neighbor 10.0.0.1 peer-group 'RR_VPNv4'
+set protocols bgp neighbor 10.0.0.2 address-family ipv4-vpn nexthop-self
+set protocols bgp neighbor 10.0.0.2 peer-group 'RR_VPNv4'
+set protocols bgp parameters log-neighbor-changes
+set protocols bgp parameters router-id 10.0.0.10
+set protocols bgp peer-group RR_VPNv4 remote-as '65001'
+set protocols bgp peer-group RR_VPNv4 update-source 'dum10'
+set protocols bgp system-as 65001
+set protocols bgp system-as 65001
+set protocols mpls interface 'eth0'
+set protocols mpls ldp discovery transport-ipv4-address '10.0.0.10'
+set protocols mpls ldp interface 'eth0'
+set protocols mpls ldp router-id '10.0.0.10'
+set protocols ospf area '0'
+set protocols ospf area 0 network 0.0.0.0/0
+set protocols ospf parameters abr-type 'cisco'
+set protocols ospf parameters router-id '10.0.0.10'
+set system host-name VyOS-PE3
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast export vpn
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast import vpn
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast label vpn export 'auto'
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast network 10.60.60.0/24
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast rd vpn export '10.60.60.1:1011'
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast redistribute connected
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast route-target vpn export '65035:1011'
+set vrf name BLUE_SPOKE protocols bgp address-family ipv4-unicast route-target vpn import '65035:1030'
+set vrf name BLUE_SPOKE protocols bgp neighbor 10.60.60.2 address-family ipv4-unicast as-override
+set vrf name BLUE_SPOKE protocols bgp neighbor 10.60.60.2 remote-as 65035
+set vrf name BLUE_SPOKE protocols bgp system-as 65001
+set vrf name BLUE_SPOKE table 200

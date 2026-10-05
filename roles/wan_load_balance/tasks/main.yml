@@ -1,0 +1,32 @@
+---
+- name: Read the current load-balancing rules
+  vyos.vyos.vyos_command:
+    commands:
+      - show configuration commands
+  register: _wan_load_balance_running
+  when:
+    - wan_load_balance_prune_rules | bool
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Delete rule settings that are not wanted, then apply the configuration
+  # No vyos.vyos load-balancing module. Stale rule settings are found by
+  # comparing the running "load-balancing wan rule" lines with the desired
+  # ones (quotes ignored), so a repeated run changes nothing.
+  vyos.vyos.vyos_config:
+    lines: "{{ _wan_load_balance_deletes + _wan_load_balance_lines }}"
+  vars:
+    _wan_load_balance_wanted: "{{ _wan_load_balance_lines | map('replace', \"'\", '') | list }}"
+    _wan_load_balance_current: >-
+      {{ (_wan_load_balance_running.stdout[0] | default('')).splitlines()
+         | select('match', _wan_load_balance_rule_prefix ~ ' ') | map('replace', "'", '') | list }}
+    _wan_load_balance_deletes: >-
+      {{ (_wan_load_balance_current | difference(_wan_load_balance_wanted)
+          | map('regex_replace', '^set ', 'delete ') | list)
+         if wan_load_balance_prune_rules | bool else [] }}
+  register: _wan_load_balance_r_cli
+  when: not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + _wan_load_balance_lines }}"
+  when: vyos_blueprints_render_only | default(false) | bool

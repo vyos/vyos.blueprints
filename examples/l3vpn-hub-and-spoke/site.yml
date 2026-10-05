@@ -1,0 +1,16 @@
+---
+- name: MPLS L3VPN hub-and-spoke
+  hosts: all
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base       # loopbacks and link addresses
+    - vyos.blueprints.ospf       # step 1: IGP (P, PE, RR)
+    - vyos.blueprints.mpls_ldp   # step 1: MPLS and LDP (P, PE, RR)
+    - vyos.blueprints.l3vpn      # step 2: iBGP VPNv4 with route reflectors (PE, RR)
+    - vyos.blueprints.vrf_lite   # step 3: PE VRFs with RD, RT and CE neighbours
+    - vyos.blueprints.bgp        # step 4: CE eBGP to the PE
+  post_tasks:
+    - name: Show rendered commands
+      ansible.builtin.debug:
+        var: vyos_blueprints_rendered
+      when: show_rendered | default(false) | bool

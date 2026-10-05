@@ -1,0 +1,40 @@
+---
+- name: Configure inter-VRF routing (skipped when vrf_lite_asn is not set)
+  when: vrf_lite_asn is not none and vrf_lite_asn | string | length > 0
+  block:
+    - name: Set the global BGP AS
+      vyos.vyos.vyos_bgp_global:
+        config:
+          as_number: "{{ vrf_lite_asn | int }}"
+        state: "{{ _vrf_lite_state }}"
+      register: _vrf_lite_r_bgp
+
+    - name: Create VRFs, their static routes and VRF BGP neighbours
+      vyos.vyos.vyos_vrf:
+        config: "{{ lookup('ansible.builtin.template', 'vrf.yml.j2') | from_yaml }}"
+        state: "{{ _vrf_lite_state }}"
+      register: _vrf_lite_r_vrf
+
+    - name: Put ethernet interfaces into their VRFs
+      vyos.vyos.vyos_interfaces:
+        config: "{{ _vrf_lite_eth_bindings }}"
+        state: "{{ _vrf_lite_state }}"
+      register: _vrf_lite_r_eth
+      when: _vrf_lite_eth_bindings | length > 0
+
+    - name: Configure RD/RT, VPN import/export and neighbour address families
+      # Not expressible with vyos_vrf yet.
+      vyos.vyos.vyos_config:
+        lines: "{{ _vrf_lite_cli_lines }}"
+      register: _vrf_lite_r_cli
+      when:
+        - _vrf_lite_cli_lines | length > 0
+        - not (vyos_blueprints_render_only | default(false) | bool)
+
+    - name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+      ansible.builtin.set_fact:
+        vyos_blueprints_rendered: >-
+          {{ vyos_blueprints_rendered | default([])
+             + ([_vrf_lite_r_bgp, _vrf_lite_r_vrf, _vrf_lite_r_eth] | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten)
+             + _vrf_lite_cli_lines }}
+      when: vyos_blueprints_render_only | default(false) | bool

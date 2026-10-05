@@ -1,0 +1,9 @@
+---
+- name: Check the LNS
+  hosts: lns
+  gather_facts: false
+  tasks:
+    - name: LNS checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.l2tp_lns
+        tasks_from: verify

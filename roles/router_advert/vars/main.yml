@@ -1,0 +1,2 @@
+---
+_router_advert_lines: "{{ (lookup('ansible.builtin.template', 'ra.j2') or '').splitlines() | select | list }}"

@@ -1,0 +1,26 @@
+set interfaces dummy dum10 address '10.0.0.2/32'
+set interfaces ethernet eth0 address '172.16.80.1/24'
+set interfaces ethernet eth1 address '172.16.70.2/24'
+set protocols bgp neighbor 10.0.0.10 address-family ipv4-vpn route-reflector-client
+set protocols bgp neighbor 10.0.0.10 peer-group 'RR_VPNv4'
+set protocols bgp neighbor 10.0.0.7 address-family ipv4-vpn route-reflector-client
+set protocols bgp neighbor 10.0.0.7 peer-group 'RR_VPNv4'
+set protocols bgp neighbor 10.0.0.8 address-family ipv4-vpn route-reflector-client
+set protocols bgp neighbor 10.0.0.8 peer-group 'RR_VPNv4'
+set protocols bgp parameters cluster-id 10.0.0.1
+set protocols bgp parameters log-neighbor-changes
+set protocols bgp parameters router-id 10.0.0.2
+set protocols bgp peer-group RR_VPNv4 remote-as '65001'
+set protocols bgp peer-group RR_VPNv4 update-source 'dum10'
+set protocols bgp system-as 65001
+set protocols mpls interface 'eth0'
+set protocols mpls interface 'eth1'
+set protocols mpls ldp discovery transport-ipv4-address '10.0.0.2'
+set protocols mpls ldp interface 'eth0'
+set protocols mpls ldp interface 'eth1'
+set protocols mpls ldp router-id '10.0.0.2'
+set protocols ospf area '0'
+set protocols ospf area 0 network 0.0.0.0/0
+set protocols ospf parameters abr-type 'cisco'
+set protocols ospf parameters router-id '10.0.0.2'
+set system host-name VyOS-RR2

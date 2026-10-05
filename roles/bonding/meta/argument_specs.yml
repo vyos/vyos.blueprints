@@ -1,0 +1,30 @@
+---
+argument_specs:
+  main:
+    short_description: Bonding (LAG/LACP) interfaces
+    description:
+      - Creates bonding interfaces with their members, mode and hash policy.
+      - Run before C(vyos.blueprints.base) so that VLANs and addresses on the
+        bond (e.g. C(bond0.201)) can be configured there.
+      - Uses vyos.vyos.vyos_lag_interfaces and vyos_interfaces.
+    options:
+      bonding_interfaces:
+        type: list
+        elements: dict
+        default: []
+        description: Bonding interfaces. Nothing is configured when empty.
+        options:
+          name: {type: str, required: true, description: "Bond name, e.g. C(bond0)."}
+          description: {type: str, description: Interface description.}
+          mode: {type: str, description: "Bonding mode, e.g. C(802.3ad)."}
+          hash_policy: {type: str, description: "Transmit hash policy, e.g. C(layer2)."}
+          members: {type: list, elements: str, required: true, description: "Member interfaces, e.g. C([eth0, eth1])."}
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the bonding role
+    description: Run with C(tasks_from=verify). Checks every bond is up.
+    options:
+      bonding_interfaces: {type: list, elements: dict, required: true, description: Same value as for C(main).}

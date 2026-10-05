@@ -26,7 +26,7 @@ for case_dir in "$here"/cases/*/*/; do
         -e "role=$role" -e "case_dir=$case_dir" -e "update_golden=$update")
   [[ -f "$case_dir/vars.yml" ]] && args+=(-e "@$case_dir/vars.yml")
   # Blueprints that combine roles list them, comma-separated, in a "roles" file.
-  [[ -f "$case_dir/roles" ]] && args+=(-e "roles=$(tr -d '[:space:]' < "$case_dir/roles")")
+  [[ -f "$case_dir/roles" ]] && args+=(-e "render_roles=$(tr -d '[:space:]' < "$case_dir/roles")")
   mkdir -p "$case_dir/expected"
   echo "=== $role/$name"
   if ! ansible-playbook "${args[@]}"; then

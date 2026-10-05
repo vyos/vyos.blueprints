@@ -49,7 +49,7 @@ argument_specs:
       firewall_ipv4:
         type: dict
         default: {}
-        description: IPv4 filters keyed by base chain (C(input), C(forward), C(output)).
+        description: IPv4 filters keyed by base chain (C(input), C(forward), C(output)), plus named rulesets under C(names).
         options: &filters
           input: &filter
             type: dict
@@ -60,6 +60,11 @@ argument_specs:
               rules: {type: list, elements: dict, default: [], description: Rules in vyos_firewall_rules format.}
           forward: *filter
           output: *filter
+          names:
+            type: dict
+            description:
+              - "Named rulesets, keyed by name, e.g. C({WAN_IN: {default_action: drop, rules: [...]}})."
+              - Reach them with C(jump) rules (C(action=jump), C(jump_target=<name>)) in a base chain.
       firewall_ipv6:
         type: dict
         default: {}

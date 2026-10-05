@@ -1,0 +1,126 @@
+---
+# Values from docs.vyos.io/en/1.5/configexamples/ha.html (part 1). router1's
+# trunk is eth1 and router2's bond members are eth1/eth2, because containerlab
+# uses eth0 for management.
+all:
+  children:
+    vyos:
+      children:
+        routers:
+          hosts:
+            router1:
+              ansible_host: clab-bp-hawalk-router1
+              base_interfaces:
+                - name: eth1.50
+                  addresses:
+                    - 192.0.2.21/24
+                - name: eth1.100
+                  addresses:
+                    - 203.0.113.2/24
+                - name: eth1.201
+                  addresses:
+                    - 10.200.201.2/24
+              ha_vrrp_priority: 200
+              ha_vrrp_groups:
+                - name: int
+                  vrid: 201
+                  interface: eth1.201
+                  address:
+                    - 10.200.201.1/24
+                - name: public
+                  vrid: 113
+                  interface: eth1.100
+                  address:
+                    - 203.0.113.1/24
+              ha_vrrp_local_addresses:
+                int: 10.200.201.2
+                public: 203.0.113.2
+              ha_vrrp_conntrack_sync:
+                interface: eth1.201
+                accept_protocols:
+                  - tcp
+                  - udp
+                  - icmp
+                event_listen_queue_size: 8
+                mcast_group: 224.0.0.50
+                sync_queue_size: 8
+                disable_helpers: true
+              nat_source_rules:
+                - id: 10
+                  outbound_interface:
+                    name: eth1.50
+                  source:
+                    address: 10.200.201.0/24
+                  destination:
+                    address: '!192.0.2.0/24'
+                  translation:
+                    address: 203.0.113.1
+            router2:
+              ansible_host: clab-bp-hawalk-router2
+              base_interfaces:
+                - name: bond0.50
+                  addresses:
+                    - 192.0.2.22/24
+                - name: bond0.100
+                  addresses:
+                    - 203.0.113.3/24
+                - name: bond0.201
+                  addresses:
+                    - 10.200.201.3/24
+              ha_vrrp_priority: 100
+              ha_vrrp_groups:
+                - name: int
+                  vrid: 201
+                  interface: bond0.201
+                  address:
+                    - 10.200.201.1/24
+                - name: public
+                  vrid: 113
+                  interface: bond0.100
+                  address:
+                    - 203.0.113.1/24
+              ha_vrrp_local_addresses:
+                int: 10.200.201.3
+                public: 203.0.113.3
+              ha_vrrp_conntrack_sync:
+                interface: bond0.201
+                accept_protocols:
+                  - tcp
+                  - udp
+                  - icmp
+                event_listen_queue_size: 8
+                mcast_group: 224.0.0.50
+                sync_queue_size: 8
+                disable_helpers: true
+              nat_source_rules:
+                - id: 10
+                  outbound_interface:
+                    name: bond0.50
+                  source:
+                    address: 10.200.201.0/24
+                  destination:
+                    address: '!192.0.2.0/24'
+                  translation:
+                    address: 203.0.113.1
+              bonding_interfaces:
+                - name: bond0
+                  description: Switch Port-Channel
+                  hash_policy: layer2
+                  members:
+                    - eth1
+                    - eth2
+                  mode: 802.3ad
+          vars:
+            ha_vrrp_pair_group: routers
+            ha_vrrp_sync_group:
+              name: sync
+              members:
+                - int
+            base_static_routes:
+              - dest: 0.0.0.0/0
+                next_hop: 192.0.2.11
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

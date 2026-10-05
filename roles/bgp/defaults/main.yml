@@ -1,0 +1,7 @@
+---
+bgp_asn: null
+bgp_router_id: ""
+bgp_networks: []
+bgp_redistribute: []
+bgp_neighbors: []
+bgp_log_neighbor_changes: false

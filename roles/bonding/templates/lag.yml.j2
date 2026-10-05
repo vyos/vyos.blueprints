@@ -1,0 +1,13 @@
+{% for b in bonding_interfaces %}
+- name: {{ b.name }}
+{%   if b.mode is defined %}
+  mode: {{ b.mode | to_json }}
+{%   endif %}
+{%   if b.hash_policy is defined %}
+  hash_policy: {{ b.hash_policy | to_json }}
+{%   endif %}
+  members:
+{%   for m in b.members %}
+    - member: {{ m }}
+{%   endfor %}
+{% endfor %}

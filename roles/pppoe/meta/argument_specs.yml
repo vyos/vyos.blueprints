@@ -1,0 +1,53 @@
+---
+argument_specs:
+  main:
+    short_description: PPPoE client with DHCPv6-PD (docs blueprint "PPPoE IPv6 Basic Setup for Home Network")
+    description:
+      - Creates PPPoE client interfaces (credentials, service name, source
+        interface) with optional IPv6 SLAAC on the WAN and DHCPv6 prefix
+        delegation into LAN interfaces.
+      - Configured with vyos.vyos.vyos_config, because vyos.vyos has no PPPoE
+        module. The password is masked in rendered output.
+      - Pair with C(vyos.blueprints.router_advert) for SLAAC on the LAN and
+        C(vyos.blueprints.firewall) for the IPv6 firewall.
+    options:
+      pppoe_interfaces:
+        type: list
+        elements: dict
+        default: []
+        description: PPPoE interfaces. Nothing is configured when empty.
+        options:
+          name: {type: str, required: true, description: "Interface name, e.g. C(pppoe0)."}
+          source_interface: {type: str, required: true, description: "Ethernet interface towards the ISP, e.g. C(eth0)."}
+          username: {type: str, required: true, description: PPPoE username.}
+          password: {type: str, required: true, no_log: true, description: PPPoE password.}
+          service_name: {type: str, description: Service name.}
+          mtu: {type: int, description: Interface MTU.}
+          default_route_distance: {type: int, description: Distance of the default route learned via PPPoE.}
+          ipv6_autoconf: {type: bool, default: false, description: Configure the WAN IPv6 address with SLAAC.}
+          prefix_delegation:
+            type: list
+            elements: dict
+            default: []
+            description: DHCPv6-PD requests and where the delegated prefix is used.
+            options:
+              id: {type: int, default: 0, description: PD request id.}
+              length: {type: int, description: Requested prefix length.}
+              interfaces:
+                type: list
+                elements: dict
+                required: true
+                description: LAN interfaces that get an address from the delegated prefix.
+                options:
+                  name: {type: str, required: true, description: "LAN interface, e.g. C(eth1)."}
+                  address: {type: str, description: "Interface identifier within the prefix, e.g. C(100) (hexadecimal 0x64)."}
+                  sla_id: {type: int, description: Subnet id within a larger delegated prefix.}
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description: Collect commands into C(vyos_blueprints_rendered) instead of configuring.
+  verify:
+    short_description: Post-deployment checks for the pppoe role
+    description: Run with C(tasks_from=verify). Checks every PPPoE session is up with an IPv4 address.
+    options:
+      pppoe_interfaces: {type: list, elements: dict, default: [], description: Same value as for C(main).}

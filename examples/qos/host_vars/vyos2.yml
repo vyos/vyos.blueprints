@@ -1,0 +1,42 @@
+---
+# interfaces shifted by one (containerlab uses eth0 for management)
+base_hostname: vyos2
+base_interfaces:
+  - name: eth1
+    addresses:
+      - 10.1.1.1/24
+  - name: eth3
+    addresses:
+      - 10.9.9.1/24
+base_static_routes:
+  - dest: 172.17.1.0/24
+    next_hop: 10.1.1.100
+qos_shapers:
+  - name: vyos2
+    classes:
+      - id: 10
+        bandwidth: 100%
+        burst: 15k
+        queue_type: fair-queue
+        set_dscp: CS5
+        matches:
+          - name: VYOS2
+            ip:
+              dscp: CS4
+      - id: 20
+        bandwidth: 5mbit
+        description: for VyOS3 eth0
+        matches:
+          - name: VyOS3
+            ip:
+              source:
+                address: 10.1.1.100/32
+    default:
+      bandwidth: 100%
+      burst: 15k
+      ceiling: 100%
+      priority: 7
+      queue_type: fair-queue
+qos_interfaces:
+  - name: eth3
+    egress: vyos2

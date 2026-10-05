@@ -1,0 +1,27 @@
+---
+- name: Check the provider network
+  hosts: p_routers:route_reflectors:pe_routers
+  gather_facts: false
+  tasks:
+    - name: LDP checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.mpls_ldp
+        tasks_from: verify
+
+- name: Check VPNv4 sessions
+  hosts: route_reflectors:pe_routers
+  gather_facts: false
+  tasks:
+    - name: VPNv4 checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.l3vpn
+        tasks_from: verify
+
+- name: Check CE sessions
+  hosts: ce_routers
+  gather_facts: false
+  tasks:
+    - name: BGP checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.bgp
+        tasks_from: verify

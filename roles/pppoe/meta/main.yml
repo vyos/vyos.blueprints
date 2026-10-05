@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: VyOS maintainers and contributors
+  description: PPPoE client interfaces with IPv6 autoconf and DHCPv6 prefix delegation
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: GenericLinux
+      versions: [all]
+  galaxy_tags: [vyos, networking, pppoe, ipv6, dhcpv6]
+dependencies: []

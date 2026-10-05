@@ -1,0 +1,17 @@
+---
+- name: Configure PPPoE interfaces
+  # No vyos.vyos PPPoE module.
+  vyos.vyos.vyos_config:
+    lines: "{{ _pppoe_lines }}"
+  register: _pppoe_r_cli
+  no_log: true
+  when:
+    - _pppoe_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands with the password masked  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: >-
+      {{ vyos_blueprints_rendered | default([])
+         + (_pppoe_lines | map('regex_replace', '(authentication password) .*$', "\1 '********'") | list) }}
+  when: vyos_blueprints_render_only | default(false) | bool

@@ -1,0 +1,31 @@
+---
+- name: Verify both tunnels and BGP sessions
+  hosts: vpn
+  gather_facts: false
+  tasks:
+    - name: Wait for IKE, IPsec and BGP
+      ansible.builtin.pause:
+        seconds: 60
+      run_once: true
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ipsec_route_based
+        tasks_from: verify
+
+- name: Verify the cloud prefix is reachable through each edge
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+  tasks:
+    - name: Ping the cloud VM through edge 1, then through edge 2
+      ansible.builtin.shell:
+        cmd: >-
+          docker exec clab-bp-gcp-lan ip route replace default via {{ item }} &&
+          docker exec clab-bp-gcp-lan ping -c 3 -W 2 10.70.0.10
+      become: "{{ _become }}"
+      changed_when: false
+      loop: [10.80.0.11, 10.80.0.12]
+      loop_control:
+        label: "via {{ item }}"

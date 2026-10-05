@@ -1,0 +1,10 @@
+set interfaces dummy dum20 address '10.0.0.80/32'
+set interfaces ethernet eth0 address '10.50.50.2/24'
+set protocols bgp address-family ipv4-unicast network 10.0.0.80/32
+set protocols bgp neighbor 10.50.50.1 ebgp-multihop 2
+set protocols bgp neighbor 10.50.50.1 remote-as 65001
+set protocols bgp neighbor 10.50.50.1 update-source eth0
+set protocols bgp parameters log-neighbor-changes
+set protocols bgp parameters router-id 10.50.50.2
+set protocols bgp system-as 65035
+set system host-name VyOS-CE1-SPOKE

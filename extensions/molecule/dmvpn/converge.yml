@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: dmvpn
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.gre_tunnel
+    - vyos.blueprints.dmvpn
+    - vyos.blueprints.ospf

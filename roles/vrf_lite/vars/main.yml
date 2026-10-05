@@ -1,0 +1,12 @@
+---
+_vrf_lite_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_vrf_lite_iftypes: {eth: ethernet, bond: bonding, br: bridge, dum: dummy, pppoe: pppoe, vtun: openvpn, wg: wireguard, tun: tunnel, vti: vti}
+_vrf_lite_eth_bindings: >-
+  {%- set out = [] -%}
+  {%- for v in vrf_lite_vrfs -%}
+  {%-   for i in v.interfaces | default([]) if i is match('^eth\\d+$') -%}
+  {%-     set _ = out.append({'name': i, 'vrf': v.name}) -%}
+  {%-   endfor -%}
+  {%- endfor -%}
+  {{ out }}
+_vrf_lite_cli_lines: "{{ (lookup('ansible.builtin.template', 'vrf_lite_cli.j2') or '').splitlines() | select | list }}"

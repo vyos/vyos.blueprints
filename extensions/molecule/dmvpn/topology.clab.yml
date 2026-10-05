@@ -1,0 +1,37 @@
+# Needs GRE, NHRP and IPsec (xfrm) support on the container host.
+name: bp-dmvpn
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+  nodes:
+    hub1: {kind: vyosnetworks_vyos}
+    hub2: {kind: vyosnetworks_vyos}
+    spoke2: {kind: vyosnetworks_vyos}
+    spoke3: {kind: vyosnetworks_vyos}
+    # the "internet" between all WAN links (10.0.X.1 on each /30)
+    isp:
+      kind: linux
+      image: alpine:3
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip addr add 10.0.0.1/30 dev eth1
+        - ip addr add 10.0.1.1/30 dev eth2
+        - ip addr add 10.0.12.1/30 dev eth3
+        - ip addr add 10.0.13.1/30 dev eth4
+    pc2:
+      kind: linux
+      image: alpine:3
+      exec: ["ip addr add 192.168.12.2/24 dev eth1", "ip route replace default via 192.168.12.1"]
+    pc3:
+      kind: linux
+      image: alpine:3
+      exec: ["ip addr add 192.168.13.2/24 dev eth1", "ip route replace default via 192.168.13.1"]
+  links:
+    # WAN eth1 / LAN eth2 here = eth0 / eth1 on the page (containerlab uses eth0 for management)
+    - endpoints: ["hub1:eth1", "isp:eth1"]
+    - endpoints: ["hub2:eth1", "isp:eth2"]
+    - endpoints: ["spoke2:eth1", "isp:eth3"]
+    - endpoints: ["spoke3:eth1", "isp:eth4"]
+    - endpoints: ["spoke2:eth2", "pc2:eth1"]
+    - endpoints: ["spoke3:eth2", "pc3:eth1"]

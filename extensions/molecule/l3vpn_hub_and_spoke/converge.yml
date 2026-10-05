@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: vyos
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ospf
+    - vyos.blueprints.mpls_ldp
+    - vyos.blueprints.l3vpn
+    - vyos.blueprints.vrf_lite
+    - vyos.blueprints.bgp

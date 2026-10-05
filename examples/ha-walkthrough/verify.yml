@@ -1,0 +1,17 @@
+---
+- name: Check the HA pair
+  hosts: routers
+  gather_facts: false
+  tasks:
+    - name: VRRP checks (both routers in one play for the one-MASTER check)
+      ansible.builtin.include_role:
+        name: vyos.blueprints.ha_vrrp
+        tasks_from: verify
+    - name: NAT checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.nat
+        tasks_from: verify
+    - name: BGP checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.bgp
+        tasks_from: verify

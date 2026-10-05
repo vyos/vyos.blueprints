@@ -1,0 +1,39 @@
+{#- flatten a nested dict into CLI path lines below a prefix -#}
+{%- macro path(prefix, d) -%}
+{%-   for k, v in d.items() -%}
+{%-     set key = k | replace('_', '-') -%}
+{%-     if v is mapping -%}
+{{ path(prefix ~ ' ' ~ key, v) }}
+{%-     elif v is sameas true -%}
+{{ prefix }} {{ key }}
+{%     elif v is not none and v is not sameas false -%}
+{{ prefix }} {{ key }} '{{ v }}'
+{%     endif -%}
+{%-   endfor -%}
+{%- endmacro -%}
+{% set settings = ['description', 'bandwidth', 'ceiling', 'burst', 'priority', 'queue_type', 'set_dscp'] %}
+{% for s in qos_shapers %}
+{%   set b = 'set qos policy shaper ' ~ s.name %}
+{%   for k in ['description', 'bandwidth'] if s[k] is defined %}
+{{ b }} {{ k }} '{{ s[k] }}'
+{%   endfor %}
+{%   for c in s.classes | default([]) %}
+{%     set cb = b ~ ' class ' ~ c.id %}
+{%     for k in settings if c[k] is defined %}
+{{ cb }} {{ k | replace('_', '-') }} '{{ c[k] }}'
+{%     endfor %}
+{%     for m in c.matches | default([]) %}
+{{ path(cb ~ ' match ' ~ m.name, m | dict2items | rejectattr('key', 'equalto', 'name') | items2dict) -}}
+{%     endfor %}
+{%   endfor %}
+{%   if s.default is defined %}
+{%     for k in settings if s.default[k] is defined %}
+{{ b }} default {{ k | replace('_', '-') }} '{{ s.default[k] }}'
+{%     endfor %}
+{%   endif %}
+{% endfor %}
+{% for i in qos_interfaces %}
+{%   for dir in ['egress', 'ingress'] if i[dir] is defined %}
+set qos interface {{ i.name }} {{ dir }} '{{ i[dir] }}'
+{%   endfor %}
+{% endfor %}

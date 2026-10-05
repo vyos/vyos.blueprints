@@ -1,0 +1,14 @@
+---
+- name: Configure IS-IS, segment routing and MPLS interfaces
+  # No vyos.vyos IS-IS or MPLS module.
+  vyos.vyos.vyos_config:
+    lines: "{{ _isis_lines }}"
+  register: _isis_r_cli
+  when:
+    - _isis_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + _isis_lines }}"
+  when: vyos_blueprints_render_only | default(false) | bool

@@ -3,3 +3,4 @@ base_hostname: "{{ inventory_hostname_short }}"
 base_interfaces: []
 base_ntp_servers: []
 base_syslog_hosts: []
+base_static_routes: []

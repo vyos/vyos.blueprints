@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: vyos
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.nat
+    - vyos.blueprints.l2tp_lns

@@ -1,0 +1,54 @@
+---
+base_interfaces:
+  - name: dum10
+    addresses:
+      - 10.0.0.7/32
+  - name: eth0
+    addresses:
+      - 172.16.90.2/24
+  - name: eth3
+    addresses:
+      - 10.50.50.1/24
+ospf_router_id: 10.0.0.7
+ospf_areas:
+  - id: '0'
+    networks:
+      - 0.0.0.0/0
+ospf_abr_type: cisco
+mpls_ldp_router_id: 10.0.0.7
+mpls_ldp_interfaces:
+  - eth0
+l3vpn_asn: 65001
+l3vpn_router_id: 10.0.0.7
+l3vpn_peer_group:
+  name: RR_VPNv4
+  remote_as: 65001
+  update_source: dum10
+l3vpn_neighbors:
+  - address: 10.0.0.1
+    nexthop_self: true
+  - address: 10.0.0.2
+    nexthop_self: true
+vrf_lite_asn: 65001
+vrf_lite_vrfs:
+  - name: BLUE_SPOKE
+    table: 200
+    interfaces:
+      - eth3
+    families:
+      - ipv4
+    label_vpn_export: auto
+    networks:
+      - 10.50.50.0/24
+    rd: 10.50.50.1:1011
+    route_targets_export:
+      - 65035:1011
+    route_targets_import:
+      - 65035:1030
+    redistribute:
+      - connected
+    neighbors:
+      - address: 10.50.50.2
+        remote_as: 65035
+        as_override: true
+base_hostname: VyOS-PE1

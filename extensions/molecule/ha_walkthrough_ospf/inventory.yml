@@ -1,0 +1,161 @@
+---
+# Values from docs.vyos.io/en/1.5/configexamples/ha.html (part 2). WireGuard
+# keys are not stored here: converge.yml generates a key pair on each router.
+# offsite1 redistributes every connected network, including 10.99.0.0/24,
+# which router1's import filter (PUBOSPF) must keep out of its routing table.
+all:
+  children:
+    vyos:
+      children:
+        ospf_sites:
+          hosts:
+            router1:
+              ansible_host: clab-bp-haospf-router1
+              wireguard_interfaces:
+                - name: wg01
+                  addresses:
+                    - 10.254.60.1/30
+                  description: router1-to-offsite1
+                  port: 50001
+                  peers:
+                    - name: OFFSITE1
+                      allowed_ips:
+                        - 0.0.0.0/0
+                      address: 192.0.2.31
+                      port: 50001
+                      persistent_keepalive: 15
+                      public_key: '{{ _lab_wg_keys[''offsite1''].public }}'
+                  private_key: '{{ _lab_wg_keys[inventory_hostname].private }}'
+              route_policy_access_lists:
+                - number: 150
+                  description: Outbound OSPF Redistribution
+                  rules:
+                    - number: 10
+                      action: permit
+                      destination:
+                        any: true
+                      source:
+                        network: 10.200.201.0
+                        inverse_mask: 0.0.0.255
+                    - number: 20
+                      action: permit
+                      destination:
+                        any: true
+                      source:
+                        network: 203.0.113.0
+                        inverse_mask: 0.0.0.255
+                    - number: 100
+                      action: deny
+                      destination:
+                        any: true
+                      source:
+                        any: true
+                - number: 100
+                  description: Inbound OSPF Routes from Peers
+                  rules:
+                    - number: 10
+                      action: deny
+                      destination:
+                        any: true
+                      source:
+                        network: 10.201.0.0
+                        inverse_mask: 0.0.255.255
+                    - number: 100
+                      action: permit
+                      destination:
+                        any: true
+                      source:
+                        any: true
+              route_policy_route_maps:
+                - name: PUBOSPF
+                  rules:
+                    - sequence: 100
+                      action: deny
+                      match_access_list: '100'
+                    - sequence: 500
+                      action: permit
+              ospf_router_id: 10.254.60.1
+              ospf_interfaces:
+                - name: wg01
+                  md5_key: i360KoCwUGZvPq7e
+                  md5_key_id: 1
+                  cost: 11
+                  dead_interval: 5
+                  hello_interval: 1
+                  network: point-to-point
+                  priority: 1
+                  retransmit_interval: 5
+                  transmit_delay: 1
+              ospf_redistribute:
+                - type: connected
+              ospf_redistribute_access_lists:
+                connected: 150
+              ospf_import_route_map: PUBOSPF
+              ospf_areas: &id001
+                - id: 0.0.0.0
+                  authentication: md5
+                  networks:
+                    - 10.254.60.0/24
+              ospf_reference_bandwidth: 10000
+              ospf_log_adjacency_changes: true
+              ospf_abr_type: cisco
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 192.0.2.21/24
+                - name: eth2
+                  addresses:
+                    - 10.200.201.1/24
+                - name: eth3
+                  addresses:
+                    - 203.0.113.2/24
+            offsite1:
+              ansible_host: clab-bp-haospf-offsite1
+              wireguard_interfaces:
+                - name: wg01
+                  addresses:
+                    - 10.254.60.2/30
+                  description: offsite1-to-router1
+                  port: 50001
+                  peers:
+                    - name: ROUTER1
+                      allowed_ips:
+                        - 0.0.0.0/0
+                      address: 192.0.2.21
+                      port: 50001
+                      persistent_keepalive: 15
+                      public_key: '{{ _lab_wg_keys[''router1''].public }}'
+                  private_key: '{{ _lab_wg_keys[inventory_hostname].private }}'
+              ospf_router_id: 10.254.60.2
+              ospf_interfaces:
+                - name: wg01
+                  md5_key: i360KoCwUGZvPq7e
+                  md5_key_id: 1
+                  cost: 11
+                  dead_interval: 5
+                  hello_interval: 1
+                  network: point-to-point
+                  priority: 1
+                  retransmit_interval: 5
+                  transmit_delay: 1
+              ospf_areas: *id001
+              ospf_reference_bandwidth: 10000
+              ospf_log_adjacency_changes: true
+              ospf_abr_type: cisco
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 192.0.2.31/24
+                - name: eth2
+                  addresses:
+                    - 10.201.1.1/24
+                - name: eth3
+                  addresses:
+                    - 10.99.0.1/24
+              ospf_redistribute:
+                - type: connected
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

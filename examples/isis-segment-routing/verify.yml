@@ -1,0 +1,9 @@
+---
+- name: Check IS-IS and segment routing
+  hosts: p_routers
+  gather_facts: false
+  tasks:
+    - name: IS-IS checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.isis
+        tasks_from: verify

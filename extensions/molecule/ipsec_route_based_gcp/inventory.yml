@@ -1,0 +1,199 @@
+---
+# Values from docs.vyos.io/en/1.5/configexamples/gcp-ha-vpn-bgp.html; the WAN is
+# eth1 (eth0 is containerlab management) and "gcp" is a VyOS stand-in for the
+# HA VPN gateway and Cloud Router, holding both gateway interface addresses.
+all:
+  children:
+    vyos:
+      children:
+        vpn:
+          hosts:
+            edge1:
+              ansible_host: clab-bp-gcp-edge1
+              ipsec_route_based_peers:
+                - name: gcp-ha-vpn-0
+                  description: Google Cloud HA VPN tunnel 0
+                  psk_name: gcp-ha-vpn-0
+                  psk: molecule-psk-0
+                  local_address: 198.51.100.10
+                  remote_address: 203.0.113.10
+                  connection_type: initiate
+                  esp_group_on_vti: true
+                  vti:
+                    interface: vti10
+                    address: 169.254.10.1/30
+                    description: Google Cloud HA VPN tunnel 0
+                    adjust_mss: '1350'
+              ipsec_route_based_interface_routes:
+                - dest: 169.254.10.2/32
+                  interface: vti10
+              ipsec_route_based_bgp:
+                asn: 65010
+                router_id: 10.80.0.11
+                networks:
+                  - 10.80.0.0/24
+                neighbors:
+                  - address: 169.254.10.2
+                    remote_as: 64514
+                    holdtime: 30
+                    keepalive: 10
+                    disable_connected_check: true
+                    soft_reconfiguration_inbound: true
+                    route_map_import: GCP-IN
+                    route_map_export: GCP-OUT
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 198.51.100.10/24
+                - name: eth2
+                  addresses:
+                    - 10.80.0.11/24
+              ipsec_route_based_default_gateway: 198.51.100.1
+            edge2:
+              ansible_host: clab-bp-gcp-edge2
+              ipsec_route_based_peers:
+                - name: gcp-ha-vpn-1
+                  description: Google Cloud HA VPN tunnel 1
+                  psk_name: gcp-ha-vpn-1
+                  psk: molecule-psk-1
+                  local_address: 198.51.100.11
+                  remote_address: 203.0.113.11
+                  connection_type: initiate
+                  esp_group_on_vti: true
+                  vti:
+                    interface: vti11
+                    address: 169.254.10.5/30
+                    description: Google Cloud HA VPN tunnel 1
+                    adjust_mss: '1350'
+              ipsec_route_based_interface_routes:
+                - dest: 169.254.10.6/32
+                  interface: vti11
+              ipsec_route_based_bgp:
+                asn: 65010
+                router_id: 10.80.0.12
+                networks:
+                  - 10.80.0.0/24
+                neighbors:
+                  - address: 169.254.10.6
+                    remote_as: 64514
+                    holdtime: 30
+                    keepalive: 10
+                    disable_connected_check: true
+                    soft_reconfiguration_inbound: true
+                    route_map_import: GCP-IN
+                    route_map_export: GCP-OUT
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 198.51.100.11/24
+                - name: eth2
+                  addresses:
+                    - 10.80.0.12/24
+              ipsec_route_based_default_gateway: 198.51.100.1
+            gcp:
+              ansible_host: clab-bp-gcp-gcp
+              base_interfaces:
+                - name: eth1
+                  addresses:
+                    - 203.0.113.10/24
+                    - 203.0.113.11/24
+                - name: eth2
+                  addresses:
+                    - 10.70.0.1/20
+              ipsec_route_based_peers:
+                - name: edge1
+                  psk_name: edge1
+                  psk: molecule-psk-0
+                  local_address: 203.0.113.10
+                  remote_address: 198.51.100.10
+                  connection_type: none
+                  esp_group_on_vti: true
+                  vti:
+                    interface: vti10
+                    address: 169.254.10.2/30
+                - name: edge2
+                  psk_name: edge2
+                  psk: molecule-psk-1
+                  local_address: 203.0.113.11
+                  remote_address: 198.51.100.11
+                  connection_type: none
+                  esp_group_on_vti: true
+                  vti:
+                    interface: vti11
+                    address: 169.254.10.6/30
+              ipsec_route_based_interface_routes:
+                - dest: 169.254.10.1/32
+                  interface: vti10
+                - dest: 169.254.10.5/32
+                  interface: vti11
+              ipsec_route_based_bgp:
+                asn: 64514
+                networks:
+                  - 10.70.0.0/20
+                neighbors:
+                  - address: 169.254.10.1
+                    remote_as: 65010
+                    holdtime: 30
+                    keepalive: 10
+                  - address: 169.254.10.5
+                    remote_as: 65010
+                    holdtime: 30
+                    keepalive: 10
+              ipsec_route_based_policy: null
+              ipsec_route_based_default_gateway: 203.0.113.1
+          vars:
+            ipsec_route_based_ike_group:
+              name: GCP-IKE
+              key_exchange: ikev2
+              lifetime: 36000
+              proposal_id: 10
+              dh_group: 14
+              encryption: aes256
+              hash: sha256
+              prf: prfsha256
+              dead_peer_detection:
+                action: restart
+                interval: 30
+            ipsec_route_based_esp_group:
+              name: GCP-ESP
+              lifetime: 10800
+              mode: tunnel
+              pfs: dh-group14
+              proposal_id: 10
+              encryption: aes256
+              hash: sha256
+            ipsec_route_based_interfaces:
+              - eth1
+            ipsec_route_based_disable_route_autoinstall: true
+            ipsec_route_based_policy:
+              prefix_lists:
+                - name: GCP-IN
+                  rules:
+                    - sequence: 10
+                      action: permit
+                      prefix: 10.70.0.0/20
+                - name: GCP-OUT
+                  rules:
+                    - sequence: 10
+                      action: permit
+                      prefix: 10.80.0.0/24
+              route_maps:
+                - name: GCP-IN
+                  rules:
+                    - sequence: 10
+                      action: permit
+                      prefix_list: GCP-IN
+                    - sequence: 20
+                      action: deny
+                - name: GCP-OUT
+                  rules:
+                    - sequence: 10
+                      action: permit
+                      prefix_list: GCP-OUT
+                    - sequence: 20
+                      action: deny
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin

@@ -1,0 +1,47 @@
+as_number: {{ bgp_asn | int }}
+{% if bgp_networks or bgp_redistribute %}
+address_family:
+  - afi: ipv4
+{%   if bgp_networks %}
+    networks:
+{%     for n in bgp_networks %}
+      - prefix: {{ n | to_json }}
+{%     endfor %}
+{%   endif %}
+{%   if bgp_redistribute %}
+    redistribute:
+{%     for r in bgp_redistribute %}
+      - protocol: {{ r.type }}
+{%       if r.metric is defined %}
+        metric: {{ r.metric | int }}
+{%       endif %}
+{%       if r.route_map is defined %}
+        route_map: {{ r.route_map | to_json }}
+{%       endif %}
+{%     endfor %}
+{%   endif %}
+{% endif %}
+{% set tuned = [] %}
+{% for n in bgp_neighbors if (n.soft_reconfiguration_inbound | default(false) | bool) or n.route_map_import is defined or n.route_map_export is defined %}
+{%   set _ = tuned.append(n) %}
+{% endfor %}
+{% if tuned %}
+neighbors:
+{%   for n in tuned %}
+  - neighbor_address: {{ n.address | to_json }}
+    address_family:
+      - afi: ipv4
+{%     if n.route_map_import is defined or n.route_map_export is defined %}
+        route_map:
+{%       if n.route_map_import is defined %}
+          - {action: import, route_map: {{ n.route_map_import | to_json }}}
+{%       endif %}
+{%       if n.route_map_export is defined %}
+          - {action: export, route_map: {{ n.route_map_export | to_json }}}
+{%       endif %}
+{%     endif %}
+{%     if n.soft_reconfiguration_inbound | default(false) | bool %}
+        soft_reconfiguration: true
+{%     endif %}
+{%   endfor %}
+{% endif %}

@@ -1,0 +1,19 @@
+---
+base_interfaces:
+  - name: dum20
+    addresses:
+      - 10.0.0.90/32
+  - name: eth0
+    addresses:
+      - 10.60.60.2/24
+bgp_asn: 65035
+bgp_router_id: 10.60.60.2
+bgp_networks:
+  - 10.0.0.90/32
+bgp_log_neighbor_changes: true
+bgp_neighbors:
+  - address: 10.60.60.1
+    remote_as: 65001
+    ebgp_multihop: 2
+    update_source: eth0
+base_hostname: VyOS-CE2-SPOKE

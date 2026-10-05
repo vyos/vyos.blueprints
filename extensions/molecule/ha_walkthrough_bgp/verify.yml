@@ -1,0 +1,41 @@
+---
+- name: Verify BGP sessions
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Wait for BGP
+      ansible.builtin.pause:
+        seconds: 30
+      run_once: true
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.bgp
+        tasks_from: verify
+
+- name: Verify what the provider receives
+  hosts: upstream
+  gather_facts: false
+  tasks:
+    - name: Read the provider's BGP table
+      vyos.vyos.vyos_command:
+        commands:
+          - show ip bgp 203.0.113.0/24
+          - show ip bgp 10.200.201.0/24
+          - show ip bgp 192.0.2.0/24
+      register: _rib
+
+    - name: The public network arrives from both routers, preferred via router1, prepended via router2
+      ansible.builtin.assert:
+        that:
+          - _rib.stdout[0] is search('Paths: \(2 available')
+          - _rib.stdout[0] is search('(?m)^\s+65551 65551 65551 65551\b')
+          - _rib.stdout[0] is search('192\.0\.2\.21 from 192\.0\.2\.21[\s\S]*?\bbest\b')
+        quiet: true
+
+    - name: Nothing else is announced (BGPOUT only permits 203.0.113.0/24)
+      ansible.builtin.assert:
+        that:
+          - _rib.stdout[1] is search('not in table')
+          - _rib.stdout[2] is search('not in table')
+        quiet: true

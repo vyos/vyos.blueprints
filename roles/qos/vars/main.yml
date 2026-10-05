@@ -1,0 +1,2 @@
+---
+_qos_lines: "{{ (lookup('ansible.builtin.template', 'qos.j2') or '').splitlines() | select | list }}"

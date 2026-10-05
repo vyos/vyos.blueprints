@@ -1,0 +1,31 @@
+---
+# not part of the lab topology; page values (eth0) for a real router
+base_hostname: vyos4
+base_interfaces:
+  - name: eth0
+    addresses:
+      - 10.2.1.100/24
+base_static_routes:
+  - dest: 0.0.0.0/0
+    next_hop: 10.2.1.1
+qos_shapers:
+  - name: vyos4
+    classes:
+      - id: 10
+        bandwidth: 100%
+        burst: 15k
+        queue_type: fair-queue
+        set_dscp: CS4
+        matches:
+          - name: ALL
+            ether:
+              protocol: all
+    default:
+      bandwidth: 10%
+      burst: 15k
+      ceiling: 100%
+      priority: 7
+      queue_type: fair-queue
+qos_interfaces:
+  - name: eth0
+    egress: vyos4

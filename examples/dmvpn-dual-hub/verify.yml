@@ -1,0 +1,10 @@
+---
+- name: Check DMVPN
+  hosts: dmvpn
+  gather_facts: false
+  tasks:
+    - name: DMVPN and OSPF checks
+      ansible.builtin.include_role:
+        name: "vyos.blueprints.{{ item }}"
+        tasks_from: verify
+      loop: [dmvpn, ospf]

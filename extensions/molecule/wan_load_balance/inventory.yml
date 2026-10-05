@@ -1,0 +1,56 @@
+---
+# Example 2 (failover on interface weights) from
+# docs.vyos.io/en/1.5/configexamples/wan-load-balancing.html, interfaces shifted
+# by one. verify.yml later switches the router to example 3's rules
+# (example3_rules) to check that stale rule settings are pruned.
+all:
+  children:
+    vyos:
+      hosts:
+        r1: {ansible_host: clab-bp-wanlb-r1}
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin
+        base_static_routes:
+          - {dest: 33.44.55.66/32, next_hop: 11.22.33.1}
+          - {dest: 44.55.66.77/32, next_hop: 11.22.33.1}
+          - {dest: 55.66.77.88/32, next_hop: 22.33.44.1}
+          - {dest: 66.77.88.99/32, next_hop: 22.33.44.1}
+        wan_load_balance_interfaces:
+          - name: eth1
+            failure_count: 5
+            nexthop: 11.22.33.1
+            tests:
+              - {id: 10, type: ping, target: 33.44.55.66}
+              - {id: 20, type: ping, target: 44.55.66.77}
+          - name: eth2
+            failure_count: 4
+            nexthop: 22.33.44.1
+            tests:
+              - {id: 10, type: ping, target: 55.66.77.88}
+              - {id: 20, type: ping, target: 66.77.88.99}
+        wan_load_balance_rules:
+          - number: 10
+            failover: true
+            inbound_interface: eth3
+            interfaces:
+              - {name: eth1, weight: 10}
+              - {name: eth2, weight: 1}
+        base_interfaces:
+          - name: eth1
+            addresses: [11.22.33.2/24]
+          - name: eth2
+            addresses: [22.33.44.2/24]
+          - name: eth3
+            addresses: [10.0.0.1/24]
+        example3_rules:
+          - number: 10
+            inbound_interface: eth3
+            interfaces:
+              - {name: eth1}
+          - number: 20
+            inbound_interface: eth3
+            interfaces:
+              - {name: eth2}

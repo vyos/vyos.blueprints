@@ -1,0 +1,2 @@
+---
+_pppoe_lines: "{{ (lookup('ansible.builtin.template', 'pppoe.j2') or '').splitlines() | select | list }}"

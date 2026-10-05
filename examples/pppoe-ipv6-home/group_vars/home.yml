@@ -1,0 +1,73 @@
+---
+# Home router - docs.vyos.io/en/1.5/configexamples/pppoe-ipv6-basic.html
+# Set username, password (ansible-vault) and service name to your ISP's values.
+# WAN eth1 / LAN eth2 here = eth0 / eth1 on the page (containerlab uses eth0
+# for management). The lab ISP delegates a /56, hence length 56 and sla-id 0;
+# with a /64 from your ISP, drop both as on the page.
+pppoe_interfaces:
+  - name: pppoe0
+    source_interface: eth1
+    username: molecule
+    password: '{{ vault_pppoe_password }}'
+    service_name: ISP
+    ipv6_autoconf: true
+    prefix_delegation:
+      - id: 0
+        length: 56
+        interfaces:
+          - name: eth2
+            address: '100'
+            sla_id: 0
+router_advert_interfaces:
+  - name: eth2
+    link_mtu: 1492
+    name_servers:
+      - 2001:db8::53
+    prefixes:
+      - prefix: ::/64
+        valid_lifetime: 172800
+firewall_ipv6:
+  names:
+    WAN_IN:
+      default_action: drop
+      rules:
+        - number: 10
+          action: accept
+          state:
+            established: true
+            related: true
+        - number: 20
+          action: accept
+          protocol: icmpv6
+    WAN_LOCAL:
+      default_action: drop
+      rules:
+        - number: 10
+          action: accept
+          state:
+            established: true
+            related: true
+        - number: 20
+          action: accept
+          protocol: icmpv6
+        - number: 30
+          action: accept
+          protocol: udp
+          source:
+            port: '547'
+          destination:
+            port: '546'
+  forward:
+    rules:
+      - number: 10
+        action: jump
+        jump_target: WAN_IN
+        inbound_interface:
+          name: pppoe0
+  input:
+    rules:
+      - number: 10
+        action: jump
+        jump_target: WAN_LOCAL
+        inbound_interface:
+          name: pppoe0

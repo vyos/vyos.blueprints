@@ -1,0 +1,25 @@
+---
+# Example 4: rule order, secondary link only for SIP
+wan_load_balance_rules:
+  - number: 10
+    inbound_interface: eth3
+    interfaces:
+      - name: eth1
+  - number: 20
+    inbound_interface: eth3
+    interfaces:
+      - name: eth2
+    destination:
+      port: sip
+    protocol: tcp
+base_static_routes:
+  - dest: 33.44.55.66/32
+    next_hop: 11.22.33.1
+  - dest: 44.55.66.77/32
+    next_hop: 11.22.33.1
+  - dest: 55.66.77.88/32
+    next_hop: 22.33.44.1
+  - dest: 66.77.88.99/32
+    next_hop: 22.33.44.1
+  - dest: 0.0.0.0/0
+    next_hop: 11.22.33.1

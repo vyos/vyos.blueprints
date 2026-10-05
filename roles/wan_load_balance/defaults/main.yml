@@ -1,0 +1,5 @@
+---
+wan_load_balance_interfaces: []
+wan_load_balance_rules: []
+wan_load_balance_prune_rules: true
+wan_load_balance_disable_source_nat: false

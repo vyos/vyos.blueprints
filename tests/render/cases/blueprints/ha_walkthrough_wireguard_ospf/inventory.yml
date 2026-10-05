@@ -1,0 +1,135 @@
+---
+# docs.vyos.io/en/1.5/configexamples/ha.html - "OSPF Over WireGuard" and
+# "Advertise connected routes" (part 2), for router1 and the remote offsite1.
+# The page's "Enable OSPF" block shows router-id 10.254.60.2 (offsite1's
+# tunnel address); router1 uses 10.254.60.1, since every router needs a unique id.
+# The route filters are applied on router1, as the page describes for "our" routers.
+all:
+  hosts:
+    router1:
+      ansible_host: 192.0.2.1
+      wireguard_interfaces:
+        - name: wg01
+          addresses:
+            - 10.254.60.1/30
+          description: router1-to-offsite1
+          port: 50001
+          peers:
+            - name: OFFSITE1
+              allowed_ips:
+                - 0.0.0.0/0
+              address: 203.0.113.3
+              port: 50001
+              persistent_keepalive: 15
+              public_key: GEFMOWzAyau42/HwdwfXnrfHdIISQF8YHj35rOgSZ0o=
+      route_policy_access_lists:
+        - number: 150
+          description: Outbound OSPF Redistribution
+          rules:
+            - number: 10
+              action: permit
+              destination:
+                any: true
+              source:
+                network: 10.200.201.0
+                inverse_mask: 0.0.0.255
+            - number: 20
+              action: permit
+              destination:
+                any: true
+              source:
+                network: 203.0.113.0
+                inverse_mask: 0.0.0.255
+            - number: 100
+              action: deny
+              destination:
+                any: true
+              source:
+                any: true
+        - number: 100
+          description: Inbound OSPF Routes from Peers
+          rules:
+            - number: 10
+              action: deny
+              destination:
+                any: true
+              source:
+                network: 10.201.0.0
+                inverse_mask: 0.0.255.255
+            - number: 100
+              action: permit
+              destination:
+                any: true
+              source:
+                any: true
+      route_policy_route_maps:
+        - name: PUBOSPF
+          rules:
+            - sequence: 100
+              action: deny
+              match_access_list: '100'
+            - sequence: 500
+              action: permit
+      ospf_router_id: 10.254.60.1
+      ospf_interfaces:
+        - name: wg01
+          md5_key: i360KoCwUGZvPq7e
+          md5_key_id: 1
+          cost: 11
+          dead_interval: 5
+          hello_interval: 1
+          network: point-to-point
+          priority: 1
+          retransmit_interval: 5
+          transmit_delay: 1
+      ospf_redistribute:
+        - type: connected
+      ospf_redistribute_access_lists:
+        connected: 150
+      ospf_import_route_map: PUBOSPF
+      ospf_areas: &id001
+        - id: 0.0.0.0
+          authentication: md5
+          networks:
+            - 10.254.60.0/24
+      ospf_reference_bandwidth: 10000
+      ospf_log_adjacency_changes: true
+      ospf_abr_type: cisco
+    offsite1:
+      ansible_host: 192.0.2.2
+      wireguard_interfaces:
+        - name: wg01
+          addresses:
+            - 10.254.60.2/30
+          description: offsite1-to-router1
+          port: 50001
+          peers:
+            - name: ROUTER1
+              allowed_ips:
+                - 0.0.0.0/0
+              address: 192.0.2.21
+              port: 50001
+              persistent_keepalive: 15
+              public_key: CKwMV3ZaLntMule2Kd3G7UyVBR7zE8/qoZgLb82EE2Q=
+      ospf_router_id: 10.254.60.2
+      ospf_interfaces:
+        - name: wg01
+          md5_key: i360KoCwUGZvPq7e
+          md5_key_id: 1
+          cost: 11
+          dead_interval: 5
+          hello_interval: 1
+          network: point-to-point
+          priority: 1
+          retransmit_interval: 5
+          transmit_delay: 1
+      ospf_areas: *id001
+      ospf_reference_bandwidth: 10000
+      ospf_log_adjacency_changes: true
+      ospf_abr_type: cisco
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_connect_timeout: 5
+    ansible_command_timeout: 5

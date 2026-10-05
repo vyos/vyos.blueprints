@@ -1,0 +1,11 @@
+---
+- name: Read L2TP server sessions
+  vyos.vyos.vyos_command:
+    commands: [show l2tp-server sessions]
+  register: _l2tp_lns_v
+
+- name: The L2TP server is running
+  ansible.builtin.assert:
+    that: _l2tp_lns_v.stdout[0] is search('ifname')
+    fail_msg: "the L2TP server is not running ('show l2tp-server sessions' has no session table)"
+    quiet: true

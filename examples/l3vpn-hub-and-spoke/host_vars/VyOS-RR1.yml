@@ -1,0 +1,36 @@
+---
+base_interfaces:
+  - name: dum10
+    addresses:
+      - 10.0.0.1/32
+  - name: eth1
+    addresses:
+      - 172.16.20.2/24
+  - name: eth2
+    addresses:
+      - 172.16.10.2/24
+ospf_router_id: 10.0.0.1
+ospf_areas:
+  - id: '0'
+    networks:
+      - 0.0.0.0/0
+ospf_abr_type: cisco
+mpls_ldp_router_id: 10.0.0.1
+mpls_ldp_interfaces:
+  - eth1
+  - eth2
+l3vpn_asn: 65001
+l3vpn_router_id: 10.0.0.1
+l3vpn_cluster_id: 10.0.0.1
+l3vpn_peer_group:
+  name: RR_VPNv4
+  remote_as: 65001
+  update_source: dum10
+l3vpn_neighbors:
+  - address: 10.0.0.7
+    route_reflector_client: true
+  - address: 10.0.0.8
+    route_reflector_client: true
+  - address: 10.0.0.10
+    route_reflector_client: true
+base_hostname: VyOS-RR1

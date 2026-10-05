@@ -39,6 +39,15 @@
   register: _ipsec_route_based_r_ipsec
   no_log: true
 
+- name: Set the IKE PRF
+  # vyos_vpn_ipsec accepts "prf" but does not render it.
+  vyos.vyos.vyos_config:
+    lines: "{{ _ipsec_route_based_ike_cli_lines }}"
+  register: _ipsec_route_based_r_ike_cli
+  when:
+    - _ipsec_route_based_ike_cli_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
 - name: Configure the site-to-site peers
   vyos.vyos.vyos_vpn_ipsec_s2s:
     config: "{{ lookup('ansible.builtin.template', 'vpn_ipsec_s2s.yml.j2') | from_yaml }}"
@@ -67,6 +76,20 @@
     state: "{{ _ipsec_route_based_state }}"
   register: _ipsec_route_based_r_ifroutes
   when: ipsec_route_based_interface_routes | length > 0
+
+- name: Create BGP prefix-lists
+  vyos.vyos.vyos_prefix_lists:
+    config: "{{ lookup('ansible.builtin.template', 'prefix_lists.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_pl
+  when: _ipsec_route_based_policy.prefix_lists | default([]) | length > 0
+
+- name: Create BGP route-maps
+  vyos.vyos.vyos_route_maps:
+    config: "{{ lookup('ansible.builtin.template', 'route_maps.yml.j2') | from_yaml }}"
+    state: "{{ _ipsec_route_based_state }}"
+  register: _ipsec_route_based_r_rm
+  when: _ipsec_route_based_policy.route_maps | default([]) | length > 0
 
 - name: Run BGP over the VTIs
   vyos.vyos.vyos_bgp_global:
@@ -106,7 +129,9 @@
       {{ vyos_blueprints_rendered | default([])
          + (_ipsec_route_based_r_vti.rendered | default([]))
          + _ipsec_route_based_cli_lines
+         + _ipsec_route_based_ike_cli_lines
          + ([_ipsec_route_based_r_vti_l3, _ipsec_route_based_r_ipsec, _ipsec_route_based_r_s2s,
+             _ipsec_route_based_r_pl, _ipsec_route_based_r_rm,
              _ipsec_route_based_r_route, _ipsec_route_based_r_ifroutes, _ipsec_route_based_r_bgp,
              _ipsec_route_based_r_bgp_af, _ipsec_route_based_r_ospf, _ipsec_route_based_r_ospf_if]
             | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten | unique) }}

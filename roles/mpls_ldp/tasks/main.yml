@@ -1,0 +1,14 @@
+---
+- name: Configure MPLS and LDP
+  # No vyos.vyos MPLS module.
+  vyos.vyos.vyos_config:
+    lines: "{{ _mpls_ldp_lines }}"
+  register: _mpls_ldp_r_cli
+  when:
+    - _mpls_ldp_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+  ansible.builtin.set_fact:
+    vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + _mpls_ldp_lines }}"
+  when: vyos_blueprints_render_only | default(false) | bool

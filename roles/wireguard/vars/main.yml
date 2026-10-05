@@ -1,0 +1,6 @@
+---
+_wireguard_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+_wireguard_cli_lines: "{{ (lookup('ansible.builtin.template', 'wireguard.j2') or '').splitlines() | select | list }}"
+_wireguard_mask_patterns:
+  - '(private-key) \S+'
+  - '(preshared-key) \S+'

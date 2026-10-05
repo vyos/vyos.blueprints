@@ -1,0 +1,48 @@
+{# Not expressible with vyos_vrf yet: non-ethernet VRF membership, the VRF BGP
+   address families (RD/RT, import/export vpn, redistribute, route-map vpn
+   import) and neighbour address-family activation. #}
+{% for v in vrf_lite_vrfs %}
+{%   for i in v.interfaces | default([]) if i is not match('^eth\d+$') %}
+{%     set m = i | regex_search('^([a-z]+)(\d+)(?:\.(\d+))?$', '\\1', '\\2', '\\3') %}
+{%     if m[2] %}
+set interfaces {{ _vrf_lite_iftypes[m[0]] }} {{ m[0] ~ m[1] }} vif {{ m[2] }} vrf '{{ v.name }}'
+{%     else %}
+set interfaces {{ _vrf_lite_iftypes[m[0]] }} {{ i }} vrf '{{ v.name }}'
+{%     endif %}
+{%   endfor %}
+{%   set b = 'set vrf name ' ~ v.name ~ ' protocols bgp' %}
+{%   if v.rd is defined %}
+{%     for f in v.families | default(['ipv4', 'ipv6']) %}
+{%       set af = b ~ ' address-family ' ~ f ~ '-unicast' %}
+{{ af }} export vpn
+{{ af }} import vpn
+{%       if v.label_vpn_export is defined %}
+{{ af }} label vpn export '{{ v.label_vpn_export }}'
+{%       endif %}
+{%       for n in v.networks | default([]) if (':' in n) == (f == 'ipv6') %}
+{{ af }} network {{ n }}
+{%       endfor %}
+{{ af }} rd vpn export '{{ v.rd }}'
+{%       for r in v.redistribute | default([]) %}
+{{ af }} redistribute {{ r }}
+{%       endfor %}
+{%       if v.route_targets_export | default([]) %}
+{{ af }} route-target vpn export '{{ v.route_targets_export | join(' ') }}'
+{%       endif %}
+{%       if v.route_targets_import | default([]) %}
+{{ af }} route-target vpn import '{{ v.route_targets_import | join(' ') }}'
+{%       endif %}
+{%       if (v.import_route_map | default({}))[f] is defined %}
+{{ af }} route-map vpn import '{{ v.import_route_map[f] }}'
+{%       endif %}
+{%     endfor %}
+{%   endif %}
+{%   for n in v.neighbors | default([]) %}
+{%     set naf = b ~ ' neighbor ' ~ n.address ~ ' address-family ' ~ ('ipv6' if ':' in n.address else 'ipv4') ~ '-unicast' %}
+{%     if n.as_override | default(false) | bool %}
+{{ naf }} as-override
+{%     else %}
+{{ naf }}
+{%     endif %}
+{%   endfor %}
+{% endfor %}

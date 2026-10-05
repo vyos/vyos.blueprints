@@ -1,0 +1,21 @@
+{%- macro side(prefix, s) -%}
+{%-   if s is not defined or s.any | default(false) | bool -%}
+{{ prefix }} any
+{%-   elif s.host is defined -%}
+{{ prefix }} host '{{ s.host }}'
+{%-   else -%}
+{{ prefix }} inverse-mask '{{ s.inverse_mask }}'
+{{ prefix }} network '{{ s.network }}'
+{%-   endif -%}
+{%- endmacro -%}
+{% for acl in route_policy_access_lists %}
+{%   set b = 'set policy access-list ' ~ acl.number %}
+{%   if acl.description is defined %}
+{{ b }} description '{{ acl.description }}'
+{%   endif %}
+{%   for r in acl.rules %}
+{{ b }} rule {{ r.number }} action '{{ r.action }}'
+{{ side(b ~ ' rule ' ~ r.number ~ ' destination', r.destination) }}
+{{ side(b ~ ' rule ' ~ r.number ~ ' source', r.source) }}
+{%   endfor %}
+{% endfor %}

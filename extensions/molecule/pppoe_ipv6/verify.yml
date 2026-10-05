@@ -1,0 +1,33 @@
+---
+- name: Verify the PPPoE session
+  hosts: home
+  gather_facts: false
+  tasks:
+    - name: Wait for PPPoE, DHCPv6-PD and router advertisements
+      ansible.builtin.pause:
+        seconds: 40
+
+    - name: Run role checks
+      ansible.builtin.include_role:
+        name: vyos.blueprints.pppoe
+        tasks_from: verify
+
+- name: Verify IPv6 on the LAN
+  hosts: localhost
+  gather_facts: false
+  vars:
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+  tasks:
+    - name: The PC has a SLAAC address from the delegated prefix
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-pppoe-pc ip -6 addr show dev eth1 scope global
+      become: "{{ _become }}"
+      register: _addr
+      changed_when: false
+      failed_when: _addr.stdout is not search('inet6 2001:db8:8003:')
+
+    - name: The PC reaches the internet over IPv6 through the page's firewall
+      ansible.builtin.command:
+        cmd: docker exec clab-bp-pppoe-pc ping -6 -c 3 -W 2 2001:db8:ffff::1
+      become: "{{ _become }}"
+      changed_when: false

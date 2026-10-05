@@ -1,0 +1,10 @@
+{% if mpls_ldp_router_id %}
+{%   for i in mpls_ldp_interfaces %}
+set protocols mpls interface '{{ i }}'
+{%   endfor %}
+set protocols mpls ldp discovery transport-ipv4-address '{{ mpls_ldp_transport_address or mpls_ldp_router_id }}'
+{%   for i in mpls_ldp_interfaces %}
+set protocols mpls ldp interface '{{ i }}'
+{%   endfor %}
+set protocols mpls ldp router-id '{{ mpls_ldp_router_id }}'
+{% endif %}
