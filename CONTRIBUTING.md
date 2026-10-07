@@ -35,7 +35,7 @@ or a building block several pages share.
 | Tier | Command | Needs |
 |---|---|---|
 | 0 – lint | `ansible-lint` | nothing |
-| 1 – render | `tests/render/run.sh` | nothing (no device) |
+| 1 – render | `tests/render/run.sh` | nothing - a test-only connection reports the VyOS version (`VYOS_OFFLINE_OS_VERSION`, default 1.5) |
 | 2 – molecule | `cd extensions && molecule test -s <role>` | docker, containerlab, a VyOS image |
 
 Run tiers 0 and 1 before opening a PR; CI runs all three.
@@ -48,8 +48,6 @@ git clone https://github.com/vyos/vyos.blueprints ~/src/ansible_collections/vyos
 cd ~/src/ansible_collections/vyos/blueprints
 pip install ansible-core ansible-lint ansible-pylibssh molecule
 ansible-galaxy collection install -r tests/requirements.yml -p ~/src
-# render tests need the patched vyos.vyos instead (see tests/render/requirements.yml):
-# ansible-galaxy collection install -r tests/render/requirements.yml -p ~/src --force
 export ANSIBLE_COLLECTIONS_PATH=~/src
 scripts/build-vyos-image.sh /path/to/vyos-1.5-*.iso    # once, for tier 2
 ```

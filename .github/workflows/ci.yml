@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install ansible-core ansible-pylibssh
-      - run: ansible-galaxy collection install -r ${{ env.COLLECTION_PATH }}/tests/render/requirements.yml -p .
+      - run: ansible-galaxy collection install -r ${{ env.COLLECTION_PATH }}/tests/requirements.yml -p .
       - name: Render tests
         env:
           ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}

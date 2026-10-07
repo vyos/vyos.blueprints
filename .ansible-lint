@@ -1,6 +1,7 @@
 ---
 profile: production
 exclude_paths:
+  - tests/render/collections/   # test-only collection, never published
   - .github/
   - extensions/molecule/*/topology.clab.yml
   - extensions/molecule/*/inventory.yml

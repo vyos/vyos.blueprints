@@ -1,0 +1,8 @@
+---
+namespace: blueprints_test
+name: offline
+version: 1.0.0
+readme: README.md
+authors: [VyOS maintainers and contributors]
+description: Test-only connection for offline render tests of vyos.blueprints. Never published.
+license: [GPL-3.0-or-later]
