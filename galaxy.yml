@@ -11,7 +11,7 @@ description: >-
 license_file: LICENSE
 tags: [vyos, networking, network, blueprints]
 dependencies:
-  vyos.vyos: ">=6.0.0"
+  vyos.vyos: ">=6.1.0"
   ansible.netcommon: ">=6.0.0"
 repository: https://github.com/vyos/vyos.blueprints
 documentation: https://github.com/vyos/vyos.blueprints/tree/main/docs

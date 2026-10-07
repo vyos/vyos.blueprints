@@ -1,7 +1,7 @@
 # Upstream findings
 
 Bugs, missing modules and missing options found while implementing the VyOS
-1.5 Configuration Blueprints with vyos.vyos (main), plus issues in the docs
+1.5 Configuration Blueprints with vyos.vyos 6.1.0, plus issues in the docs
 pages themselves. Every item is worked around in this collection; the
 "Workaround" column says where, so the workaround can be removed once the item
 is fixed upstream.
@@ -14,8 +14,8 @@ is fixed upstream.
 | B2 | **vyos_vrf** | With `state: merged`, `bind_to_all` omitted or `false` renders `delete vrf bind-to-all`. A merge must not delete. | Removes an existing `bind-to-all` on apply. | VRF and firewall, Inter-VRF, L3VPN | `vrf_firewall`, `vrf_lite`: value always passed explicitly (documented) |
 | B3 | all version-gated modules (13) | `get_os_version()` opens a device connection even for `state: rendered`/`parsed`; also an `UnboundLocalError` when no device info is returned. | Offline rendering/parsing impossible for ntp_global, logging_global, ha, firewall_global, firewall_rules, ospfv2, ospfv3, ospf_interfaces, bgp_global, bgp_address_family, route_maps, static_routes, vrf. | Scaffold (render tests) | Patch `vyos.vyos-offline-render.patch`; CI uses the patched branch |
 | B4 | vyos_vpn_ipsec | `ike_group.proposal.prf` is in the argspec but has no template - silently dropped. | IKE PRF never configured. | Google Cloud HA VPN | `ipsec_route_based`: PRF via vyos_config |
-| B5 | vyos_snmp_server | The trap-target template checks `authorization_type`/`client`/`network` (copied from communities) instead of `community`/`port`. | Trap-target community and port silently dropped. | Roadmap: management (SNMP) | `management`: v2c trap targets via vyos_config |
-| B6 | vyos_snmp_server | SNMPv3 trap-target `port` renders `service snmp v3 trap-target port X` without the address. | Invalid command. | Roadmap: management (SNMP) | - (avoid v3 trap-target port) |
+| B5 | vyos_snmp_server | The trap-target template checks `authorization_type`/`client`/`network` (copied from communities) instead of `community`/`port`. | Trap-target community and port silently dropped. | management role (SNMP) | `management`: v2c trap targets via vyos_config |
+| B6 | vyos_snmp_server | SNMPv3 trap-target `port` renders `service snmp v3 trap-target port X` without the address. | Invalid command. | management role (SNMP) | - (avoid v3 trap-target port) |
 | B7 | vyos_bgp_global | Neighbours with `peer_group: true` (peer-group definitions) render nothing. | Peer-groups silently missing. | BGP IPv6 unnumbered, L3VPN | `bgp_unnumbered`, `l3vpn`: vyos_config |
 | B8 | vyos_bgp_address_family | `default_originate` is typed as a string (route-map name); a plain `default-originate` renders `default-originate route-map {}`. | Bare default-originate impossible. | Inter-VRF (ISP side) | Lab ISP via vyos_config |
 | B9 | vyos_ospf_interfaces | `passive: false` renders nothing instead of `passive disable`. | Interfaces cannot be exempted from `passive-interface default`. | DMVPN | `ospf`: `passive disable` via vyos_config |

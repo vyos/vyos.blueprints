@@ -65,7 +65,7 @@ conventions and the render-only preview mode.
 ## Requirements
 
 - ansible-core 2.16+
-- vyos.vyos 6.0.0+ (installed automatically)
+- vyos.vyos 6.1.0+ (installed automatically)
 - VyOS 1.4 or 1.5, reachable over SSH (`ansible.netcommon.network_cli`)
 
 ## Scope

@@ -1,9 +1,7 @@
 ---
-# Development / CI dependencies. vyos.vyos comes from git until the
-# offline-render fix (get_os_version for state=rendered/parsed) is released.
+# Development / CI dependencies (lint, Molecule): released collections from Galaxy.
 collections:
-  - name: https://github.com/vyos/vyos.vyos.git
-    type: git
-    version: main
+  - name: vyos.vyos
+    version: ">=6.1.0"
   - name: ansible.netcommon
   - name: ansible.utils

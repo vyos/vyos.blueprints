@@ -48,6 +48,8 @@ git clone https://github.com/vyos/vyos.blueprints ~/src/ansible_collections/vyos
 cd ~/src/ansible_collections/vyos/blueprints
 pip install ansible-core ansible-lint ansible-pylibssh molecule
 ansible-galaxy collection install -r tests/requirements.yml -p ~/src
+# render tests need the patched vyos.vyos instead (see tests/render/requirements.yml):
+# ansible-galaxy collection install -r tests/render/requirements.yml -p ~/src --force
 export ANSIBLE_COLLECTIONS_PATH=~/src
 scripts/build-vyos-image.sh /path/to/vyos-1.5-*.iso    # once, for tier 2
 ```
