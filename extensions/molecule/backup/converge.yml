@@ -1,0 +1,12 @@
+---
+- name: Back up all routers three times
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Run the backup role
+      ansible.builtin.include_role:
+        name: vyos.blueprints.backup
+      loop: [1, 2, 3]
+      loop_control:
+        loop_var: _run
+        pause: 2

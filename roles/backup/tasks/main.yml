@@ -1,0 +1,78 @@
+---
+- name: One timestamp for the whole run
+  ansible.builtin.set_fact:
+    _backup_timestamp: "{{ now(utc=true, fmt='%Y%m%dT%H%M%SZ') }}"
+  run_once: true
+
+- name: Create the backup directory
+  ansible.builtin.file:
+    path: "{{ _backup_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+
+- name: Save the configuration as set commands
+  vyos.vyos.vyos_config:
+    backup: true
+    backup_options:
+      dir_path: "{{ _backup_dir }}"
+      filename: "{{ _backup_prefix }}.set"
+  register: _backup_r_set
+  when: "'set' in backup_formats"
+
+- name: Read the configuration in hierarchical form
+  vyos.vyos.vyos_command:
+    commands: [show configuration]
+  register: _backup_r_cfg
+  no_log: true
+  when: "'cfg' in backup_formats"
+
+- name: Save the hierarchical configuration (restorable with replace=config)
+  ansible.builtin.copy:
+    content: "{{ _backup_r_cfg.stdout[0] }}\n"
+    dest: "{{ _backup_dir }}/{{ _backup_prefix }}.cfg"
+    mode: "0600"
+  delegate_to: localhost
+  no_log: true
+  when: "'cfg' in backup_formats"
+
+- name: Restrict the set-command backup
+  ansible.builtin.file:
+    path: "{{ _backup_r_set.backup_path }}"
+    mode: "0600"
+  delegate_to: localhost
+  when: "'set' in backup_formats"
+
+- name: Collect version facts for the manifest
+  vyos.vyos.vyos_facts:
+    gather_subset: [default]
+  when: backup_manifest | bool
+
+- name: Write the manifest
+  ansible.builtin.copy:
+    content: >-
+      {{ {'host': inventory_hostname, 'timestamp': _backup_timestamp,
+          'version': ansible_net_version | default(''), 'model': ansible_net_model | default(''),
+          'serial': ansible_net_serialnum | default(''), 'hostname': ansible_net_hostname | default(''),
+          'files': backup_formats | map('regex_replace', '^(.*)$', _backup_prefix ~ '.\1') | list}
+         | to_nice_json }}
+    dest: "{{ _backup_dir }}/{{ _backup_prefix }}.json"
+    mode: "0600"
+  delegate_to: localhost
+  when: backup_manifest | bool
+
+- name: Apply retention
+  ansible.builtin.include_tasks: retention.yml
+  when: backup_keep | int > 0
+
+- name: Commit the backups to git  # noqa: command-instead-of-module - ansible.builtin.git cannot commit
+  ansible.builtin.shell:
+    cmd: >-
+      git add -A &&
+      (git diff --cached --quiet || git commit -q -m "VyOS backups {{ _backup_timestamp }}")
+    chdir: "{{ backup_root }}"
+  delegate_to: localhost
+  run_once: true
+  register: _backup_r_git
+  changed_when: true
+  when: backup_git_commit | bool

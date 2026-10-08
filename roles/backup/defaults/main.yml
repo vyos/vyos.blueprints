@@ -1,0 +1,7 @@
+---
+backup_root: "{{ playbook_dir }}/backups"
+backup_formats: [set, cfg]
+backup_manifest: true
+backup_keep: 10
+backup_dry_run: false
+backup_git_commit: false

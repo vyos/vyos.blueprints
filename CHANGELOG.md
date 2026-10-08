@@ -29,3 +29,4 @@
 - New role `l2tp_lns` (docs blueprint "PPPoE over L2TP"); its Molecule scenario is experimental.
 - New role `dmvpn`; `gre_tunnel` gains GRE key and enable-multicast; `ospf` gains interface area, `passive disable`, `passive-interface default` and an optional router-id (docs blueprint "DMVPN Dual HUB Dual Cloud").
 - New role `management`: SNMP (communities, v3, trap targets), remote syslog, NTP and RADIUS login; secrets are masked in rendered output.
+- New role `backup` and collection playbook `vyos.blueprints.backup` for bulk configuration backups.

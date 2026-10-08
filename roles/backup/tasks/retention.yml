@@ -1,0 +1,32 @@
+---
+# Keeps the newest backup_keep backups (all formats of one run together) per
+# router; based on find + sort by modification time.
+- name: Find this router's backups
+  ansible.builtin.find:
+    paths: "{{ _backup_dir }}"
+    patterns: "{{ inventory_hostname }}_*"
+  delegate_to: localhost
+  register: _backup_found
+
+- name: Work out which backups are beyond the retention count
+  ansible.builtin.set_fact:
+    _backup_old: >-
+      {%- set runs = _backup_found.files | map(attribute='path') | map('basename')
+                     | map('regex_replace', '^' ~ (inventory_hostname | regex_escape) ~ '_(\\d{8}T\\d{6}Z)\\..*$', '\\1')
+                     | unique | sort(reverse=true) | list -%}
+      {%- set keep = runs[:backup_keep | int] -%}
+      {{ _backup_found.files | map(attribute='path')
+         | reject('search', '_(' ~ (keep | join('|') if keep else 'none') ~ ')\.') | list }}
+
+- name: Report backups retention would remove
+  ansible.builtin.debug:
+    var: _backup_old
+  when: backup_dry_run | bool
+
+- name: Remove backups beyond the retention count
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ _backup_old }}"
+  delegate_to: localhost
+  when: not (backup_dry_run | bool)

@@ -1,0 +1,18 @@
+---
+- name: Check this run's backup files
+  ansible.builtin.stat:
+    path: "{{ _backup_dir }}/{{ _backup_prefix }}.{{ item }}"
+  loop: "{{ backup_formats }}"
+  delegate_to: localhost
+  register: _backup_v
+
+- name: Every backup file exists and is not empty
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.size > 0
+    fail_msg: "{{ item.item }} backup of {{ inventory_hostname }} is missing or empty"
+    quiet: true
+  loop: "{{ _backup_v.results }}"
+  loop_control:
+    label: "{{ item.item }}"

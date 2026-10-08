@@ -1,0 +1,3 @@
+---
+_backup_dir: "{{ backup_root }}/{{ inventory_hostname }}"
+_backup_prefix: "{{ inventory_hostname }}_{{ _backup_timestamp }}"

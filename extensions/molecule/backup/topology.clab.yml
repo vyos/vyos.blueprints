@@ -1,0 +1,9 @@
+name: bp-backup
+topology:
+  nodes:
+    r1:
+      kind: vyosnetworks_vyos
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}
+    r2:
+      kind: vyosnetworks_vyos
+      image: ${VYOS_IMAGE:=vyos:blueprints-ci}

@@ -1,0 +1,36 @@
+---
+- name: Verify the backups
+  hosts: vyos
+  gather_facts: false
+  vars:
+    _dir: "{{ backup_root }}/{{ inventory_hostname }}"
+  tasks:
+    - name: Find this router's backup runs (one manifest per run)
+      ansible.builtin.find:
+        paths: "{{ _dir }}"
+        patterns: "{{ inventory_hostname }}_*.json"
+      delegate_to: localhost
+      register: _runs
+
+    - name: Retention kept the newest 2 of 3 runs
+      ansible.builtin.assert:
+        that: _runs.matched == 2
+        quiet: true
+
+    - name: Read the newest run's hierarchical backup and manifest
+      ansible.builtin.set_fact:
+        _manifest: "{{ lookup('ansible.builtin.file', _newest) | from_json }}"
+        _cfg: "{{ lookup('ansible.builtin.file', _newest | regex_replace('\\.json$', '.cfg')) }}"
+        _set: "{{ lookup('ansible.builtin.file', _newest | regex_replace('\\.json$', '.set')) }}"
+      vars:
+        _newest: "{{ (_runs.files | sort(attribute='mtime', reverse=true) | first).path }}"
+      no_log: true
+
+    - name: Both formats are complete and the manifest has the version
+      ansible.builtin.assert:
+        that:
+          - _cfg is search('(?m)^interfaces \{')
+          - _set is search('(?m)^set interfaces ')
+          - _manifest.version | length > 0
+          - _manifest.host == inventory_hostname
+        quiet: true

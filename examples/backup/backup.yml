@@ -1,0 +1,16 @@
+---
+# Same as "ansible-playbook vyos.blueprints.backup", with the settings visible.
+- name: Back up VyOS router configurations
+  hosts: routers
+  gather_facts: false
+  vars:
+    backup_root: /srv/vyos-backups   # backups contain secrets - protect this directory
+    backup_keep: 30
+    backup_git_commit: false         # true: commit each run (backup_root must be a git repo)
+  roles:
+    - vyos.blueprints.backup
+  post_tasks:
+    - name: Check this run's backups
+      ansible.builtin.include_role:
+        name: vyos.blueprints.backup
+        tasks_from: verify

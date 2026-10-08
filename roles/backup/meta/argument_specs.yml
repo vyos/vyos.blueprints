@@ -1,0 +1,44 @@
+---
+argument_specs:
+  main:
+    short_description: Back up VyOS configurations in bulk
+    description:
+      - Saves each router's configuration on the controller as
+        C(<backup_root>/<host>/<host>_<timestamp>.<ext>), with one timestamp
+        per run so the backups of one run belong together.
+      - C(set) - C(show configuration commands) via vyos.vyos.vyos_config
+        C(backup), for reading and diffing.
+      - C(cfg) - C(show configuration) (hierarchical); this is the format
+        vyos.vyos.vyos_config C(replace=config) loads, so it is the one to
+        restore from.
+      - A C(.json) manifest records the VyOS version, model, serial number and
+        time - used by upgrades to check versions.
+      - Retention keeps the newest C(backup_keep) backups per router.
+      - B(Backups contain secrets) (password hashes, keys). Files are written
+        with mode 0600; protect C(backup_root) accordingly.
+      - Bulk runs use the play's forks; use C(throttle) or C(serial) in the
+        play to limit concurrency.
+    options:
+      backup_root: {type: str, default: "{{ playbook_dir }}/backups", description: Backup directory on the controller.}
+      backup_formats:
+        type: list
+        elements: str
+        choices: [set, cfg]
+        default: [set, cfg]
+        description: Formats to save.
+      backup_manifest: {type: bool, default: true, description: Write a facts manifest next to each backup.}
+      backup_keep: {type: int, default: 10, description: Backups to keep per router; C(0) keeps all.}
+      backup_dry_run: {type: bool, default: false, description: Only report which old backups retention would remove.}
+      backup_git_commit:
+        type: bool
+        default: false
+        description: Commit C(backup_root) to git after the run (it must already be a git repository).
+  verify:
+    short_description: Post-backup checks for the backup role
+    description: Run with C(tasks_from=verify) in the same play after C(main). Checks this run's files exist and are not empty.
+    options:
+      backup_formats:
+        type: list
+        elements: str
+        default: [set, cfg]
+        description: Same value as for C(main).

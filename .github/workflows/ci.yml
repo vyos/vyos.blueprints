@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [base, edge_nat, ha_vrrp, ospf_unnumbered, bgp_unnumbered, zone_firewall, vrf_firewall, bridge_firewall, ipsec_route_based, ipsec_policy_based, policy_ipsec_firewall, gre_tunnel, ipsec_route_based_bgp, ipsec_route_based_bgp_dual, ipsec_route_based_gcp, ha_walkthrough, ha_walkthrough_ospf, ha_walkthrough_bgp, inter_vrf, wan_load_balance, pppoe_ipv6, qos, isis_segment_routing, l3vpn_hub_and_spoke, l2tp_lns, dmvpn, management]
+        scenario: [base, edge_nat, ha_vrrp, ospf_unnumbered, bgp_unnumbered, zone_firewall, vrf_firewall, bridge_firewall, ipsec_route_based, ipsec_policy_based, policy_ipsec_firewall, gre_tunnel, ipsec_route_based_bgp, ipsec_route_based_bgp_dual, ipsec_route_based_gcp, ha_walkthrough, ha_walkthrough_ospf, ha_walkthrough_bgp, inter_vrf, wan_load_balance, pppoe_ipv6, qos, isis_segment_routing, l3vpn_hub_and_spoke, l2tp_lns, dmvpn, management, backup]
     steps:
       - uses: actions/checkout@v4
         with:

@@ -1,0 +1,13 @@
+---
+# Bulk backup of VyOS routers:
+#   ansible-playbook vyos.blueprints.backup -i inventory.yml [-e vyos_backup_hosts=<group>] [-e backup_root=/srv/backups]
+- name: Back up VyOS router configurations
+  hosts: "{{ vyos_backup_hosts | default('all') }}"
+  gather_facts: false
+  roles:
+    - vyos.blueprints.backup
+  post_tasks:
+    - name: Check this run's backups
+      ansible.builtin.include_role:
+        name: vyos.blueprints.backup
+        tasks_from: verify

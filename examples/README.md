@@ -28,6 +28,7 @@ Each directory is a complete, runnable Ansible project:
 | `l2tp-lns/` | `base`, `nat`, `l2tp_lns` | [PPPoE over L2TP](https://docs.vyos.io/en/1.5/configexamples/lac-lns.html) (the lab topology stands in for the Cisco LAC and adds FreeRADIUS) |
 | `dmvpn-dual-hub/` | `base`, `gre_tunnel`, `dmvpn`, `ospf` | [DMVPN Dual HUB Dual Cloud](https://docs.vyos.io/en/1.5/configexamples/dmvpn-dualhub-dualcloud.html) (VyOS hubs and spokes) |
 | `management/` | `base`, `management` | management plane - SNMP, traps, syslog, NTP, RADIUS login |
+| `backup/` | `backup` | bulk backups of any VyOS inventory |
 
 Most examples ship a `topology.clab.yml`, so you can try them against
 containerized VyOS before pointing it at real routers:
