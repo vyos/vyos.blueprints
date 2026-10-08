@@ -8,4 +8,10 @@ on: # yamllint disable-line rule:truthy
     types: [opened, labeled, unlabeled, synchronize]
 jobs:
   check_label:
+    # The reusable workflow requests these; the repository default token is
+    # read-only, so they have to be granted here explicitly.
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
     uses: ansible/ansible-content-actions/.github/workflows/check_label.yaml@main
