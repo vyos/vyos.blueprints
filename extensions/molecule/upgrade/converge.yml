@@ -1,0 +1,26 @@
+---
+# Containers cannot boot a new image, so converge exercises the safe path:
+# every router already runs the "expected" version and must be skipped.
+- name: Read the running version
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Show version
+      vyos.vyos.vyos_command:
+        commands: [show version]
+      register: _v
+
+    - name: Remember it as the target version
+      ansible.builtin.set_fact:
+        _running: "{{ _v.stdout[0] | regex_search('(?m)^Version:\\s*VyOS\\s+(\\S+)', '\\1') | first }}"
+
+- name: Upgrade to the version already running (must be a no-op)
+  hosts: vyos
+  gather_facts: false
+  serial: 1
+  max_fail_percentage: 0
+  roles:
+    - role: vyos.blueprints.upgrade
+      vars:
+        upgrade_image_url: https://example.invalid/never-downloaded.iso
+        upgrade_expected_version: "{{ _running }}"

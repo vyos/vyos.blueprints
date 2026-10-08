@@ -1,0 +1,120 @@
+---
+- name: Read the running version
+  vyos.vyos.vyos_command:
+    commands: [show version]
+  register: _upgrade_before
+
+- name: Note the running version
+  ansible.builtin.set_fact:
+    _upgrade_running: "{{ _upgrade_before.stdout[0] | regex_search('(?m)^Version:\\s*(.*)$', '\\1') | first | default('') | trim }}"
+
+- name: Skip routers already running the expected version
+  ansible.builtin.meta: end_host
+  when:
+    - upgrade_expected_version | length > 0
+    - upgrade_expected_version in _upgrade_running
+
+- name: Back up the configuration first
+  ansible.builtin.include_role:
+    name: vyos.blueprints.backup
+  when: upgrade_backup | bool
+
+- name: Add the new image
+  # Prompts as printed by VyOS 1.4/1.5 (name, default boot, copy config, copy SSH keys).
+  ansible.netcommon.cli_command:
+    command: "{{ _upgrade_add_command }}"
+    check_all: false
+    prompt:
+      - What would you like to name this image
+      - Would you like to set the new image as the default one for boot
+      - Would you like to copy it to the new image
+      - Would you like to copy SSH host keys
+    answer:
+      - "{{ upgrade_image_name }}"
+      - "{{ _upgrade_yes_no[0] }}"
+      - "{{ _upgrade_yes_no[1] }}"
+      - "{{ _upgrade_yes_no[2] }}"
+  vars:
+    ansible_command_timeout: "{{ upgrade_command_timeout }}"
+  register: _upgrade_add
+  changed_when: true
+
+- name: The image installer reported no error
+  # The installer can print "Error: ..." after copying everything (vyos.dev T7668).
+  ansible.builtin.assert:
+    that: _upgrade_add.stdout is not search('(?im)^\s*(error|failed)\b')
+    fail_msg: "add system image failed on {{ inventory_hostname }}: {{ _upgrade_add.stdout | regex_search('(?im)^\\s*(error|failed).*$') }}"
+    quiet: true
+
+- name: Read the installed images
+  vyos.vyos.vyos_command:
+    commands: [show system image]
+  register: _upgrade_images
+
+- name: Locate the new image in the image list
+  # "show system image" is a table; the Default boot column is found from the
+  # header, because "Yes" in the Running column must not count as default.
+  ansible.builtin.set_fact:
+    _upgrade_image_line: "{{ _upgrade_lines | select('match', '^' ~ (_upgrade_name | regex_escape) ~ '\\s') | first | default('') }}"
+    _upgrade_default_col: "{{ (_upgrade_lines | select('match', '^Name\\s') | first | default('')).find('Default boot') }}"
+  vars:
+    _upgrade_lines: "{{ _upgrade_images.stdout[0].splitlines() }}"
+    _upgrade_name: "{{ upgrade_image_name or (_upgrade_add.stdout | regex_search('\\(Default: ([^)]+)\\)', '\\1') | first | default('')) }}"
+
+- name: The new image is installed (and is the default boot image)
+  ansible.builtin.assert:
+    that:
+      - _upgrade_image_line | length > 0
+      - >-
+        not (upgrade_set_default | bool)
+        or (_upgrade_default_col | int >= 0
+            and _upgrade_image_line[_upgrade_default_col | int:(_upgrade_default_col | int) + 3] == 'Yes')
+    fail_msg: "the new image is not listed{{ ' as default boot' if upgrade_set_default | bool else '' }} on {{ inventory_hostname }}"
+    quiet: true
+
+- name: Reboot into the new image and verify it
+  when: upgrade_reboot | bool
+  block:
+    - name: Reboot
+      ansible.netcommon.cli_command:
+        command: reboot now
+      register: _upgrade_reboot
+      failed_when: false
+      changed_when: true
+
+    - name: Drop the old connection
+      ansible.builtin.meta: reset_connection
+
+    - name: Wait for SSH to go down
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: "{{ ansible_port | default(22) }}"
+        state: stopped
+        timeout: 300
+      delegate_to: localhost
+
+    - name: Wait for SSH to come back
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: "{{ ansible_port | default(22) }}"
+        state: started
+        delay: 20
+        timeout: "{{ upgrade_reboot_timeout }}"
+      delegate_to: localhost
+
+    - name: Wait until the router answers commands
+      vyos.vyos.vyos_command:
+        commands: [show version]
+      register: _upgrade_after
+      until: _upgrade_after is succeeded
+      retries: 30
+      delay: 10
+
+    - name: The router runs the expected version
+      ansible.builtin.assert:
+        that: upgrade_expected_version in (_upgrade_after.stdout[0] | regex_search('(?m)^Version:.*$'))
+        fail_msg: >-
+          {{ inventory_hostname }} runs {{ _upgrade_after.stdout[0] | regex_search('(?m)^Version:.*$') }},
+          expected {{ upgrade_expected_version }}
+        quiet: true
+      when: upgrade_expected_version | length > 0

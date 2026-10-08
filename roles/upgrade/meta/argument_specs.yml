@@ -1,0 +1,41 @@
+---
+argument_specs:
+  main:
+    short_description: Upgrade VyOS routers to a new image
+    description:
+      - Per router - optional backup (C(vyos.blueprints.backup)), C(add system
+        image) with its prompts answered, a check that the image is installed
+        and set as default boot, a reboot, a wait for the router to come back,
+        and a check of the running version.
+      - With C(upgrade_expected_version), routers already running that version
+        are skipped, so a bulk upgrade can be re-run safely.
+      - For bulk upgrades use the collection playbook C(vyos.blueprints.upgrade),
+        which upgrades one router at a time (C(serial)) and stops at the first
+        failure, so HA pairs never reboot together.
+      - Uses ansible.netcommon.cli_command and vyos.vyos.vyos_command; vyos.vyos
+        has no image-management module.
+    options:
+      upgrade_image_url:
+        type: str
+        required: true
+        description: "Image URL or path on the router, e.g. C(https://example.com/vyos-1.5.1-generic-amd64.iso)."
+      upgrade_image_name:
+        type: str
+        default: ""
+        description: Name for the new image. Empty accepts the name VyOS proposes (its version).
+      upgrade_expected_version:
+        type: str
+        default: ""
+        description:
+          - Text expected in the C(Version:) line of C(show version) after the upgrade, e.g. C(1.5.1).
+          - Routers already running it are skipped. Strongly recommended for bulk runs.
+          - The skip ends the router's play (C(meta end_host)); put tasks that must
+            still run for up-to-date routers in a separate play.
+      upgrade_vrf: {type: str, default: "", description: VRF used to download the image.}
+      upgrade_set_default: {type: bool, default: true, description: Make the new image the default boot image.}
+      upgrade_copy_config: {type: bool, default: true, description: Copy the active configuration to the new image.}
+      upgrade_copy_ssh_keys: {type: bool, default: true, description: Copy SSH host keys to the new image.}
+      upgrade_backup: {type: bool, default: true, description: Back up the configuration first with vyos.blueprints.backup.}
+      upgrade_reboot: {type: bool, default: true, description: Reboot into the new image and verify it. Without it the image is only installed.}
+      upgrade_command_timeout: {type: int, default: 1800, description: Seconds allowed for downloading and installing the image.}
+      upgrade_reboot_timeout: {type: int, default: 900, description: Seconds to wait for the router to come back after the reboot.}

@@ -1,0 +1,15 @@
+---
+# Any VyOS inventory works; group the routers you want backed up.
+all:
+  children:
+    routers:
+      hosts:
+        r1:
+          ansible_host: 192.0.2.11   # your routers' addresses
+        r2:
+          ansible_host: 192.0.2.12
+  vars:
+    ansible_network_os: vyos.vyos.vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_user: vyos
+    ansible_password: vyos         # use ansible-vault for real devices

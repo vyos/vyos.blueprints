@@ -1,0 +1,12 @@
+---
+# Bulk VyOS upgrade, one router at a time; stops at the first failure.
+#   ansible-playbook vyos.blueprints.upgrade -i inventory.yml \
+#     -e upgrade_image_url=https://example.com/vyos-1.5.1-generic-amd64.iso \
+#     -e upgrade_expected_version=1.5.1 [-e vyos_upgrade_hosts=<group>] [-e vyos_upgrade_serial=2]
+- name: Upgrade VyOS routers
+  hosts: "{{ vyos_upgrade_hosts | default('all') }}"
+  gather_facts: false
+  serial: "{{ vyos_upgrade_serial | default(1) }}"
+  max_fail_percentage: 0
+  roles:
+    - vyos.blueprints.upgrade

@@ -1,0 +1,12 @@
+---
+upgrade_image_url: ""
+upgrade_image_name: ""
+upgrade_expected_version: ""
+upgrade_vrf: ""
+upgrade_set_default: true
+upgrade_copy_config: true
+upgrade_copy_ssh_keys: true
+upgrade_backup: true
+upgrade_reboot: true
+upgrade_command_timeout: 1800
+upgrade_reboot_timeout: 900

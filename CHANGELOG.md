@@ -30,3 +30,4 @@
 - New role `dmvpn`; `gre_tunnel` gains GRE key and enable-multicast; `ospf` gains interface area, `passive disable`, `passive-interface default` and an optional router-id (docs blueprint "DMVPN Dual HUB Dual Cloud").
 - New role `management`: SNMP (communities, v3, trap targets), remote syslog, NTP and RADIUS login; secrets are masked in rendered output.
 - New role `backup` and collection playbook `vyos.blueprints.backup` for bulk configuration backups.
+- New role `upgrade` and collection playbook `vyos.blueprints.upgrade` for rolling image upgrades with pre-upgrade backups.

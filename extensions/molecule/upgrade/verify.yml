@@ -1,0 +1,42 @@
+---
+- name: Verify the skip path took no action
+  hosts: vyos
+  gather_facts: false
+  tasks:
+    - name: Look for backups (none should exist - skipped routers are not touched)
+      ansible.builtin.find:
+        paths: "{{ backup_root }}/{{ inventory_hostname }}"
+      delegate_to: localhost
+      register: _found
+
+    - name: No backup was taken for an up-to-date router
+      ansible.builtin.assert:
+        that: _found.matched == 0
+        quiet: true
+
+- name: Verify a failed install stops before any reboot
+  hosts: r1
+  gather_facts: false
+  tasks:
+    - name: Try to install an image that does not exist
+      block:
+        - name: Run the upgrade role with a missing image
+          ansible.builtin.include_role:
+            name: vyos.blueprints.upgrade
+          vars:
+            upgrade_image_url: /tmp/does-not-exist.iso
+            upgrade_backup: false
+            upgrade_command_timeout: 120
+
+        - name: The role should not get here
+          ansible.builtin.fail:
+            msg: the upgrade role did not fail for a missing image
+      rescue:
+        - name: The failure happened before the reboot
+          ansible.builtin.assert:
+            that: _upgrade_reboot is not defined
+            quiet: true
+
+    - name: The router is still up and running its original image
+      vyos.vyos.vyos_command:
+        commands: [show version]

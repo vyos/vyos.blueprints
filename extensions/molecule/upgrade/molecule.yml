@@ -1,0 +1,31 @@
+---
+# VyOS runs as a container (containerlab kind vyosnetworks_vyos);
+# the lab is deployed in prepare and destroyed in cleanup.
+dependency:
+  name: galaxy
+  enabled: false
+driver:
+  name: default
+  options:
+    managed: false
+platforms:
+  - name: r1
+  - name: r2
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      host_key_checking: false
+    persistent_connection:
+      command_timeout: 60
+  inventory:
+    links:
+      hosts: inventory.yml
+  playbooks:
+    prepare: ../_shared/lab_up.yml
+    cleanup: ../_shared/lab_down.yml
+verifier:
+  name: ansible
+scenario:
+  # the scenario checks the skip and failure paths; containers cannot boot new images
+  test_sequence: [dependency, cleanup, destroy, syntax, create, prepare, converge, verify, cleanup, destroy]

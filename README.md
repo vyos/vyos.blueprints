@@ -39,6 +39,7 @@ validated, idempotent, testable unit.
 | `vyos.blueprints.dmvpn` | DMVPN - NHRP for hubs and spokes (phase 3), IPsec profile in transport mode, unprotected-GRE drop rule | [DMVPN Dual HUB Dual Cloud](https://docs.vyos.io/en/1.5/configexamples/dmvpn-dualhub-dualcloud.html) |
 | `vyos.blueprints.management` | SNMP v2c/v3 and trap targets, remote syslog, NTP, RADIUS login; secrets masked | building block (roadmap: management plane) |
 | `vyos.blueprints.backup` | Bulk configuration backups - restorable hierarchical form and set commands, version manifest, retention, optional git commit | operations; `ansible-playbook vyos.blueprints.backup` |
+| `vyos.blueprints.upgrade` | Bulk image upgrades - backup, add image, reboot, version check; skips routers already upgraded, one router at a time | operations; `ansible-playbook vyos.blueprints.upgrade` |
 
 Every role has documented, validated inputs (`ansible-doc -t role vyos.blueprints.<role>`)
 and a `verify` entry point with operational checks
