@@ -1,3 +1,15 @@
+# Contributing
+
+## Pull requests
+
+- Sign the VyOS CLA (the CLA check comments on your first PR).
+- Start the PR title and every commit message with a task key from vyos.dev,
+  e.g. `T1234: add the foo role` (checked by Mergify).
+- Add a changelog fragment in `changelogs/fragments/` (keys: `major_changes`,
+  `minor_changes`, `bugfixes`, `breaking_changes`, `deprecated_features`,
+  `removed_features`, `security_fixes`, `known_issues`, `doc_changes`, `trivial`).
+- Optional: `pre-commit install` runs the same formatting checks locally.
+
 # Contributing a blueprint role
 
 A role should implement one page of the VyOS

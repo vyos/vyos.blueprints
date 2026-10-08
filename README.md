@@ -89,7 +89,7 @@ options, and docs-page issues found while building these roles, with the workaro
 ## Contributing
 
 New blueprints are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
-role checklist and the test tiers.
+PR conventions (CLA, `T<id>:` titles, changelog fragments), the role checklist and the test tiers.
 
 ## License
 

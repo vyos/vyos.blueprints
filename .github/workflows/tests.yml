@@ -1,0 +1,90 @@
+---
+name: CI
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * *
+
+permissions:
+  contents: read
+
+jobs:
+  # Shared Ansible content jobs, as in vyos.vyos and rest.vyos. There are no
+  # Python modules in this collection, so there are no unit jobs.
+  changelog:
+    uses: ansible/ansible-content-actions/.github/workflows/changelog.yaml@main
+    if: github.event_name == 'pull_request'
+  build-import:
+    uses: ansible/ansible-content-actions/.github/workflows/build_import.yaml@main
+  ansible-lint:
+    uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@main
+  sanity:
+    uses: ansible/ansible-content-actions/.github/workflows/sanity.yaml@main
+
+  # Collection-specific jobs.
+  render:
+    # Tier 1: no device. Renders every role and diffs against golden commands.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: ansible_collections/vyos/blueprints
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install ansible-core ansible-pylibssh
+      - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
+      - name: Render tests
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
+        run: ansible_collections/vyos/blueprints/tests/render/run.sh
+
+  molecule:
+    # Tier 2: containerized VyOS. Needs repository variable VYOS_ISO_URL.
+    needs: [lint, render]
+    if: ${{ vars.VYOS_ISO_URL != '' }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [base, edge_nat, ha_vrrp, ospf_unnumbered, bgp_unnumbered, zone_firewall, vrf_firewall, bridge_firewall, ipsec_route_based, ipsec_policy_based, policy_ipsec_firewall, gre_tunnel, ipsec_route_based_bgp, ipsec_route_based_bgp_dual, ipsec_route_based_gcp, ha_walkthrough, ha_walkthrough_ospf, ha_walkthrough_bgp, inter_vrf, wan_load_balance, pppoe_ipv6, qos, isis_segment_routing, l3vpn_hub_and_spoke, l2tp_lns, dmvpn, management, backup, upgrade]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: ansible_collections/vyos/blueprints
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install ansible-core ansible-pylibssh molecule
+      - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
+      - name: Install containerlab and image tools
+        run: |
+          bash -c "$(curl -sL https://get.containerlab.dev)"
+          sudo apt-get update && sudo apt-get install -y libarchive-tools squashfs-tools-ng
+      - name: Build VyOS image
+        run: ansible_collections/vyos/blueprints/scripts/build-vyos-image.sh "${{ vars.VYOS_ISO_URL }}" vyos:blueprints-ci
+      - name: molecule test
+        working-directory: ansible_collections/vyos/blueprints/extensions
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
+          VYOS_IMAGE: vyos:blueprints-ci
+        run: molecule test -s ${{ matrix.scenario }}
+
+  all_green:
+    if: ${{ always() }}
+    needs: [changelog, build-import, ansible-lint, sanity, render, molecule]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Fail if any required job failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+      - run: echo "All jobs passed or were skipped"

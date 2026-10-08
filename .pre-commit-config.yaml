@@ -1,0 +1,31 @@
+---
+ci:
+  # format compatible with commitlint
+  autoupdate_commit_msg: "chore: pre-commit autoupdate"
+  autoupdate_schedule: monthly
+  autofix_commit_msg: "chore: auto fixes from pre-commit.com hooks"
+
+# As in vyos.vyos and rest.vyos, without collection_prep (this collection has
+# no plugins to document) and the Python formatters (no Python content apart
+# from the test-only connection plugin).
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: end-of-file-fixer
+      - id: no-commit-to-branch
+        args: [--branch, main]
+      - id: trailing-whitespace
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        entry: env CI=1 bash -c "prettier --list-different . || ec=$? && prettier --loglevel=error --write . && exit $ec"
+        pass_filenames: false
+        args: []
+        additional_dependencies:
+          - prettier
+          - prettier-plugin-toml

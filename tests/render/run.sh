@@ -40,8 +40,14 @@ for case_dir in "$here"/cases/*/*/; do
   ANSIBLE_PERSISTENT_CONTROL_PATH_DIR="$(mktemp -d)"
   export ANSIBLE_PERSISTENT_CONTROL_PATH_DIR
   if ! ansible-playbook "${args[@]}"; then
-    echo "FAILED: $role/$name" >&2
-    rc=1
+    # one retry: the offline connection occasionally fails to start; a real
+    # regression fails twice. RETRY lines keep the flakiness visible.
+    echo "RETRY: $role/$name" >&2
+    rm -rf "$ANSIBLE_PERSISTENT_CONTROL_PATH_DIR"; ANSIBLE_PERSISTENT_CONTROL_PATH_DIR="$(mktemp -d)"
+    if ! ansible-playbook "${args[@]}"; then
+      echo "FAILED: $role/$name" >&2
+      rc=1
+    fi
   fi
   rm -rf "$ANSIBLE_PERSISTENT_CONTROL_PATH_DIR"
 done

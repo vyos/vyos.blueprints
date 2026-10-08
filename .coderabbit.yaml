@@ -1,0 +1,44 @@
+---
+# Per-repo CodeRabbit configuration for vyos/vyos.blueprints (Ansible roles collection).
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!changelogs/changelog.yaml"
+    - "!tests/render/cases/**/expected/**"
+  path_instructions:
+    - path: "**"
+      instructions: |
+        This is the vyos.blueprints Ansible collection: roles only, no modules. Roles
+        drive vyos.vyos resource modules. PR titles must follow `T{id}: description`
+        (Phorge task at vyos.dev). Every PR needs a changelog fragment in
+        changelogs/fragments/.
+    - path: "roles/*/meta/argument_specs.yml"
+      instructions: |
+        The role's input contract and documentation. Check that every input used in
+        tasks or templates is declared, defaults match defaults/main.yml, secrets
+        use no_log, and descriptions say which module or vyos_config path is used.
+    - path: "roles/*/tasks/*.yml"
+      instructions: |
+        Prefer vyos.vyos resource modules over vyos_config; any vyos_config use must
+        explain which module or option is missing. Every role must honour
+        vyos_blueprints_render_only, append to vyos_blueprints_rendered, mask
+        secrets and keep no_log on tasks handling them. Template lookups that may
+        render empty must be guarded with "or ''". Watch backslash escaping in
+        regex backreferences (statement blocks need \\1, folded expressions \1).
+    - path: "tests/render/cases/**"
+      instructions: |
+        Render cases: vars.yml / inventory.yml inputs taken from the docs page.
+        Golden files under expected/ are generated - review that the commands
+        match the docs page, not the file format.
+    - path: "extensions/molecule/**"
+      instructions: |
+        containerlab scenarios. eth0 is containerlab management and must stay
+        reachable (input firewalls need a rule for it). Verify tasks should test
+        the blueprint's intent with traffic where possible.

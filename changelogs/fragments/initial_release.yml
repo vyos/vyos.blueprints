@@ -1,0 +1,6 @@
+---
+release_summary: >-
+  Initial release - Ansible roles for the VyOS 1.5 Configuration Blueprints
+  (docs.vyos.io configexamples), building-block roles for firewall, NAT,
+  routing, VPNs and management, and operational roles for bulk backup and
+  rolling upgrades.
