@@ -1,0 +1,4 @@
+---
+doc_changes:
+  - README - add the collection's beta status, what is tested, CI badges and a security section.
+  - Add SECURITY.md with the private vulnerability reporting process.

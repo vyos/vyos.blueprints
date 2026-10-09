@@ -1,9 +1,28 @@
 # vyos.blueprints
 
+[![CI](https://github.com/vyos/vyos.blueprints/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/vyos/vyos.blueprints/actions/workflows/tests.yml)
+[![Security](https://github.com/vyos/vyos.blueprints/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/vyos/vyos.blueprints/actions/workflows/security.yml)
+
 Ansible roles that deploy the [VyOS Configuration Blueprints](https://docs.vyos.io/en/1.5/configexamples/index.html)
 on top of the [vyos.vyos](https://github.com/vyos/vyos.vyos) resource modules.
 Each role turns one blueprint (or one building block shared by several) into a
 validated, idempotent, testable unit.
+
+## Status
+
+**Beta.** All blueprints from the VyOS 1.5 configuration examples are implemented,
+together with building-block roles and operational roles for bulk backups and
+rolling upgrades. What is tested today:
+
+| Test | Runs | State |
+|---|---|---|
+| ansible-lint, ansible-test sanity, Galaxy import | every pull request | passing |
+| Render tests - every role and blueprint rendered offline against vyos.vyos and compared with the docs page's commands | every pull request | passing |
+| Molecule - the roles applied to containerised VyOS 1.5, with traffic checks | not yet in CI | written, not yet run against live VyOS |
+
+Until the Molecule scenarios run in CI, test the roles in a lab before using them in
+production, for example with the render-only preview (see [docs/using.md](docs/using.md))
+and the examples' containerlab topologies. Issues and fixes are welcome.
 
 ## Roles
 
@@ -49,6 +68,8 @@ and a `verify` entry point with operational checks
 
 ```bash
 ansible-galaxy collection install vyos.blueprints
+# until the first release is on Ansible Galaxy:
+# ansible-galaxy collection install git+https://github.com/vyos/vyos.blueprints.git
 ansible-playbook vyos.blueprints.install_examples   # copies runnable examples to ./vyos-blueprints-examples
 ```
 
@@ -68,7 +89,8 @@ conventions and the render-only preview mode.
 
 - ansible-core 2.16+
 - vyos.vyos 6.1.0+ (installed automatically)
-- VyOS 1.4 or 1.5, reachable over SSH (`ansible.netcommon.network_cli`)
+- VyOS 1.5, reachable over SSH (`ansible.netcommon.network_cli`); the roles follow the
+  1.5 docs, and 1.4 is not tested
 
 ## Scope
 
@@ -79,12 +101,16 @@ inventories, containerlab, Netbox and AWX.
 
 Roles use `state: merged`: they add or change what they describe and leave
 other configuration alone. Removing settings that were dropped from your
-variables is not handled yet.
+variables is not handled yet, except by `wan_load_balance`, which owns its rules.
 
 ## Upstream findings
 
 [docs/upstream-findings.md](docs/upstream-findings.md) lists the vyos.vyos bugs, missing modules and
 options, and docs-page issues found while building these roles, with the workaround used for each.
+
+## Security
+
+Please report security issues privately - see [SECURITY.md](SECURITY.md).
 
 ## Contributing
 
