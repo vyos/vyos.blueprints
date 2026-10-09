@@ -51,15 +51,63 @@ jobs:
           ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
         run: ansible_collections/vyos/blueprints/tests/render/run.sh
 
-  molecule:
-    # Tier 2: containerized VyOS. Needs repository variable VYOS_ISO_URL.
-    needs: [ansible-lint, render]
+  vyos-image:
+    # Builds the VyOS container image once per run (cached per ISO URL) with the
+    # official vyos-build iso-to-oci tool; the Molecule jobs import it.
     if: ${{ vars.VYOS_ISO_URL != '' }}
+    needs: [ansible-lint, render]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cache key (ISO URL and build script)
+        id: key
+        env:
+          VYOS_ISO_URL: ${{ vars.VYOS_ISO_URL }}
+        run: |
+          url=$(printf '%s' "$VYOS_ISO_URL" | sha256sum | cut -c1-16)
+          script=$(sha256sum scripts/build-vyos-image.sh | cut -c1-12)
+          echo "key=vyos-oci-$url-$script" >> "$GITHUB_OUTPUT"
+      - name: Report a newer VyOS Stream release (never fails)
+        env:
+          VYOS_ISO_URL: ${{ vars.VYOS_ISO_URL }}
+        run: |
+          newest=$(curl -fsSL --max-time 30 https://vyos.net/get/stream/ \
+                   | grep -oE 'https://community-downloads\.vyos\.dev/stream/[^"[:space:])<>]+-generic-amd64\.iso' | head -1) || true
+          if [[ -n "$newest" && "$VYOS_ISO_URL" == *"/stream/"* && "$newest" != "$VYOS_ISO_URL" ]]; then
+            echo "::warning title=Newer VyOS Stream available::$newest is available; VYOS_ISO_URL still points to $VYOS_ISO_URL"
+          fi
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache
+        with:
+          path: vyos-oci.tar.xz
+          key: ${{ steps.key.outputs.key }}
+      - name: Build the image tarball
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          VYOS_ISO_URL: ${{ vars.VYOS_ISO_URL }}
+          # VyOS image signing key (https://vyos.net/get/stream/); override with VYOS_MINISIGN_PUBKEY
+          MINISIGN_PUBKEY: ${{ vars.VYOS_MINISIGN_PUBKEY || 'RWTR1ty93Oyontk6caB9WqmiQC4fgeyd/ejgRxCRGd2MQej7nqebHneP' }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y xorriso squashfs-tools jq xz-utils minisign
+          scripts/build-vyos-image.sh --oci "$VYOS_ISO_URL" vyos-oci.tar.xz
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vyos-oci
+          path: vyos-oci.tar.xz
+          retention-days: 1
+          compression-level: 0
+
+  molecule:
+    # Tier 2: containerized VyOS. Needs repository variable VYOS_ISO_URL; the
+    # optional variable MOLECULE_SCENARIOS (a JSON list) limits the scenarios.
+    needs: [vyos-image]
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        scenario: [base, edge_nat, ha_vrrp, ospf_unnumbered, bgp_unnumbered, zone_firewall, vrf_firewall, bridge_firewall, ipsec_route_based, ipsec_policy_based, policy_ipsec_firewall, gre_tunnel, ipsec_route_based_bgp, ipsec_route_based_bgp_dual, ipsec_route_based_gcp, ha_walkthrough, ha_walkthrough_ospf, ha_walkthrough_bgp, inter_vrf, wan_load_balance, pppoe_ipv6, qos, isis_segment_routing, l3vpn_hub_and_spoke, l2tp_lns, dmvpn, management, backup, upgrade]
+        scenario: ${{ fromJSON(vars.MOLECULE_SCENARIOS || '["base","edge_nat","ha_vrrp","ospf_unnumbered","bgp_unnumbered","zone_firewall","vrf_firewall","bridge_firewall","ipsec_route_based","ipsec_policy_based","policy_ipsec_firewall","gre_tunnel","ipsec_route_based_bgp","ipsec_route_based_bgp_dual","ipsec_route_based_gcp","ha_walkthrough","ha_walkthrough_ospf","ha_walkthrough_bgp","inter_vrf","wan_load_balance","pppoe_ipv6","qos","isis_segment_routing","l3vpn_hub_and_spoke","l2tp_lns","dmvpn","management","backup","upgrade"]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -70,24 +118,24 @@ jobs:
           python-version: "3.12"
       - run: pip install ansible-core ansible-pylibssh molecule
       - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
-      - name: Install containerlab and image tools
-        run: |
-          bash -c "$(curl -sL https://get.containerlab.dev)"
-          sudo apt-get update && sudo apt-get install -y libarchive-tools squashfs-tools-ng
-      - name: Build VyOS image
-        env:
-          VYOS_ISO_URL: ${{ vars.VYOS_ISO_URL }}
-        run: ansible_collections/vyos/blueprints/scripts/build-vyos-image.sh "$VYOS_ISO_URL" vyos:blueprints-ci
+      - name: Install containerlab
+        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.79.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vyos-oci
+      - name: Import the VyOS image
+        run: ansible_collections/vyos/blueprints/scripts/build-vyos-image.sh --import vyos-oci.tar.xz vyos:blueprints-ci
       - name: molecule test
         working-directory: ansible_collections/vyos/blueprints/extensions
         env:
           ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
           VYOS_IMAGE: vyos:blueprints-ci
-        run: molecule test -s ${{ matrix.scenario }}
+          SCENARIO: ${{ matrix.scenario }}
+        run: molecule test -s "$SCENARIO"
 
   all_green:
     if: ${{ always() }}
-    needs: [changelog, build-import, ansible-lint, sanity, render, molecule]
+    needs: [changelog, build-import, ansible-lint, sanity, render, vyos-image, molecule]
     runs-on: ubuntu-24.04
     steps:
       - name: Fail if any required job failed

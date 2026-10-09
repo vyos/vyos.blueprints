@@ -63,7 +63,8 @@ cd ~/src/ansible_collections/vyos/blueprints
 pip install ansible-core ansible-lint ansible-pylibssh molecule
 ansible-galaxy collection install -r tests/requirements.yml -p ~/src
 export ANSIBLE_COLLECTIONS_PATH=~/src
-scripts/build-vyos-image.sh /path/to/vyos-1.5-*.iso    # once, for tier 2
+scripts/build-vyos-image.sh /path/to/vyos-1.5-*.iso    # once, for tier 2 (official iso-to-oci tool)
+# or reuse an image built per docs.vyos.io (Run VyOS as a container): docker tag <image> vyos:blueprints-ci
 ```
 
 Set `CLAB_BECOME=false` if you run containerlab without sudo.
