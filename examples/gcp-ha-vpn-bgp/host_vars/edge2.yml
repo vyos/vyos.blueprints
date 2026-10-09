@@ -3,7 +3,7 @@ ipsec_route_based_peers:
   - name: gcp-ha-vpn-1
     description: Google Cloud HA VPN tunnel 1
     psk_name: gcp-ha-vpn-1
-    psk: example-gcp-ha-vpn-psk-1   # use ansible-vault; high-entropy in production
+    psk: example-gcp-ha-vpn-psk-1 # use ansible-vault; high-entropy in production
     local_address: 198.51.100.11
     remote_address: 203.0.113.11
     connection_type: initiate
@@ -12,7 +12,7 @@ ipsec_route_based_peers:
       interface: vti11
       address: 169.254.10.5/30
       description: Google Cloud HA VPN tunnel 1
-      adjust_mss: '1350'
+      adjust_mss: "1350"
 ipsec_route_based_interface_routes:
   - dest: 169.254.10.6/32
     interface: vti11

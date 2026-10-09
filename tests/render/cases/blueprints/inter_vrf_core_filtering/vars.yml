@@ -2,73 +2,73 @@
 # docs.vyos.io/en/1.5/configexamples/inter-vrf-routing-vrf-lite.html - Core router, Appendix-A plus Appendix-B route filtering
 base_interfaces:
   - name: eth0
-    addresses: [10.1.1.1/30, '2001:db8::/127']
+    addresses: [10.1.1.1/30, "2001:db8::/127"]
   - name: eth1
-    addresses: [172.16.2.1/30, '2001:db8::2/127']
+    addresses: [172.16.2.1/30, "2001:db8::2/127"]
   - name: eth2
-    addresses: [192.168.3.1/30, '2001:db8::4/127']
+    addresses: [192.168.3.1/30, "2001:db8::4/127"]
   - name: eth3
-    addresses: [10.2.2.1/30, '2001:db8::6/127']
+    addresses: [10.2.2.1/30, "2001:db8::6/127"]
 vrf_lite_asn: 64496
 vrf_lite_vrfs:
   - name: Internet
     table: 104
     interfaces: [eth3]
     rd: 64496:100
-    route_targets_export: ['64496:100']
-    route_targets_import: ['64496:1', '64496:2']
+    route_targets_export: ["64496:100"]
+    route_targets_import: ["64496:1", "64496:2"]
     neighbors:
-      - {address: 10.2.2.2, remote_as: 64497}
-      - {address: '2001:db8::7', remote_as: 64497}
+      - { address: 10.2.2.2, remote_as: 64497 }
+      - { address: "2001:db8::7", remote_as: 64497 }
   - name: LAN1
     table: 101
     interfaces: [eth0]
     routes:
-      - {dest: 10.0.0.0/24, next_hop: 10.1.1.2}
-      - {dest: '2001:db8:0:1::/64', next_hop: '2001:db8::1'}
-    rd: '64496:1'
-    route_targets_export: ['64496:1']
-    route_targets_import: ['64496:100', '64496:50', '64496:2']
+      - { dest: 10.0.0.0/24, next_hop: 10.1.1.2 }
+      - { dest: "2001:db8:0:1::/64", next_hop: "2001:db8::1" }
+    rd: "64496:1"
+    route_targets_export: ["64496:1"]
+    route_targets_import: ["64496:100", "64496:50", "64496:2"]
     redistribute: [static]
   - name: LAN2
     table: 102
     interfaces: [eth1]
     routes:
-      - {dest: 172.16.0.0/24, next_hop: 172.16.2.2}
-      - {dest: '2001:db8:0:2::/64', next_hop: '2001:db8::3'}
-    rd: '64496:2'
-    route_targets_export: ['64496:2']
-    route_targets_import: ['64496:100', '64496:50', '64496:1']
+      - { dest: 172.16.0.0/24, next_hop: 172.16.2.2 }
+      - { dest: "2001:db8:0:2::/64", next_hop: "2001:db8::3" }
+    rd: "64496:2"
+    route_targets_export: ["64496:2"]
+    route_targets_import: ["64496:100", "64496:50", "64496:1"]
     redistribute: [static]
-    import_route_map: {ipv4: LAN2-Internet, ipv6: LAN2-Internet-v6}
+    import_route_map: { ipv4: LAN2-Internet, ipv6: LAN2-Internet-v6 }
   - name: Management
     table: 103
     interfaces: [eth2]
     routes:
-      - {dest: 192.168.0.0/24, next_hop: 192.168.3.2}
-      - {dest: '2001:db8:0:3::/64', next_hop: '2001:db8::5'}
-    rd: '64496:50'
-    route_targets_export: ['64496:50']
-    route_targets_import: ['64496:1', '64496:2']
+      - { dest: 192.168.0.0/24, next_hop: 192.168.3.2 }
+      - { dest: "2001:db8:0:3::/64", next_hop: "2001:db8::5" }
+    rd: "64496:50"
+    route_targets_export: ["64496:50"]
+    route_targets_import: ["64496:1", "64496:2"]
     redistribute: [static]
 route_policy_prefix_lists:
   - name: LAN2-Internet
     rules:
-      - {sequence: 1, action: permit, le: 24, prefix: 198.51.0.0/16}
-      - {sequence: 2, action: permit, prefix: 192.0.2.0/24}
-      - {sequence: 3, action: permit, prefix: 192.168.0.0/24}
-      - {sequence: 4, action: permit, prefix: 10.0.0.0/24}
+      - { sequence: 1, action: permit, le: 24, prefix: 198.51.0.0/16 }
+      - { sequence: 2, action: permit, prefix: 192.0.2.0/24 }
+      - { sequence: 3, action: permit, prefix: 192.168.0.0/24 }
+      - { sequence: 4, action: permit, prefix: 10.0.0.0/24 }
   - name: LAN2-Internet-v6
     afi: ipv6
     rules:
-      - {sequence: 1, action: permit, prefix: '2001:db8:1::/48'}
-      - {sequence: 2, action: permit, prefix: '2001:db8:2::/48'}
-      - {sequence: 3, action: permit, prefix: '2001:db8:0:3::/64'}
-      - {sequence: 4, action: permit, prefix: '2001:db8:0:1::/64'}
+      - { sequence: 1, action: permit, prefix: "2001:db8:1::/48" }
+      - { sequence: 2, action: permit, prefix: "2001:db8:2::/48" }
+      - { sequence: 3, action: permit, prefix: "2001:db8:0:3::/64" }
+      - { sequence: 4, action: permit, prefix: "2001:db8:0:1::/64" }
 route_policy_route_maps:
   - name: LAN2-Internet
     rules:
-      - {sequence: 1, action: permit, match_prefix_list: LAN2-Internet}
+      - { sequence: 1, action: permit, match_prefix_list: LAN2-Internet }
   - name: LAN2-Internet-v6
     rules:
-      - {sequence: 1, action: permit, match_prefix_list6: LAN2-Internet-v6}
+      - { sequence: 1, action: permit, match_prefix_list6: LAN2-Internet-v6 }

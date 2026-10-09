@@ -8,12 +8,24 @@ all:
       ansible_host: 192.0.2.1
       bgp_router_id: 192.0.2.21
       bgp_neighbors:
-        - {address: 192.0.2.11, remote_as: 65550, update_source: 192.0.2.21, soft_reconfiguration_inbound: true, route_map_export: BGPOUT}
+        - {
+            address: 192.0.2.11,
+            remote_as: 65550,
+            update_source: 192.0.2.21,
+            soft_reconfiguration_inbound: true,
+            route_map_export: BGPOUT,
+          }
     router2:
       ansible_host: 192.0.2.2
       bgp_router_id: 192.0.2.22
       bgp_neighbors:
-        - {address: 192.0.2.12, remote_as: 65550, update_source: 192.0.2.22, soft_reconfiguration_inbound: true, route_map_export: BGPPREPENDOUT}
+        - {
+            address: 192.0.2.12,
+            remote_as: 65550,
+            update_source: 192.0.2.22,
+            soft_reconfiguration_inbound: true,
+            route_map_export: BGPPREPENDOUT,
+          }
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli

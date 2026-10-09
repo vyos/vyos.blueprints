@@ -7,9 +7,9 @@ all:
     onprem:
       hosts:
         vyos:
-          ansible_host: 192.0.2.10        # your router's address
+          ansible_host: 192.0.2.10 # your router's address
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: vyos
-    ansible_password: vyos              # use ansible-vault for real devices
+    ansible_password: vyos # use ansible-vault for real devices

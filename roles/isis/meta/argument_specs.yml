@@ -12,45 +12,104 @@ argument_specs:
       - Loopback (dummy) and link addressing and MTU belong to C(vyos.blueprints.base).
       - MPLS forwarding needs the kernel MPLS modules (mpls_router, mpls_iptunnel).
     options:
-      isis_net: {type: str, default: "", description: "Network entity title, e.g. C(49.0000.0000.0000.0001.00). Nothing is configured when empty."}
-      isis_level: {type: str, choices: ["", level-1, level-1-2, level-2], default: "", description: IS-IS level.}
-      isis_metric_style: {type: str, choices: ["", narrow, transition, wide], default: "", description: Metric style.}
-      isis_log_adjacency_changes: {type: bool, default: false, description: Log adjacency changes.}
+      isis_net:
+        {
+          type: str,
+          default: "",
+          description: "Network entity title, e.g. C(49.0000.0000.0000.0001.00). Nothing is configured when empty.",
+        }
+      isis_level:
+        {
+          type: str,
+          choices: ["", level-1, level-1-2, level-2],
+          default: "",
+          description: IS-IS level.,
+        }
+      isis_metric_style:
+        {
+          type: str,
+          choices: ["", narrow, transition, wide],
+          default: "",
+          description: Metric style.,
+        }
+      isis_log_adjacency_changes:
+        { type: bool, default: false, description: Log adjacency changes. }
       isis_interfaces:
         type: list
         elements: dict
         default: []
         description: IS-IS interfaces.
         options:
-          name: {type: str, required: true, description: "Interface, e.g. C(eth1) or C(dum0)."}
-          passive: {type: bool, default: false, description: Advertise but do not form adjacencies (loopbacks).}
-          network: {type: str, choices: [point-to-point], description: Network type.}
-          metric: {type: int, description: Interface metric.}
+          name:
+            {
+              type: str,
+              required: true,
+              description: "Interface, e.g. C(eth1) or C(dum0).",
+            }
+          passive:
+            {
+              type: bool,
+              default: false,
+              description: Advertise but do not form adjacencies (loopbacks).,
+            }
+          network:
+            { type: str, choices: [point-to-point], description: Network type. }
+          metric: { type: int, description: Interface metric. }
       isis_redistribute:
         type: list
         elements: dict
         default: []
         description: Redistribution into IS-IS (IPv4).
         options:
-          type: {type: str, required: true, description: "Route type, e.g. C(connected)."}
-          level: {type: str, default: level-2, description: Level the routes are redistributed into.}
+          type:
+            {
+              type: str,
+              required: true,
+              description: "Route type, e.g. C(connected).",
+            }
+          level:
+            {
+              type: str,
+              default: level-2,
+              description: Level the routes are redistributed into.,
+            }
       isis_segment_routing:
         type: dict
         default: {}
         description: MPLS segment routing.
         options:
-          maximum_label_depth: {type: int, description: Maximum SID depth (MSD).}
-          global_block: {type: dict, description: "SRGB, e.g. C({low: 16000, high: 23999})."}
-          local_block: {type: dict, description: "SRLB, e.g. C({low: 15000, high: 15999})."}
+          maximum_label_depth:
+            { type: int, description: Maximum SID depth (MSD). }
+          global_block:
+            {
+              type: dict,
+              description: "SRGB, e.g. C({low: 16000, high: 23999}).",
+            }
+          local_block:
+            {
+              type: dict,
+              description: "SRLB, e.g. C({low: 15000, high: 15999}).",
+            }
           prefixes:
             type: list
             elements: dict
             default: []
             description: Prefix SIDs.
             options:
-              prefix: {type: str, required: true, description: "Prefix, usually the loopback, e.g. C(192.0.2.1/32)."}
-              index: {type: int, required: true, description: SID index.}
-      isis_mpls_interfaces: {type: list, elements: str, default: [], description: Interfaces MPLS forwarding is enabled on (C(protocols mpls interface)).}
+              prefix:
+                {
+                  type: str,
+                  required: true,
+                  description: "Prefix, usually the loopback, e.g. C(192.0.2.1/32).",
+                }
+              index: { type: int, required: true, description: SID index. }
+      isis_mpls_interfaces:
+        {
+          type: list,
+          elements: str,
+          default: [],
+          description: Interfaces MPLS forwarding is enabled on (C(protocols mpls interface)).,
+        }
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -59,5 +118,12 @@ argument_specs:
     short_description: Post-deployment checks for the isis role
     description: Run with C(tasks_from=verify). Checks an Up adjacency on every non-passive interface and, with segment routing, SR entries in the MPLS table.
     options:
-      isis_interfaces: {type: list, elements: dict, default: [], description: Same value as for C(main).}
-      isis_segment_routing: {type: dict, default: {}, description: Same value as for C(main).}
+      isis_interfaces:
+        {
+          type: list,
+          elements: dict,
+          default: [],
+          description: Same value as for C(main).,
+        }
+      isis_segment_routing:
+        { type: dict, default: {}, description: Same value as for C(main). }

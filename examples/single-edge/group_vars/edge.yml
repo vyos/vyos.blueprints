@@ -6,6 +6,6 @@ base_interfaces:
 base_ntp_servers: [0.pool.ntp.org, 1.pool.ntp.org]
 
 edge_nat_wan_interface: eth1
-edge_nat_wan_address: 203.0.113.2/24      # or: dhcp
+edge_nat_wan_address: 203.0.113.2/24 # or: dhcp
 edge_nat_wan_gateway: 203.0.113.1
 edge_nat_source_networks: [192.168.10.0/24]

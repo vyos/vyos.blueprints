@@ -12,7 +12,7 @@
     fail_msg: "source NAT rule {{ item }} missing from 'show nat source rules'"
     quiet: true
   loop: "{{ range(edge_nat_rule_base | int,
-            edge_nat_rule_base | int + ([edge_nat_source_networks | length, 1] | max) * 10, 10) | list }}"
+    edge_nat_rule_base | int + ([edge_nat_source_networks | length, 1] | max) * 10, 10) | list }}"
 
 - name: A default route exists
   ansible.builtin.assert:

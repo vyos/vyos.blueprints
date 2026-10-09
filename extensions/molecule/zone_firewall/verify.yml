@@ -13,10 +13,30 @@
   gather_facts: false
   vars:
     _flows:
-      - {from: lan, to: 192.168.200.200, allowed: true, why: "LAN can access DMZ resources"}
-      - {from: wan, to: 192.168.200.200, allowed: true, why: "inbound WAN connects to the DMZ host"}
-      - {from: dmz, to: 192.168.100.10, allowed: false, why: "DMZ cannot access LAN resources"}
-      - {from: wan, to: 192.168.100.10, allowed: false, why: "WAN cannot reach the LAN"}
+      - {
+          from: lan,
+          to: 192.168.200.200,
+          allowed: true,
+          why: "LAN can access DMZ resources",
+        }
+      - {
+          from: wan,
+          to: 192.168.200.200,
+          allowed: true,
+          why: "inbound WAN connects to the DMZ host",
+        }
+      - {
+          from: dmz,
+          to: 192.168.100.10,
+          allowed: false,
+          why: "DMZ cannot access LAN resources",
+        }
+      - {
+          from: wan,
+          to: 192.168.100.10,
+          allowed: false,
+          why: "WAN cannot reach the LAN",
+        }
   tasks:
     - name: Try HTTP across zones
       ansible.builtin.command:

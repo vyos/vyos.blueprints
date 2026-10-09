@@ -1,7 +1,7 @@
 ---
 base_interfaces:
-  - {name: eth1.201, addresses: [10.200.201.3/24]}
-  - {name: eth1.100, addresses: [203.0.113.3/24]}
+  - { name: eth1.201, addresses: [10.200.201.3/24] }
+  - { name: eth1.100, addresses: [203.0.113.3/24] }
 ha_vrrp_priority: 100
-ha_vrrp_local_addresses: {int: 10.200.201.3, public: 203.0.113.3}
+ha_vrrp_local_addresses: { int: 10.200.201.3, public: 203.0.113.3 }
 ha_vrrp_conntrack_sync_local_address: 10.200.201.3

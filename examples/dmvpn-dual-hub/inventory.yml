@@ -6,7 +6,7 @@ all:
     dmvpn:
       hosts:
         hub1:
-          ansible_host: clab-dmvpn-dual-hub-hub1   # your router's address
+          ansible_host: clab-dmvpn-dual-hub-hub1 # your router's address
         hub2:
           ansible_host: clab-dmvpn-dual-hub-hub2
         spoke2:
@@ -17,4 +17,4 @@ all:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: admin
-    ansible_password: admin                      # use ansible-vault for real devices
+    ansible_password: admin # use ansible-vault for real devices

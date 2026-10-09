@@ -9,7 +9,7 @@ ipsec_route_based_peers:
     psk_type: base64
     psk_name: AUTH-PSK
     connection_type: initiate
-    vti: {interface: vti1, address: 10.100.100.1/30, mtu: 1438}
+    vti: { interface: vti1, address: 10.100.100.1/30, mtu: 1438 }
 ipsec_route_based_ike_group:
   name: IKE-GROUP
   key_exchange: ikev1
@@ -18,7 +18,7 @@ ipsec_route_based_ike_group:
   encryption: aes128
   hash: sha1
   close_action: start
-  dead_peer_detection: {action: restart, interval: 10, timeout: 30}
+  dead_peer_detection: { action: restart, interval: 10, timeout: 30 }
 ipsec_route_based_esp_group:
   name: ESP-GROUP
   lifetime: 3600

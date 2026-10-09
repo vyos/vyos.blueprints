@@ -24,14 +24,14 @@ l2tp_lns_authentication:
   mode: radius
   radius_servers:
     - address: 192.168.139.110
-      key: '{{ vault_radius_key }}'
+      key: "{{ vault_radius_key }}"
 l2tp_lns_pools:
   - name: TEST-POOL
     range: 10.0.0.2-10.0.0.100
 l2tp_lns_default_pool: TEST-POOL
 l2tp_lns_gateway_address: 10.0.0.1
 l2tp_lns_lac_host_name: LAC
-l2tp_lns_shared_secret: '{{ vault_l2tp_tunnel_secret }}'
+l2tp_lns_shared_secret: "{{ vault_l2tp_tunnel_secret }}"
 l2tp_lns_name_servers:
   - 8.8.8.8
 l2tp_lns_ppp_options:

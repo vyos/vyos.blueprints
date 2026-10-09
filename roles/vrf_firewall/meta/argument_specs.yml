@@ -122,7 +122,7 @@ argument_specs:
         description: Log packets hitting the filters' default action.
       vrf_firewall_state_policy:
         type: dict
-        default: {established: accept, related: accept, invalid: drop}
+        default: { established: accept, related: accept, invalid: drop }
         description: Global state policy, connection type to action.
       vyos_blueprints_render_only:
         type: bool

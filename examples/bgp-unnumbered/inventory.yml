@@ -5,11 +5,11 @@ all:
     fabric:
       hosts:
         routerA:
-          ansible_host: clab-bgp-unnumbered-routerA   # your router's address
+          ansible_host: clab-bgp-unnumbered-routerA # your router's address
         routerB:
           ansible_host: clab-bgp-unnumbered-routerB
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: admin
-    ansible_password: admin                        # use ansible-vault for real devices
+    ansible_password: admin # use ansible-vault for real devices

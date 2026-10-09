@@ -3,9 +3,9 @@
   hosts: lns
   gather_facts: false
   roles:
-    - vyos.blueprints.base       # address and default route
-    - vyos.blueprints.nat        # masquerade the client pool
-    - vyos.blueprints.l2tp_lns   # LNS with RADIUS authentication
+    - vyos.blueprints.base # address and default route
+    - vyos.blueprints.nat # masquerade the client pool
+    - vyos.blueprints.l2tp_lns # LNS with RADIUS authentication
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

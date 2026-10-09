@@ -19,27 +19,51 @@ topology:
     internet:
       kind: linux
       image: alpine:3
-      exec: ["ip addr add 203.0.113.10/24 dev eth1", "ip route replace default via 203.0.113.1"]
+      exec:
+        [
+          "ip addr add 203.0.113.10/24 dev eth1",
+          "ip route replace default via 203.0.113.1",
+        ]
     l11:
       kind: linux
       image: alpine:3
-      exec: ["ip link add link eth1 name eth1.111 type vlan id 111", "ip link set eth1.111 up",
-             "ip addr add 10.1.11.10/24 dev eth1.111", "ip route replace default via 10.1.11.1"]
+      exec:
+        [
+          "ip link add link eth1 name eth1.111 type vlan id 111",
+          "ip link set eth1.111 up",
+          "ip addr add 10.1.11.10/24 dev eth1.111",
+          "ip route replace default via 10.1.11.1",
+        ]
     l12:
       kind: linux
       image: alpine:3
-      exec: ["ip link add link eth1 name eth1.112 type vlan id 112", "ip link set eth1.112 up",
-             "ip addr add 10.1.12.10/24 dev eth1.112", "ip route replace default via 10.1.12.1"]
+      exec:
+        [
+          "ip link add link eth1 name eth1.112 type vlan id 112",
+          "ip link set eth1.112 up",
+          "ip addr add 10.1.12.10/24 dev eth1.112",
+          "ip route replace default via 10.1.12.1",
+        ]
     r21:
       kind: linux
       image: alpine:3
-      exec: ["ip link add link eth1 name eth1.221 type vlan id 221", "ip link set eth1.221 up",
-             "ip addr add 10.2.21.10/24 dev eth1.221", "ip route replace default via 10.2.21.1"]
+      exec:
+        [
+          "ip link add link eth1 name eth1.221 type vlan id 221",
+          "ip link set eth1.221 up",
+          "ip addr add 10.2.21.10/24 dev eth1.221",
+          "ip route replace default via 10.2.21.1",
+        ]
     r22:
       kind: linux
       image: alpine:3
-      exec: ["ip link add link eth1 name eth1.222 type vlan id 222", "ip link set eth1.222 up",
-             "ip addr add 10.2.22.10/24 dev eth1.222", "ip route replace default via 10.2.22.1"]
+      exec:
+        [
+          "ip link add link eth1 name eth1.222 type vlan id 222",
+          "ip link set eth1.222 up",
+          "ip addr add 10.2.22.10/24 dev eth1.222",
+          "ip route replace default via 10.2.22.1",
+        ]
   links:
     # WAN is eth3 here (eth0 on the page; eth0 is containerlab management)
     - endpoints: ["left:eth3", "isp:eth1"]

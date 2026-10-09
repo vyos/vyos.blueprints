@@ -19,16 +19,36 @@ argument_specs:
       - Bulk runs use the play's forks; use C(throttle) or C(serial) in the
         play to limit concurrency.
     options:
-      backup_root: {type: str, default: "{{ playbook_dir }}/backups", description: Backup directory on the controller.}
+      backup_root:
+        {
+          type: str,
+          default: "{{ playbook_dir }}/backups",
+          description: Backup directory on the controller.,
+        }
       backup_formats:
         type: list
         elements: str
         choices: [set, cfg]
         default: [set, cfg]
         description: Formats to save.
-      backup_manifest: {type: bool, default: true, description: Write a facts manifest next to each backup.}
-      backup_keep: {type: int, default: 10, description: Backups to keep per router; C(0) keeps all.}
-      backup_dry_run: {type: bool, default: false, description: Only report which old backups retention would remove.}
+      backup_manifest:
+        {
+          type: bool,
+          default: true,
+          description: Write a facts manifest next to each backup.,
+        }
+      backup_keep:
+        {
+          type: int,
+          default: 10,
+          description: Backups to keep per router; C(0) keeps all.,
+        }
+      backup_dry_run:
+        {
+          type: bool,
+          default: false,
+          description: Only report which old backups retention would remove.,
+        }
       backup_git_commit:
         type: bool
         default: false

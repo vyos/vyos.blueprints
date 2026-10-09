@@ -9,7 +9,7 @@
   register: _nat_r
   when: (nat_source_rules | length > 0) or (nat_destination_rules | length > 0)
 
-- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
+- name: Collect rendered commands # noqa: var-naming[no-role-prefix] - shared across roles by design
   ansible.builtin.set_fact:
     vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + (_nat_r.rendered | default([])) }}"
   when: vyos_blueprints_render_only | default(false) | bool

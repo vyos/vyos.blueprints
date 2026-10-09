@@ -1,4 +1,4 @@
 ---
 ospf_unnumbered_router_id: 192.168.0.2
 base_interfaces:
-  - {name: eth3, addresses: [10.0.0.2/24]}
+  - { name: eth3, addresses: [10.0.0.2/24] }

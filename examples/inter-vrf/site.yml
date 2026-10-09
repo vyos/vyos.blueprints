@@ -3,9 +3,9 @@
   hosts: core
   gather_facts: false
   roles:
-    - vyos.blueprints.base           # interface addresses
-    - vyos.blueprints.route_policy   # Appendix-B prefix-lists and route-maps
-    - vyos.blueprints.vrf_lite       # VRFs, static routes, RD/RT, VPN import/export
+    - vyos.blueprints.base # interface addresses
+    - vyos.blueprints.route_policy # Appendix-B prefix-lists and route-maps
+    - vyos.blueprints.vrf_lite # VRFs, static routes, RD/RT, VPN import/export
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

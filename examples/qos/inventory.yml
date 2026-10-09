@@ -5,7 +5,7 @@ all:
     qos:
       hosts:
         vyos3:
-          ansible_host: clab-qos-vyos3   # your router's address
+          ansible_host: clab-qos-vyos3 # your router's address
         vyos2:
           ansible_host: clab-qos-vyos2
         # vyos4:                        # add with its address on a real network
@@ -13,4 +13,4 @@ all:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: admin
-    ansible_password: admin            # use ansible-vault for real devices
+    ansible_password: admin # use ansible-vault for real devices

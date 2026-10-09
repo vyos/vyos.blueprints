@@ -42,7 +42,7 @@ nat_source_rules:
     source:
       address: 10.200.201.0/24
     destination:
-      address: '!192.0.2.0/24'
+      address: "!192.0.2.0/24"
     translation:
       address: 203.0.113.1
 
@@ -61,11 +61,11 @@ wireguard_interfaces:
         port: 50001
         persistent_keepalive: 15
         public_key: GEFMOWzAyau42/HwdwfXnrfHdIISQF8YHj35rOgSZ0o=
-    private_key: '{{ vault_wg01_private_key }}'
+    private_key: "{{ vault_wg01_private_key }}"
 ospf_router_id: 10.254.60.1
 ospf_interfaces:
   - name: wg01
-    md5_key: i360KoCwUGZvPq7e        # use ansible-vault for real devices
+    md5_key: i360KoCwUGZvPq7e # use ansible-vault for real devices
     md5_key_id: 1
     cost: 11
     dead_interval: 5

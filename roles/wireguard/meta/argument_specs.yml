@@ -17,25 +17,63 @@ argument_specs:
         default: []
         description: WireGuard interfaces. Nothing is configured when empty.
         options:
-          name: {type: str, required: true, description: "Interface name, e.g. C(wg01)."}
-          addresses: {type: list, elements: str, required: true, description: Interface addresses in CIDR notation.}
-          description: {type: str, description: Interface description.}
-          port: {type: int, description: UDP listen port.}
-          private_key: {type: str, no_log: true, description: Base64 private key of this interface.}
-          mtu: {type: int, description: Interface MTU.}
+          name:
+            {
+              type: str,
+              required: true,
+              description: "Interface name, e.g. C(wg01).",
+            }
+          addresses:
+            {
+              type: list,
+              elements: str,
+              required: true,
+              description: Interface addresses in CIDR notation.,
+            }
+          description: { type: str, description: Interface description. }
+          port: { type: int, description: UDP listen port. }
+          private_key:
+            {
+              type: str,
+              no_log: true,
+              description: Base64 private key of this interface.,
+            }
+          mtu: { type: int, description: Interface MTU. }
           peers:
             type: list
             elements: dict
             default: []
             description: Peers.
             options:
-              name: {type: str, required: true, description: "Peer name, e.g. C(OFFSITE1)."}
-              public_key: {type: str, required: true, description: Peer's base64 public key.}
-              allowed_ips: {type: list, elements: str, required: true, description: "Allowed IPs, e.g. C([0.0.0.0/0]) for a routed link."}
-              address: {type: str, description: Peer endpoint address.}
-              port: {type: int, description: Peer endpoint port.}
-              persistent_keepalive: {type: int, description: Keepalive interval in seconds.}
-              preshared_key: {type: str, no_log: true, description: Optional preshared key.}
+              name:
+                {
+                  type: str,
+                  required: true,
+                  description: "Peer name, e.g. C(OFFSITE1).",
+                }
+              public_key:
+                {
+                  type: str,
+                  required: true,
+                  description: Peer's base64 public key.,
+                }
+              allowed_ips:
+                {
+                  type: list,
+                  elements: str,
+                  required: true,
+                  description: "Allowed IPs, e.g. C([0.0.0.0/0]) for a routed link.",
+                }
+              address: { type: str, description: Peer endpoint address. }
+              port: { type: int, description: Peer endpoint port. }
+              persistent_keepalive:
+                { type: int, description: Keepalive interval in seconds. }
+              preshared_key:
+                {
+                  type: str,
+                  no_log: true,
+                  description: Optional preshared key.,
+                }
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -44,4 +82,10 @@ argument_specs:
     short_description: Post-deployment checks for the wireguard role
     description: Run with C(tasks_from=verify). Checks every WireGuard interface is up and every peer has completed a handshake.
     options:
-      wireguard_interfaces: {type: list, elements: dict, default: [], description: Same value as for C(main).}
+      wireguard_interfaces:
+        {
+          type: list,
+          elements: dict,
+          default: [],
+          description: Same value as for C(main).,
+        }

@@ -8,15 +8,15 @@ all:
             r1:
               ansible_host: clab-bp-ipsec-vyos
               base_interfaces:
-                - {name: eth1, addresses: [10.0.1.2/30]}
-                - {name: eth2, addresses: [192.168.0.1/24]}
+                - { name: eth1, addresses: [10.0.1.2/30] }
+                - { name: eth2, addresses: [192.168.0.1/24] }
               ipsec_route_based_peers:
                 - name: CISCO
                   local_address: 10.0.1.2
                   remote_address: 10.0.2.2
                   psk: molecule-psk
                   connection_type: initiate
-                  vti: {interface: vti1, address: 10.100.100.1/30, mtu: 1438}
+                  vti: { interface: vti1, address: 10.100.100.1/30, mtu: 1438 }
               ipsec_route_based_ospf:
                 router_id: 2.2.2.2
                 networks: [10.100.100.0/30, 192.168.0.0/24]
@@ -25,15 +25,15 @@ all:
             r2:
               ansible_host: clab-bp-ipsec-cisco
               base_interfaces:
-                - {name: eth1, addresses: [10.0.2.2/30]}
-                - {name: eth2, addresses: [192.168.10.1/24]}
+                - { name: eth1, addresses: [10.0.2.2/30] }
+                - { name: eth2, addresses: [192.168.10.1/24] }
               ipsec_route_based_peers:
                 - name: VYOS
                   local_address: 10.0.2.2
                   remote_address: 10.0.1.2
                   psk: molecule-psk
                   connection_type: none
-                  vti: {interface: vti1, address: 10.100.100.2/30, mtu: 1438}
+                  vti: { interface: vti1, address: 10.100.100.2/30, mtu: 1438 }
               ipsec_route_based_ospf:
                 router_id: 1.1.1.1
                 networks: [10.100.100.0/30, 192.168.10.0/24]

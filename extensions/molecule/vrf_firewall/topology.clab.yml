@@ -7,7 +7,11 @@ topology:
     mgmt:
       kind: linux
       image: alpine:3
-      exec: ["ip addr add 10.100.100.10/24 dev eth1", "ip route replace default via 10.100.100.1"]
+      exec:
+        [
+          "ip addr add 10.100.100.10/24 dev eth1",
+          "ip route replace default via 10.100.100.1",
+        ]
     # VLAN-aware bridge for the eth2 trunk (vif 150 = LAN, vif 3500 = PROD)
     sw:
       kind: linux
@@ -25,16 +29,28 @@ topology:
     lan:
       kind: linux
       image: alpine:3
-      exec: ["ip addr add 10.150.150.10/24 dev eth1", "ip route replace default via 10.150.150.1"]
+      exec:
+        [
+          "ip addr add 10.150.150.10/24 dev eth1",
+          "ip route replace default via 10.150.150.1",
+        ]
     prod:
       kind: linux
       image: alpine:3
-      exec: ["ip addr add 172.16.20.10/24 dev eth1", "ip route replace default via 172.16.20.1"]
+      exec:
+        [
+          "ip addr add 172.16.20.10/24 dev eth1",
+          "ip route replace default via 172.16.20.1",
+        ]
     # stands in for the page's PPPoE uplink
     wan:
       kind: linux
       image: alpine:3
-      exec: ["ip addr add 203.0.113.100/24 dev eth1", "ip route replace default via 203.0.113.1"]
+      exec:
+        [
+          "ip addr add 203.0.113.100/24 dev eth1",
+          "ip route replace default via 203.0.113.1",
+        ]
   links:
     - endpoints: ["r1:eth1", "mgmt:eth1"]
     - endpoints: ["r1:eth2", "sw:eth1"]

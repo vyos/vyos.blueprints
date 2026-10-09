@@ -5,9 +5,9 @@ all:
     bridge:
       hosts:
         r1:
-          ansible_host: clab-bridge-firewall-r1   # your router's address
+          ansible_host: clab-bridge-firewall-r1 # your router's address
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: admin
-    ansible_password: admin                    # use ansible-vault for real devices
+    ansible_password: admin # use ansible-vault for real devices

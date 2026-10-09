@@ -4,9 +4,9 @@ all:
     edge:
       hosts:
         edge1:
-          ansible_host: clab-single-edge-edge1   # your router's address
+          ansible_host: clab-single-edge-edge1 # your router's address
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: admin
-    ansible_password: admin                      # use ansible-vault for real devices
+    ansible_password: admin # use ansible-vault for real devices

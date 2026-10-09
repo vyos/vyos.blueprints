@@ -16,16 +16,27 @@ argument_specs:
         default: []
         description: Numbered IPv4 access-lists (C(policy access-list)).
         options:
-          number: {type: int, required: true, description: "Access-list number, e.g. C(150)."}
-          description: {type: str, description: Description.}
+          number:
+            {
+              type: int,
+              required: true,
+              description: "Access-list number, e.g. C(150).",
+            }
+          description: { type: str, description: Description. }
           rules:
             type: list
             elements: dict
             required: true
             description: Rules.
             options:
-              number: {type: int, required: true, description: Rule number.}
-              action: {type: str, choices: [permit, deny], required: true, description: Rule action.}
+              number: { type: int, required: true, description: Rule number. }
+              action:
+                {
+                  type: str,
+                  choices: [permit, deny],
+                  required: true,
+                  description: Rule action.,
+                }
               source:
                 type: dict
                 description: "C({any: true}) or C({network: 10.0.0.0, inverse_mask: 0.0.0.255}) or C({host: 192.0.2.1})."
@@ -38,42 +49,68 @@ argument_specs:
         default: []
         description: Prefix-lists (C(prefix-list), or C(prefix-list6) with C(afi=ipv6)).
         options:
-          name: {type: str, required: true, description: Prefix-list name.}
-          afi: {type: str, choices: [ipv4, ipv6], default: ipv4, description: Address family.}
-          description: {type: str, description: Description.}
+          name: { type: str, required: true, description: Prefix-list name. }
+          afi:
+            {
+              type: str,
+              choices: [ipv4, ipv6],
+              default: ipv4,
+              description: Address family.,
+            }
+          description: { type: str, description: Description. }
           rules:
             type: list
             elements: dict
             required: true
             description: Rules.
             options:
-              sequence: {type: int, required: true, description: Rule number.}
-              action: {type: str, choices: [permit, deny], required: true, description: Rule action.}
-              prefix: {type: str, required: true, description: Prefix to match.}
-              ge: {type: int, description: Minimum prefix length.}
-              le: {type: int, description: Maximum prefix length.}
-              description: {type: str, description: Rule description.}
+              sequence: { type: int, required: true, description: Rule number. }
+              action:
+                {
+                  type: str,
+                  choices: [permit, deny],
+                  required: true,
+                  description: Rule action.,
+                }
+              prefix:
+                { type: str, required: true, description: Prefix to match. }
+              ge: { type: int, description: Minimum prefix length. }
+              le: { type: int, description: Maximum prefix length. }
+              description: { type: str, description: Rule description. }
       route_policy_route_maps:
         type: list
         elements: dict
         default: []
         description: Route-maps.
         options:
-          name: {type: str, required: true, description: Route-map name.}
-          description: {type: str, description: Description.}
+          name: { type: str, required: true, description: Route-map name. }
+          description: { type: str, description: Description. }
           rules:
             type: list
             elements: dict
             required: true
             description: Rules.
             options:
-              sequence: {type: int, required: true, description: Rule number.}
-              action: {type: str, choices: [permit, deny], required: true, description: Rule action.}
-              description: {type: str, description: Rule description.}
-              match_prefix_list: {type: str, description: Match this prefix-list.}
-              match_access_list: {type: str, description: Match this access-list (number).}
-              match_prefix_list6: {type: str, description: Match this IPv6 prefix-list.}
-              set_as_path_prepend: {type: str, description: "AS-path prepend, e.g. C(65551 65551 65551)."}
+              sequence: { type: int, required: true, description: Rule number. }
+              action:
+                {
+                  type: str,
+                  choices: [permit, deny],
+                  required: true,
+                  description: Rule action.,
+                }
+              description: { type: str, description: Rule description. }
+              match_prefix_list:
+                { type: str, description: Match this prefix-list. }
+              match_access_list:
+                { type: str, description: Match this access-list (number). }
+              match_prefix_list6:
+                { type: str, description: Match this IPv6 prefix-list. }
+              set_as_path_prepend:
+                {
+                  type: str,
+                  description: "AS-path prepend, e.g. C(65551 65551 65551).",
+                }
       vyos_blueprints_render_only:
         type: bool
         default: false

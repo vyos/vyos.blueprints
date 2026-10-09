@@ -6,13 +6,19 @@ ipsec_route_based_peers:
     description: AZURE PRIMARY TUNNEL
     psk_name: azure
     psk: ch00s3-4-s3cur3-psk
-    local_address: 10.10.0.5        # private IP; the device is behind NAT
-    local_id: 198.51.100.3          # public IP
+    local_address: 10.10.0.5 # private IP; the device is behind NAT
+    local_id: 198.51.100.3 # public IP
     remote_address: 203.0.113.2
     connection_type: initiate
     ikev2_reauth: inherit
     esp_group_on_vti: true
-    vti: {interface: vti1, address: 10.10.1.5/32, description: Azure Primary Tunnel, adjust_mss: "1350"}
+    vti:
+      {
+        interface: vti1,
+        address: 10.10.1.5/32,
+        description: Azure Primary Tunnel,
+        adjust_mss: "1350",
+      }
   - name: azure-secondary
     description: AZURE secondary TUNNEL
     psk_name: azure
@@ -23,7 +29,13 @@ ipsec_route_based_peers:
     connection_type: initiate
     ikev2_reauth: inherit
     esp_group_on_vti: true
-    vti: {interface: vti2, address: 10.10.1.6/32, description: Azure Secondary Tunnel, adjust_mss: "1350"}
+    vti:
+      {
+        interface: vti2,
+        address: 10.10.1.6/32,
+        description: Azure Secondary Tunnel,
+        adjust_mss: "1350",
+      }
 ipsec_route_based_ike_group:
   name: AZURE
   key_exchange: ikev2
@@ -33,7 +45,7 @@ ipsec_route_based_ike_group:
   dh_group: 2
   encryption: aes256
   hash: sha1
-  dead_peer_detection: {action: restart, interval: 15, timeout: 30}
+  dead_peer_detection: { action: restart, interval: 15, timeout: 30 }
 ipsec_route_based_esp_group:
   name: AZURE
   lifetime: 3600
@@ -43,10 +55,10 @@ ipsec_route_based_esp_group:
   encryption: aes256
   hash: sha1
 ipsec_route_based_interfaces: [eth0]
-ipsec_route_based_disable_route_autoinstall: false   # the page does not set it
+ipsec_route_based_disable_route_autoinstall: false # the page does not set it
 ipsec_route_based_interface_routes:
-  - {dest: 10.0.0.4/32, interface: vti1}
-  - {dest: 10.0.0.5/32, interface: vti2}
+  - { dest: 10.0.0.4/32, interface: vti1 }
+  - { dest: 10.0.0.5/32, interface: vti2 }
 ipsec_route_based_bgp:
   asn: 64499
   neighbors:

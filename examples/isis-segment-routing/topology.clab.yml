@@ -12,5 +12,5 @@ topology:
     p3:
       kind: vyosnetworks_vyos
   links:
-    - endpoints: ["p1:eth1", "p3:eth1"]   # 192.0.2.4/30
-    - endpoints: ["p3:eth2", "p2:eth2"]   # 192.0.2.16/30
+    - endpoints: ["p1:eth1", "p3:eth1"] # 192.0.2.4/30
+    - endpoints: ["p3:eth2", "p2:eth2"] # 192.0.2.16/30

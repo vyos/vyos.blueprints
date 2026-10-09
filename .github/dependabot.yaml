@@ -5,6 +5,10 @@ updates:
     directory: /
     schedule:
       interval: daily
+    # wait a week before proposing a new release (newly published versions are
+    # the most likely to be compromised or withdrawn)
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 3
     labels:
       - skip-changelog

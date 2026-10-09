@@ -9,7 +9,7 @@
     - _pppoe_lines | length > 0
     - not (vyos_blueprints_render_only | default(false) | bool)
 
-- name: Collect rendered commands with the password masked  # noqa: var-naming[no-role-prefix] - shared across roles by design
+- name: Collect rendered commands with the password masked # noqa: var-naming[no-role-prefix] - shared across roles by design
   ansible.builtin.set_fact:
     vyos_blueprints_rendered: >-
       {{ vyos_blueprints_rendered | default([])

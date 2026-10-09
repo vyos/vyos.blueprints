@@ -19,9 +19,24 @@
   gather_facts: false
   vars:
     _flows:
-      - {from: internal, to: 10.201.1.10, allowed: true, why: "remote 10.201.0.0/16 routes are imported"}
-      - {from: internal, to: 10.99.0.10, allowed: false, why: "routes outside 10.201.0.0/16 are filtered by PUBOSPF"}
-      - {from: remote, to: 203.0.113.10, allowed: true, why: "203.0.113.0/24 is exported (access-list 150)"}
+      - {
+          from: internal,
+          to: 10.201.1.10,
+          allowed: true,
+          why: "remote 10.201.0.0/16 routes are imported",
+        }
+      - {
+          from: internal,
+          to: 10.99.0.10,
+          allowed: false,
+          why: "routes outside 10.201.0.0/16 are filtered by PUBOSPF",
+        }
+      - {
+          from: remote,
+          to: 203.0.113.10,
+          allowed: true,
+          why: "203.0.113.0/24 is exported (access-list 150)",
+        }
   tasks:
     - name: Ping per filter
       ansible.builtin.command:

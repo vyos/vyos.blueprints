@@ -9,12 +9,12 @@ all:
               ansible_host: clab-bp-ospf-r1
               ospf_unnumbered_router_id: 192.168.0.1
               base_interfaces:
-                - {name: eth3, addresses: [10.1.0.1/24]}
+                - { name: eth3, addresses: [10.1.0.1/24] }
             r2:
               ansible_host: clab-bp-ospf-r2
               ospf_unnumbered_router_id: 192.168.0.2
               base_interfaces:
-                - {name: eth3, addresses: [10.2.0.1/24]}
+                - { name: eth3, addresses: [10.2.0.1/24] }
           vars:
             ospf_unnumbered_interfaces: [eth1, eth2]
             ospf_unnumbered_md5_key: molecule-ospf

@@ -46,11 +46,11 @@ or a building block several pages share.
 
 ## Test tiers
 
-| Tier | Command | Needs |
-|---|---|---|
-| 0 – lint | `ansible-lint` | nothing |
-| 1 – render | `tests/render/run.sh` | nothing - a test-only connection reports the VyOS version (`VYOS_OFFLINE_OS_VERSION`, default 1.5) |
-| 2 – molecule | `cd extensions && molecule test -s <role>` | docker, containerlab, a VyOS image |
+| Tier         | Command                                    | Needs                                                                                              |
+| ------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| 0 – lint     | `ansible-lint`                             | nothing                                                                                            |
+| 1 – render   | `tests/render/run.sh`                      | nothing - a test-only connection reports the VyOS version (`VYOS_OFFLINE_OS_VERSION`, default 1.5) |
+| 2 – molecule | `cd extensions && molecule test -s <role>` | docker, containerlab, a VyOS image                                                                 |
 
 Run tiers 0 and 1 before opening a PR; CI runs all three.
 

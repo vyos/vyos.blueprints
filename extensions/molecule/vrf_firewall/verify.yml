@@ -13,16 +13,56 @@
   gather_facts: false
   vars:
     _flows:
-      - {from: mgmt, to: 10.150.150.10, allowed: true, why: "MGMT may connect to LAN"}
-      - {from: mgmt, to: 172.16.20.10, allowed: true, why: "MGMT may connect to PROD"}
-      - {from: mgmt, to: 203.0.113.100, allowed: false, why: "MGMT may not reach the internet"}
-      - {from: lan, to: 172.16.20.10, allowed: true, why: "LAN may connect to PROD"}
-      - {from: lan, to: 203.0.113.100, allowed: true, why: "LAN may reach the internet"}
-      - {from: lan, to: 10.100.100.10, allowed: false, why: "nothing may connect to MGMT"}
-      - {from: prod, to: 10.150.150.10, allowed: false, why: "PROD only accepts connections"}
+      - {
+          from: mgmt,
+          to: 10.150.150.10,
+          allowed: true,
+          why: "MGMT may connect to LAN",
+        }
+      - {
+          from: mgmt,
+          to: 172.16.20.10,
+          allowed: true,
+          why: "MGMT may connect to PROD",
+        }
+      - {
+          from: mgmt,
+          to: 203.0.113.100,
+          allowed: false,
+          why: "MGMT may not reach the internet",
+        }
+      - {
+          from: lan,
+          to: 172.16.20.10,
+          allowed: true,
+          why: "LAN may connect to PROD",
+        }
+      - {
+          from: lan,
+          to: 203.0.113.100,
+          allowed: true,
+          why: "LAN may reach the internet",
+        }
+      - {
+          from: lan,
+          to: 10.100.100.10,
+          allowed: false,
+          why: "nothing may connect to MGMT",
+        }
+      - {
+          from: prod,
+          to: 10.150.150.10,
+          allowed: false,
+          why: "PROD only accepts connections",
+        }
       # The page's text says WAN may connect to PROD, but its configuration has
       # no rule for it, so the configuration (default drop) is what is tested.
-      - {from: wan, to: 172.16.20.10, allowed: false, why: "no WAN->PROD rule in the page's configuration"}
+      - {
+          from: wan,
+          to: 172.16.20.10,
+          allowed: false,
+          why: "no WAN->PROD rule in the page's configuration",
+        }
   tasks:
     - name: Ping across VRFs
       ansible.builtin.command:

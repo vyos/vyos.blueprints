@@ -26,47 +26,97 @@ argument_specs:
         default: []
         description: Areas.
         options:
-          id: {type: str, required: true, description: "Area id, e.g. C(0.0.0.0)."}
-          networks: {type: list, elements: str, default: [], description: Networks in the area.}
-          authentication: {type: str, choices: [md5, plaintext-password], description: Area authentication.}
+          id:
+            {
+              type: str,
+              required: true,
+              description: "Area id, e.g. C(0.0.0.0).",
+            }
+          networks:
+            {
+              type: list,
+              elements: str,
+              default: [],
+              description: Networks in the area.,
+            }
+          authentication:
+            {
+              type: str,
+              choices: [md5, plaintext-password],
+              description: Area authentication.,
+            }
       ospf_interfaces:
         type: list
         elements: dict
         default: []
         description: Per-interface settings.
         options:
-          name: {type: str, required: true, description: "Interface, e.g. C(wg01)."}
-          network: {type: str, description: "Network type, e.g. C(point-to-point)."}
-          cost: {type: int, description: Interface cost.}
-          priority: {type: int, description: DR priority.}
-          hello_interval: {type: int, description: Hello interval in seconds.}
-          dead_interval: {type: int, description: Dead interval in seconds.}
-          retransmit_interval: {type: int, description: Retransmit interval in seconds.}
-          transmit_delay: {type: int, description: Transmit delay in seconds.}
+          name:
+            {
+              type: str,
+              required: true,
+              description: "Interface, e.g. C(wg01).",
+            }
+          network:
+            { type: str, description: "Network type, e.g. C(point-to-point)." }
+          cost: { type: int, description: Interface cost. }
+          priority: { type: int, description: DR priority. }
+          hello_interval: { type: int, description: Hello interval in seconds. }
+          dead_interval: { type: int, description: Dead interval in seconds. }
+          retransmit_interval:
+            { type: int, description: Retransmit interval in seconds. }
+          transmit_delay: { type: int, description: Transmit delay in seconds. }
           passive:
             type: bool
             description: "C(true) - do not form adjacencies; C(false) - C(passive disable), i.e. form adjacencies despite C(ospf_passive_interface_default)."
-          area: {type: str, description: "Put the interface into this area (C(interface <if> area)), instead of a network statement."}
-          md5_key: {type: str, no_log: true, description: MD5 authentication key.}
-          md5_key_id: {type: int, default: 1, description: MD5 key id.}
+          area:
+            {
+              type: str,
+              description: "Put the interface into this area (C(interface <if> area)), instead of a network statement.",
+            }
+          md5_key:
+            { type: str, no_log: true, description: MD5 authentication key. }
+          md5_key_id: { type: int, default: 1, description: MD5 key id. }
       ospf_redistribute:
         type: list
         elements: dict
         default: []
         description: Redistribution into OSPF.
         options:
-          type: {type: str, required: true, description: "Route type, e.g. C(connected), C(static), C(bgp)."}
-          metric: {type: int, description: Metric.}
-          route_map: {type: str, description: Route-map applied to redistributed routes.}
+          type:
+            {
+              type: str,
+              required: true,
+              description: "Route type, e.g. C(connected), C(static), C(bgp).",
+            }
+          metric: { type: int, description: Metric. }
+          route_map:
+            {
+              type: str,
+              description: Route-map applied to redistributed routes.,
+            }
       ospf_redistribute_access_lists:
         type: dict
         default: {}
         description: "Access-list export filter per redistributed route type, e.g. C({connected: 150})."
-      ospf_reference_bandwidth: {type: int, description: Auto-cost reference bandwidth in Mbit/s.}
-      ospf_abr_type: {type: str, default: "", description: "ABR type, e.g. C(cisco)."}
-      ospf_passive_interface_default: {type: bool, default: false, description: Make all interfaces passive by default (C(passive-interface default)).}
-      ospf_log_adjacency_changes: {type: bool, default: false, description: Log adjacency changes.}
-      ospf_import_route_map: {type: str, default: "", description: Route-map deciding which OSPF routes are installed (C(system ip protocol ospf route-map)).}
+      ospf_reference_bandwidth:
+        { type: int, description: Auto-cost reference bandwidth in Mbit/s. }
+      ospf_abr_type:
+        { type: str, default: "", description: "ABR type, e.g. C(cisco)." }
+      ospf_passive_interface_default:
+        {
+          type: bool,
+          default: false,
+          description: Make all interfaces passive by default (C(passive-interface default)).,
+        }
+      ospf_log_adjacency_changes:
+        { type: bool, default: false, description: Log adjacency changes. }
+      ospf_import_route_map:
+        {
+          type: str,
+          default: "",
+          description: Route-map deciding which OSPF routes are installed (C(system ip protocol ospf route-map)).,
+        }
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -75,5 +125,12 @@ argument_specs:
     short_description: Post-deployment checks for the ospf role
     description: Run with C(tasks_from=verify). Checks a Full adjacency on every interface that forms adjacencies.
     options:
-      ospf_interfaces: {type: list, elements: dict, default: [], description: Same value as for C(main).}
-      ospf_passive_interface_default: {type: bool, default: false, description: Same value as for C(main).}
+      ospf_interfaces:
+        {
+          type: list,
+          elements: dict,
+          default: [],
+          description: Same value as for C(main).,
+        }
+      ospf_passive_interface_default:
+        { type: bool, default: false, description: Same value as for C(main). }

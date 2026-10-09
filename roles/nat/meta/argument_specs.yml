@@ -29,5 +29,17 @@ argument_specs:
     short_description: Post-deployment checks for the nat role
     description: Run with C(tasks_from=verify). Checks every rule is installed.
     options:
-      nat_source_rules: {type: list, elements: dict, default: [], description: Same value as for C(main).}
-      nat_destination_rules: {type: list, elements: dict, default: [], description: Same value as for C(main).}
+      nat_source_rules:
+        {
+          type: list,
+          elements: dict,
+          default: [],
+          description: Same value as for C(main).,
+        }
+      nat_destination_rules:
+        {
+          type: list,
+          elements: dict,
+          default: [],
+          description: Same value as for C(main).,
+        }

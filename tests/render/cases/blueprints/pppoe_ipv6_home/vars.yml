@@ -12,29 +12,53 @@ pppoe_interfaces:
     prefix_delegation:
       - id: 0
         interfaces:
-          - {name: eth1, address: "100"}
+          - { name: eth1, address: "100" }
 router_advert_interfaces:
   - name: eth1
     link_mtu: 1492
     name_servers: ["2001:db8::53"]
     prefixes:
-      - {prefix: "::/64", valid_lifetime: 172800}
+      - { prefix: "::/64", valid_lifetime: 172800 }
 firewall_ipv6:
   names:
     WAN_IN:
       default_action: drop
       rules:
-        - {number: 10, action: accept, state: {established: true, related: true}}
-        - {number: 20, action: accept, protocol: icmpv6}
+        - {
+            number: 10,
+            action: accept,
+            state: { established: true, related: true },
+          }
+        - { number: 20, action: accept, protocol: icmpv6 }
     WAN_LOCAL:
       default_action: drop
       rules:
-        - {number: 10, action: accept, state: {established: true, related: true}}
-        - {number: 20, action: accept, protocol: icmpv6}
-        - {number: 30, action: accept, protocol: udp, source: {port: "547"}, destination: {port: "546"}}
+        - {
+            number: 10,
+            action: accept,
+            state: { established: true, related: true },
+          }
+        - { number: 20, action: accept, protocol: icmpv6 }
+        - {
+            number: 30,
+            action: accept,
+            protocol: udp,
+            source: { port: "547" },
+            destination: { port: "546" },
+          }
   forward:
     rules:
-      - {number: 10, action: jump, jump_target: WAN_IN, inbound_interface: {name: pppoe0}}
+      - {
+          number: 10,
+          action: jump,
+          jump_target: WAN_IN,
+          inbound_interface: { name: pppoe0 },
+        }
   input:
     rules:
-      - {number: 10, action: jump, jump_target: WAN_LOCAL, inbound_interface: {name: pppoe0}}
+      - {
+          number: 10,
+          action: jump,
+          jump_target: WAN_LOCAL,
+          inbound_interface: { name: pppoe0 },
+        }

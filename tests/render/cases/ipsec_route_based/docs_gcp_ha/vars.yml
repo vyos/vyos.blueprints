@@ -9,7 +9,7 @@ ipsec_route_based_ike_group:
   encryption: aes256
   hash: sha256
   prf: prfsha256
-  dead_peer_detection: {action: restart, interval: 30}
+  dead_peer_detection: { action: restart, interval: 30 }
 ipsec_route_based_esp_group:
   name: GCP-ESP
   lifetime: 10800
@@ -22,8 +22,28 @@ ipsec_route_based_interfaces: [eth0]
 ipsec_route_based_disable_route_autoinstall: true
 ipsec_route_based_policy:
   prefix_lists:
-    - {name: GCP-IN, rules: [{sequence: 10, action: permit, prefix: 10.70.0.0/20}]}
-    - {name: GCP-OUT, rules: [{sequence: 10, action: permit, prefix: 10.80.0.0/24}]}
+    - {
+        name: GCP-IN,
+        rules: [{ sequence: 10, action: permit, prefix: 10.70.0.0/20 }],
+      }
+    - {
+        name: GCP-OUT,
+        rules: [{ sequence: 10, action: permit, prefix: 10.80.0.0/24 }],
+      }
   route_maps:
-    - {name: GCP-IN, rules: [{sequence: 10, action: permit, prefix_list: GCP-IN}, {sequence: 20, action: deny}]}
-    - {name: GCP-OUT, rules: [{sequence: 10, action: permit, prefix_list: GCP-OUT}, {sequence: 20, action: deny}]}
+    - {
+        name: GCP-IN,
+        rules:
+          [
+            { sequence: 10, action: permit, prefix_list: GCP-IN },
+            { sequence: 20, action: deny },
+          ],
+      }
+    - {
+        name: GCP-OUT,
+        rules:
+          [
+            { sequence: 10, action: permit, prefix_list: GCP-OUT },
+            { sequence: 20, action: deny },
+          ],
+      }

@@ -19,11 +19,19 @@ topology:
     pc1:
       kind: linux
       image: alpine:3
-      exec: ["ip addr add 192.168.0.2/24 dev eth1", "ip route replace default via 192.168.0.1"]
+      exec:
+        [
+          "ip addr add 192.168.0.2/24 dev eth1",
+          "ip route replace default via 192.168.0.1",
+        ]
     pc3:
       kind: linux
       image: alpine:3
-      exec: ["ip addr add 192.168.10.2/24 dev eth1", "ip route replace default via 192.168.10.1"]
+      exec:
+        [
+          "ip addr add 192.168.10.2/24 dev eth1",
+          "ip route replace default via 192.168.10.1",
+        ]
   links:
     # WAN is eth1 here (eth0 on the page; eth0 is containerlab management)
     - endpoints: ["vyos:eth1", "isp:eth1"]

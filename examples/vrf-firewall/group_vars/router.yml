@@ -2,50 +2,70 @@
 # The page's WAN is PPPoE (pppoe0); this example uses eth3 instead, because
 # PPPoE needs an access concentrator. Swap eth3 back to pppoe0 on a real router.
 base_interfaces:
-  - {name: eth1, addresses: [10.100.100.1/24]}
-  - {name: eth2}
-  - {name: eth2.150, addresses: [10.150.150.1/24]}
-  - {name: eth2.160, addresses: [10.160.160.1/24]}
-  - {name: eth2.3500, addresses: [172.16.20.1/24]}
-  - {name: eth3, addresses: [203.0.113.1/24]}
+  - { name: eth1, addresses: [10.100.100.1/24] }
+  - { name: eth2 }
+  - { name: eth2.150, addresses: [10.150.150.1/24] }
+  - { name: eth2.160, addresses: [10.160.160.1/24] }
+  - { name: eth2.3500, addresses: [172.16.20.1/24] }
+  - { name: eth3, addresses: [203.0.113.1/24] }
 vrf_firewall_vrfs:
   - name: MGMT
     table: 102
     interfaces: [eth1]
     routes:
-      - {dest: 10.150.150.0/24, interface: eth2.150, vrf: LAN}
-      - {dest: 10.160.160.0/24, interface: eth2.160, vrf: LAN}
-      - {dest: 172.16.20.0/24, interface: eth2.3500, vrf: PROD}
+      - { dest: 10.150.150.0/24, interface: eth2.150, vrf: LAN }
+      - { dest: 10.160.160.0/24, interface: eth2.160, vrf: LAN }
+      - { dest: 172.16.20.0/24, interface: eth2.3500, vrf: PROD }
   - name: WAN
     table: 101
     interfaces: [eth3]
     routes:
-      - {dest: 10.150.150.0/24, interface: eth2.150, vrf: LAN}
-      - {dest: 10.160.160.0/24, interface: eth2.160, vrf: LAN}
-      - {dest: 172.16.20.0/24, interface: eth2.3500, vrf: PROD}
+      - { dest: 10.150.150.0/24, interface: eth2.150, vrf: LAN }
+      - { dest: 10.160.160.0/24, interface: eth2.160, vrf: LAN }
+      - { dest: 172.16.20.0/24, interface: eth2.3500, vrf: PROD }
   - name: LAN
     table: 103
     interfaces: [eth2.150, eth2.160]
     routes:
-      - {dest: 0.0.0.0/0, interface: eth3, vrf: WAN}
-      - {dest: 10.100.100.0/24, interface: eth1, vrf: MGMT}
-      - {dest: 172.16.20.0/24, interface: eth2.3500, vrf: PROD}
+      - { dest: 0.0.0.0/0, interface: eth3, vrf: WAN }
+      - { dest: 10.100.100.0/24, interface: eth1, vrf: MGMT }
+      - { dest: 172.16.20.0/24, interface: eth2.3500, vrf: PROD }
   - name: PROD
     table: 104
     interfaces: [eth2.3500]
     routes:
-      - {dest: 0.0.0.0/0, interface: eth3, vrf: WAN}
-      - {dest: 10.100.100.0/24, interface: eth1, vrf: MGMT}
-      - {dest: 10.150.150.0/24, interface: eth2.150, vrf: LAN}
-      - {dest: 10.160.160.0/24, interface: eth2.160, vrf: LAN}
+      - { dest: 0.0.0.0/0, interface: eth3, vrf: WAN }
+      - { dest: 10.100.100.0/24, interface: eth1, vrf: MGMT }
+      - { dest: 10.150.150.0/24, interface: eth2.150, vrf: LAN }
+      - { dest: 10.160.160.0/24, interface: eth2.160, vrf: LAN }
 
 vrf_firewall_forward_rules:
-  - {number: 10, description: MGMT - Allow to LAN and PROD, inbound_interface: MGMT, outbound_interface: eth2*}
-  - {number: 99, action: drop, description: MGMT - Drop all going to mgmt, outbound_interface: eth1}
-  - {number: 120, description: LAN - Allow to PROD, inbound_interface: LAN, outbound_interface: eth2.3500}
-  - {number: 130, description: LAN - Allow internet, inbound_interface: LAN, outbound_interface: eth3}
+  - {
+      number: 10,
+      description: MGMT - Allow to LAN and PROD,
+      inbound_interface: MGMT,
+      outbound_interface: eth2*,
+    }
+  - {
+      number: 99,
+      action: drop,
+      description: MGMT - Drop all going to mgmt,
+      outbound_interface: eth1,
+    }
+  - {
+      number: 120,
+      description: LAN - Allow to PROD,
+      inbound_interface: LAN,
+      outbound_interface: eth2.3500,
+    }
+  - {
+      number: 130,
+      description: LAN - Allow internet,
+      inbound_interface: LAN,
+      outbound_interface: eth3,
+    }
 
 vrf_firewall_input_rules:
   # containerlab management only - on a real router the page allows input from MGMT only
-  - {number: 5, description: containerlab management, inbound_interface: eth0}
-  - {number: 10, description: MGMT - Allow input, inbound_interface: MGMT}
+  - { number: 5, description: containerlab management, inbound_interface: eth0 }
+  - { number: 10, description: MGMT - Allow input, inbound_interface: MGMT }

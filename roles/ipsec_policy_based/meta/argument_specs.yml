@@ -87,34 +87,58 @@ argument_specs:
           - IKE (phase 1) settings shared by all peers.
           - Settings without a default here are configured only when given.
         options:
-          name: {type: str, default: IKE-GROUP, description: Group name.}
-          proposal_id: {type: int, default: 10, description: Proposal number.}
-          key_exchange: {type: str, choices: [ikev1, ikev2], default: ikev2, description: IKE version.}
-          lifetime: {type: int, description: Lifetime in seconds.}
-          dh_group: {type: int, default: 14, description: Diffie-Hellman group.}
-          encryption: {type: str, default: aes256, description: "Encryption, e.g. C(aes128)."}
-          hash: {type: str, default: sha256, description: "Hash, e.g. C(sha1)."}
-          close_action: {type: str, choices: [none, trap, start], description: Action when the peer closes the SA.}
+          name: { type: str, default: IKE-GROUP, description: Group name. }
+          proposal_id: { type: int, default: 10, description: Proposal number. }
+          key_exchange:
+            {
+              type: str,
+              choices: [ikev1, ikev2],
+              default: ikev2,
+              description: IKE version.,
+            }
+          lifetime: { type: int, description: Lifetime in seconds. }
+          dh_group:
+            { type: int, default: 14, description: Diffie-Hellman group. }
+          encryption:
+            {
+              type: str,
+              default: aes256,
+              description: "Encryption, e.g. C(aes128).",
+            }
+          hash:
+            { type: str, default: sha256, description: "Hash, e.g. C(sha1)." }
+          close_action:
+            {
+              type: str,
+              choices: [none, trap, start],
+              description: Action when the peer closes the SA.,
+            }
           dead_peer_detection:
             type: dict
             description: DPD settings; only the keys given are configured.
             options:
-              action: {type: str, choices: [trap, clear, restart], description: DPD action.}
-              interval: {type: int, description: Interval in seconds.}
-              timeout: {type: int, description: Timeout in seconds.}
+              action:
+                {
+                  type: str,
+                  choices: [trap, clear, restart],
+                  description: DPD action.,
+                }
+              interval: { type: int, description: Interval in seconds. }
+              timeout: { type: int, description: Timeout in seconds. }
       ipsec_policy_based_esp_group:
         type: dict
         description:
           - ESP (phase 2) settings shared by all peers.
           - Settings without a default here are configured only when given.
         options:
-          name: {type: str, default: ESP-GROUP, description: Group name.}
-          proposal_id: {type: int, default: 10, description: Proposal number.}
-          mode: {type: str, choices: [tunnel, transport], description: ESP mode.}
-          lifetime: {type: int, description: Lifetime in seconds.}
-          pfs: {type: str, description: PFS group or C(disable).}
-          encryption: {type: str, default: aes256, description: Encryption.}
-          hash: {type: str, default: sha256, description: Hash.}
+          name: { type: str, default: ESP-GROUP, description: Group name. }
+          proposal_id: { type: int, default: 10, description: Proposal number. }
+          mode:
+            { type: str, choices: [tunnel, transport], description: ESP mode. }
+          lifetime: { type: int, description: Lifetime in seconds. }
+          pfs: { type: str, description: PFS group or C(disable). }
+          encryption: { type: str, default: aes256, description: Encryption. }
+          hash: { type: str, default: sha256, description: Hash. }
       ipsec_policy_based_interfaces:
         type: list
         elements: str

@@ -25,27 +25,45 @@ argument_specs:
             default: []
             description: IPv4 network groups.
             options:
-              name: {type: str, required: true, description: Group name.}
-              description: {type: str, description: Group description.}
-              networks: {type: list, elements: str, required: true, description: Member networks.}
+              name: { type: str, required: true, description: Group name. }
+              description: { type: str, description: Group description. }
+              networks:
+                {
+                  type: list,
+                  elements: str,
+                  required: true,
+                  description: Member networks.,
+                }
           address:
             type: list
             elements: dict
             default: []
             description: IPv4 address groups.
             options:
-              name: {type: str, required: true, description: Group name.}
-              description: {type: str, description: Group description.}
-              addresses: {type: list, elements: str, required: true, description: Member addresses or ranges.}
+              name: { type: str, required: true, description: Group name. }
+              description: { type: str, description: Group description. }
+              addresses:
+                {
+                  type: list,
+                  elements: str,
+                  required: true,
+                  description: Member addresses or ranges.,
+                }
           port:
             type: list
             elements: dict
             default: []
             description: Port groups.
             options:
-              name: {type: str, required: true, description: Group name.}
-              description: {type: str, description: Group description.}
-              ports: {type: list, elements: str, required: true, description: Member ports or ranges.}
+              name: { type: str, required: true, description: Group name. }
+              description: { type: str, description: Group description. }
+              ports:
+                {
+                  type: list,
+                  elements: str,
+                  required: true,
+                  description: Member ports or ranges.,
+                }
       firewall_ipv4:
         type: dict
         default: {}
@@ -55,9 +73,25 @@ argument_specs:
             type: dict
             description: Filter for this chain.
             options:
-              default_action: {type: str, choices: [accept, drop, reject], description: Default action.}
-              default_log: {type: bool, default: false, description: Log packets hitting the default action.}
-              rules: {type: list, elements: dict, default: [], description: Rules in vyos_firewall_rules format.}
+              default_action:
+                {
+                  type: str,
+                  choices: [accept, drop, reject],
+                  description: Default action.,
+                }
+              default_log:
+                {
+                  type: bool,
+                  default: false,
+                  description: Log packets hitting the default action.,
+                }
+              rules:
+                {
+                  type: list,
+                  elements: dict,
+                  default: [],
+                  description: Rules in vyos_firewall_rules format.,
+                }
           forward: *filter
           output: *filter
           names:
@@ -78,5 +112,7 @@ argument_specs:
     short_description: Post-deployment checks for the firewall role
     description: Run with C(tasks_from=verify). Checks every configured filter is active with its rules.
     options:
-      firewall_ipv4: {type: dict, default: {}, description: Same value as for C(main).}
-      firewall_ipv6: {type: dict, default: {}, description: Same value as for C(main).}
+      firewall_ipv4:
+        { type: dict, default: {}, description: Same value as for C(main). }
+      firewall_ipv6:
+        { type: dict, default: {}, description: Same value as for C(main). }

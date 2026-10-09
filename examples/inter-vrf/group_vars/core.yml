@@ -29,8 +29,8 @@ vrf_lite_vrfs:
     route_targets_export:
       - 64496:100
     route_targets_import:
-      - '64496:1'
-      - '64496:2'
+      - "64496:1"
+      - "64496:2"
     neighbors:
       - address: 10.2.2.2
         remote_as: 64497
@@ -45,13 +45,13 @@ vrf_lite_vrfs:
         next_hop: 10.1.1.2
       - dest: 2001:db8:0:1::/64
         next_hop: 2001:db8::1
-    rd: '64496:1'
+    rd: "64496:1"
     route_targets_export:
-      - '64496:1'
+      - "64496:1"
     route_targets_import:
       - 64496:100
-      - '64496:50'
-      - '64496:2'
+      - "64496:50"
+      - "64496:2"
     redistribute:
       - static
   - name: LAN2
@@ -63,13 +63,13 @@ vrf_lite_vrfs:
         next_hop: 172.16.2.2
       - dest: 2001:db8:0:2::/64
         next_hop: 2001:db8::3
-    rd: '64496:2'
+    rd: "64496:2"
     route_targets_export:
-      - '64496:2'
+      - "64496:2"
     route_targets_import:
       - 64496:100
-      - '64496:50'
-      - '64496:1'
+      - "64496:50"
+      - "64496:1"
     redistribute:
       - static
     import_route_map:
@@ -84,12 +84,12 @@ vrf_lite_vrfs:
         next_hop: 192.168.3.2
       - dest: 2001:db8:0:3::/64
         next_hop: 2001:db8::5
-    rd: '64496:50'
+    rd: "64496:50"
     route_targets_export:
-      - '64496:50'
+      - "64496:50"
     route_targets_import:
-      - '64496:1'
-      - '64496:2'
+      - "64496:1"
+      - "64496:2"
     redistribute:
       - static
 route_policy_prefix_lists:

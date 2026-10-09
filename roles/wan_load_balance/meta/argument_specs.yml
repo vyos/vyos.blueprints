@@ -22,43 +22,100 @@ argument_specs:
         required: true
         description: WAN interfaces and their health checks.
         options:
-          name: {type: str, required: true, description: "WAN interface, e.g. C(eth0)."}
-          nexthop: {type: str, description: Next hop (ISP gateway) for this interface.}
-          failure_count: {type: int, description: Failed tests before the interface is removed from the pool.}
-          success_count: {type: int, description: Successful tests before it is added back.}
+          name:
+            {
+              type: str,
+              required: true,
+              description: "WAN interface, e.g. C(eth0).",
+            }
+          nexthop:
+            {
+              type: str,
+              description: Next hop (ISP gateway) for this interface.,
+            }
+          failure_count:
+            {
+              type: int,
+              description: Failed tests before the interface is removed from the pool.,
+            }
+          success_count:
+            {
+              type: int,
+              description: Successful tests before it is added back.,
+            }
           tests:
             type: list
             elements: dict
             default: []
             description: Health tests.
             options:
-              id: {type: int, required: true, description: Test number.}
-              type: {type: str, default: ping, description: "Test type, e.g. C(ping)."}
-              target: {type: str, required: true, description: Address to test.}
+              id: { type: int, required: true, description: Test number. }
+              type:
+                {
+                  type: str,
+                  default: ping,
+                  description: "Test type, e.g. C(ping).",
+                }
+              target:
+                { type: str, required: true, description: Address to test. }
       wan_load_balance_rules:
         type: list
         elements: dict
         required: true
         description: Load-balancing rules, matched in number order.
         options:
-          number: {type: int, required: true, description: Rule number.}
-          description: {type: str, description: Rule description.}
-          inbound_interface: {type: str, required: true, description: "Interface the traffic enters on, e.g. C(eth2) or C(eth+)."}
+          number: { type: int, required: true, description: Rule number. }
+          description: { type: str, description: Rule description. }
+          inbound_interface:
+            {
+              type: str,
+              required: true,
+              description: "Interface the traffic enters on, e.g. C(eth2) or C(eth+).",
+            }
           interfaces:
             type: list
             elements: dict
             default: []
             description: Outgoing WAN interfaces; omit for C(exclude) rules.
             options:
-              name: {type: str, required: true, description: WAN interface.}
-              weight: {type: int, description: Weight (higher is preferred in failover mode).}
-          failover: {type: bool, default: false, description: Use only the highest-weight healthy interface.}
-          exclude: {type: bool, default: false, description: Exclude matching traffic from load balancing.}
-          protocol: {type: str, description: "Protocol, e.g. C(tcp)."}
-          source: {type: dict, description: "Source match (C(address), C(port))."}
-          destination: {type: dict, description: "Destination match (C(address), C(port)), e.g. C({port: sip})."}
-      wan_load_balance_prune_rules: {type: bool, default: true, description: Delete rule settings that are not in C(wan_load_balance_rules).}
-      wan_load_balance_disable_source_nat: {type: bool, default: false, description: Do not SNAT outgoing traffic to the interface address.}
+              name: { type: str, required: true, description: WAN interface. }
+              weight:
+                {
+                  type: int,
+                  description: Weight (higher is preferred in failover mode).,
+                }
+          failover:
+            {
+              type: bool,
+              default: false,
+              description: Use only the highest-weight healthy interface.,
+            }
+          exclude:
+            {
+              type: bool,
+              default: false,
+              description: Exclude matching traffic from load balancing.,
+            }
+          protocol: { type: str, description: "Protocol, e.g. C(tcp)." }
+          source:
+            { type: dict, description: "Source match (C(address), C(port))." }
+          destination:
+            {
+              type: dict,
+              description: "Destination match (C(address), C(port)), e.g. C({port: sip}).",
+            }
+      wan_load_balance_prune_rules:
+        {
+          type: bool,
+          default: true,
+          description: Delete rule settings that are not in C(wan_load_balance_rules).,
+        }
+      wan_load_balance_disable_source_nat:
+        {
+          type: bool,
+          default: false,
+          description: Do not SNAT outgoing traffic to the interface address.,
+        }
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -67,4 +124,10 @@ argument_specs:
     short_description: Post-deployment checks for the wan_load_balance role
     description: Run with C(tasks_from=verify). Checks every WAN interface is listed by C(show wan-load-balance).
     options:
-      wan_load_balance_interfaces: {type: list, elements: dict, required: true, description: Same value as for C(main).}
+      wan_load_balance_interfaces:
+        {
+          type: list,
+          elements: dict,
+          required: true,
+          description: Same value as for C(main).,
+        }

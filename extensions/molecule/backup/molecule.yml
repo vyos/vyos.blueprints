@@ -28,4 +28,16 @@ verifier:
   name: ansible
 scenario:
   # a backup always reports a change, so there is no idempotence step
-  test_sequence: [dependency, cleanup, destroy, syntax, create, prepare, converge, verify, cleanup, destroy]
+  test_sequence:
+    [
+      dependency,
+      cleanup,
+      destroy,
+      syntax,
+      create,
+      prepare,
+      converge,
+      verify,
+      cleanup,
+      destroy,
+    ]

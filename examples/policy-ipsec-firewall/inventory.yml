@@ -5,11 +5,11 @@ all:
     sites:
       hosts:
         left:
-          ansible_host: clab-policy-ipsec-firewall-left    # your router's address
+          ansible_host: clab-policy-ipsec-firewall-left # your router's address
         right:
           ansible_host: clab-policy-ipsec-firewall-right
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: admin
-    ansible_password: admin                             # use ansible-vault for real devices
+    ansible_password: admin # use ansible-vault for real devices

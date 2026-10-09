@@ -19,9 +19,13 @@
   gather_facts: false
   vars:
     _flows:
-      ce1: [{dest: 10.0.0.100, source: 10.0.0.80}]
-      ce2: [{dest: 10.0.0.100, source: 10.0.0.90}]
-      cehub: [{dest: 10.0.0.80, source: 10.0.0.100}, {dest: 10.0.0.90, source: 10.0.0.100}]
+      ce1: [{ dest: 10.0.0.100, source: 10.0.0.80 }]
+      ce2: [{ dest: 10.0.0.100, source: 10.0.0.90 }]
+      cehub:
+        [
+          { dest: 10.0.0.80, source: 10.0.0.100 },
+          { dest: 10.0.0.90, source: 10.0.0.100 },
+        ]
   tasks:
     - name: Ping between CE loopbacks through the L3VPN
       vyos.vyos.vyos_ping:

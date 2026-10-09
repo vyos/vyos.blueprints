@@ -47,9 +47,18 @@ argument_specs:
         default: []
         description: IPv4 static routes, e.g. the (temporary) default route towards the upstream.
         options:
-          dest: {type: str, required: true, description: "Destination prefix, e.g. C(0.0.0.0/0)."}
-          next_hop: {type: str, description: Next-hop address.}
-          interface: {type: str, description: Outgoing interface (instead of C(next_hop)).}
+          dest:
+            {
+              type: str,
+              required: true,
+              description: "Destination prefix, e.g. C(0.0.0.0/0).",
+            }
+          next_hop: { type: str, description: Next-hop address. }
+          interface:
+            {
+              type: str,
+              description: Outgoing interface (instead of C(next_hop)).,
+            }
       base_ntp_servers:
         type: list
         elements: str
