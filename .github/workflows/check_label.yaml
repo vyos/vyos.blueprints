@@ -14,4 +14,4 @@ jobs:
       checks: write
       contents: write
       pull-requests: write
-    uses: ansible/ansible-content-actions/.github/workflows/check_label.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/check_label.yaml@cbdec1f72eeee38b7e60d0f2346c66e622eea02a # main

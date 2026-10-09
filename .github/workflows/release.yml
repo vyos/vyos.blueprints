@@ -3,9 +3,14 @@ name: Release collection
 on: # yamllint disable-line rule:truthy
   release:
     types: [published]
+permissions: {}
 jobs:
   release:
-    uses: ansible/ansible-content-actions/.github/workflows/release.yaml@main
+    # The shared workflow builds the collection and publishes it through the
+    # Galaxy / Automation Hub APIs; it needs no write access to this repository.
+    permissions:
+      contents: read
+    uses: ansible/ansible-content-actions/.github/workflows/release.yaml@cbdec1f72eeee38b7e60d0f2346c66e622eea02a # main
     with:
       environment: release
     secrets:

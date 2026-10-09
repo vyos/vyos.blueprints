@@ -12,4 +12,6 @@ on:
 jobs:
   call-cla-assistant:
     uses: vyos/vyos-cla-signatures/.github/workflows/cla-reusable.yml@production
-    secrets: inherit
+    secrets:
+      # only the vyos-bot key the shared CLA workflow declares
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}

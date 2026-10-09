@@ -8,6 +8,8 @@
 - Add a changelog fragment in `changelogs/fragments/` (keys: `major_changes`,
   `minor_changes`, `bugfixes`, `breaking_changes`, `deprecated_features`,
   `removed_features`, `security_fixes`, `known_issues`, `doc_changes`, `trivial`).
+- After changing a role's `meta/argument_specs.yml`, regenerate its README with
+  `python3 scripts/gen-role-readmes.py` (CI checks they match).
 - Optional: `pre-commit install` runs the same formatting checks locally.
 
 # Contributing a blueprint role

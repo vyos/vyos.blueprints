@@ -1,0 +1,15 @@
+# zizmor configuration (https://docs.zizmor.sh/configuration/)
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # reusable workflows maintained by the VyOS organisation itself
+        "vyos/*": ref-pin
+        # everything else by commit SHA (Dependabot keeps the pins current)
+        "*": hash-pin
+  dangerous-triggers:
+    ignore:
+      # pull_request_target is needed to comment on / label pull requests from
+      # forks. Neither workflow checks out or runs code from the pull request.
+      - cla-check.yml
+      - check_label.yaml
