@@ -18,12 +18,18 @@ set -euo pipefail
 ISO_TO_OCI_URL="https://raw.githubusercontent.com/vyos/vyos-build/f5a1e8334f772225d9e3ccdab45f6884cec28e59/scripts/iso-to-oci"
 DEFAULT_TAG="vyos:blueprints-ci"
 
+# iso-to-oci must run as root: unpacking the image's root filesystem as another
+# user leaves every file owned by that user (sudo, polkit and the VyOS CLI then
+# refuse to work inside the container).
+SUDO=""
+[[ $EUID -ne 0 ]] && SUDO="sudo"
+
 build_oci() {  # <iso-path-or-url> <out.tar.xz>
   local src="$1" out
   out="$(realpath -m "$2")"
   local work
   work="$(mktemp -d)"
-  trap 'rm -rf "$work"' RETURN
+  trap '$SUDO rm -rf "$work"' RETURN
   if [[ "$src" =~ ^https?:// ]]; then
     echo "I: downloading $src"
     curl -fL --retry 3 -o "$work/vyos.iso" "$src"
@@ -38,8 +44,9 @@ build_oci() {  # <iso-path-or-url> <out.tar.xz>
   fi
   curl -fsSL --retry 3 -o "$work/iso-to-oci" "$ISO_TO_OCI_URL"
   chmod +x "$work/iso-to-oci"
-  (cd "$work" && ./iso-to-oci "$(realpath "$src")")
-  mv "$work"/vyos-*-oci-*.tar.xz "$out"
+  (cd "$work" && $SUDO ./iso-to-oci "$(realpath "$src")")
+  $SUDO mv "$work"/vyos-*-oci-*.tar.xz "$out"
+  $SUDO chown "$(id -u):$(id -g)" "$out"
   echo "I: image tarball: $out"
 }
 
