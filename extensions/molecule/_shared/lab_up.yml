@@ -12,7 +12,7 @@
       block:
         - name: Deploy lab (containerlab waits until VyOS has loaded its boot configuration)
           ansible.builtin.shell:
-            cmd: containerlab deploy --reconfigure --log-level debug --topo {{ _topology }} > {{ _log }} 2>&1
+            cmd: containerlab deploy --reconfigure --log-level debug --topo {{ _topology | quote }} > {{ _log | quote }} 2>&1
           become: "{{ _become }}"
           changed_when: true
           timeout: "{{ lookup('ansible.builtin.env', 'CLAB_DEPLOY_TIMEOUT', default='900') | int }}"
@@ -20,9 +20,9 @@
         - name: Collect diagnostics from the lab's containers
           ansible.builtin.shell:
             cmd: |
-              echo "===== containerlab deploy log (last 60 lines)"; tail -n 60 {{ _log }}
-              echo "===== containers"; docker ps -a --filter label=containerlab={{ _lab }}
-              for c in $(docker ps -q --filter label=containerlab={{ _lab }} --filter label=clab-node-kind=vyosnetworks_vyos); do
+              echo "===== containerlab deploy log (last 60 lines)"; tail -n 60 {{ _log | quote }}
+              echo "===== containers"; docker ps -a --filter label=containerlab={{ _lab | quote }}
+              for c in $(docker ps -q --filter label=containerlab={{ _lab | quote }} --filter label=clab-node-kind=vyosnetworks_vyos); do
                 n=$(docker inspect -f '{% raw %}{{.Name}}{% endraw %}' "$c")
                 echo "===== $n: systemctl is-system-running"; docker exec "$c" systemctl is-system-running
                 echo "===== $n: failed units"; docker exec "$c" systemctl --failed --no-pager
