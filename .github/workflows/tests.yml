@@ -126,13 +126,31 @@ jobs:
           name: vyos-oci
       - name: Import the VyOS image
         run: ansible_collections/vyos/blueprints/scripts/build-vyos-image.sh --import vyos-oci.tar.xz vyos:blueprints-ci
+      - name: Pre-pull alpine:3 from a mirror (Docker Hub rate-limits shared runners)
+        # Topologies use alpine:3 for PCs, servers and ISPs; containerlab only pulls
+        # missing images, so with a local alpine:3 it never contacts Docker Hub.
+        run: |
+          for i in 1 2 3; do
+            docker pull public.ecr.aws/docker/library/alpine:3 && break
+            sleep $((i * 10))
+          done
+          docker tag public.ecr.aws/docker/library/alpine:3 alpine:3
       - name: molecule test
         working-directory: ansible_collections/vyos/blueprints/extensions
         env:
           ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
           VYOS_IMAGE: vyos:blueprints-ci
           SCENARIO: ${{ matrix.scenario }}
+          MOLECULE_LOG_DIR: ${{ github.workspace }}/molecule-logs/${{ matrix.scenario }}
         run: molecule test -s "$SCENARIO"
+      - name: Upload the lab logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: molecule-logs-${{ matrix.scenario }}
+          path: molecule-logs/
+          retention-days: 7
+          if-no-files-found: ignore
 
   all_green:
     if: ${{ always() }}

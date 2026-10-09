@@ -5,9 +5,17 @@
   vars:
     _topology: "{{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_DIRECTORY') }}/topology.clab.yml"
     _lab: "{{ (lookup('ansible.builtin.file', _topology) | from_yaml).name }}"
-    _log: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/containerlab-deploy.log"
+    # MOLECULE_LOG_DIR (set in CI) survives the run; Molecule prunes its ephemeral directory.
+    _logdir: "{{ lookup('ansible.builtin.env', 'MOLECULE_LOG_DIR', default=lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY')) }}"
+    _log: "{{ _logdir }}/containerlab-deploy.log"
     _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
   tasks:
+    - name: Create the log directory
+      ansible.builtin.file:
+        path: "{{ _logdir }}"
+        state: directory
+        mode: "0755"
+
     - name: Deploy the lab, with diagnostics if it fails or hangs
       block:
         - name: Deploy lab (containerlab waits until VyOS has loaded its boot configuration)
@@ -34,13 +42,19 @@
           changed_when: false
           failed_when: false
 
+        - name: Save the diagnostics next to the deploy log
+          ansible.builtin.copy:
+            content: "{{ _diag.stdout }}\n"
+            dest: "{{ _logdir }}/diagnostics.txt"
+            mode: "0644"
+
         - name: Show the diagnostics
           ansible.builtin.debug:
             msg: "{{ _diag.stdout_lines }}"
 
         - name: The lab did not come up
           ansible.builtin.fail:
-            msg: "containerlab deploy failed or timed out; see the diagnostics above ({{ _log }})"
+            msg: "containerlab deploy failed or timed out; see the diagnostics above and in {{ _logdir }}"
 
 - name: Wait for VyOS nodes to accept configuration
   hosts: vyos
