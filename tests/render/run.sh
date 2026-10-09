@@ -17,6 +17,12 @@ here="$(cd "$(dirname "$0")" && pwd)"
 # the device version, so released vyos.vyos renders offline.
 export ANSIBLE_COLLECTIONS_PATH="$here/collections${ANSIBLE_COLLECTIONS_PATH:+:$ANSIBLE_COLLECTIONS_PATH}"
 offline_version="${VYOS_OFFLINE_OS_VERSION:-1.5}"
+# A persistent connection that is idle for ANSIBLE_PERSISTENT_CONNECT_TIMEOUT
+# (default 30 s) shuts down; in large cases (12 routers, 6 roles) a host can wait
+# longer than that between its own tasks and then hits a closing connection.
+# Rendering is offline, so keep connections alive and run all hosts at once.
+export ANSIBLE_PERSISTENT_CONNECT_TIMEOUT="${ANSIBLE_PERSISTENT_CONNECT_TIMEOUT:-600}"
+export ANSIBLE_FORKS="${ANSIBLE_FORKS:-20}"
 update="${UPDATE_GOLDEN:-false}"
 filter="${1:-}"
 rc=0
