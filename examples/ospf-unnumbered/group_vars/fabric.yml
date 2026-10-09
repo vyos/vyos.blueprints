@@ -1,4 +1,4 @@
 ---
 ospf_unnumbered_interfaces: [eth1, eth2]
-ospf_unnumbered_md5_key: yourpassword # use ansible-vault for real devices
+ospf_unnumbered_md5_key: yourpassword               # use ansible-vault for real devices
 ospf_unnumbered_group: fabric

@@ -11,52 +11,11 @@ topology:
     isp:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "sysctl -w net.ipv4.ip_forward=1",
-          "ip addr add 10.0.1.1/30 dev eth1",
-          "ip addr add 10.0.2.1/30 dev eth2",
-        ]
-    pc1:
-      {
-        kind: linux,
-        image: "alpine:3",
-        exec:
-          [
-            "ip addr add 192.168.0.2/24 dev eth1",
-            "ip route replace default via 192.168.0.1",
-          ],
-      }
-    pc2:
-      {
-        kind: linux,
-        image: "alpine:3",
-        exec:
-          [
-            "ip addr add 192.168.1.2/24 dev eth1",
-            "ip route replace default via 192.168.1.1",
-          ],
-      }
-    pc3:
-      {
-        kind: linux,
-        image: "alpine:3",
-        exec:
-          [
-            "ip addr add 192.168.10.2/24 dev eth1",
-            "ip route replace default via 192.168.10.1",
-          ],
-      }
-    pc4:
-      {
-        kind: linux,
-        image: "alpine:3",
-        exec:
-          [
-            "ip addr add 192.168.11.2/24 dev eth1",
-            "ip route replace default via 192.168.11.1",
-          ],
-      }
+      exec: ["sysctl -w net.ipv4.ip_forward=1", "ip addr add 10.0.1.1/30 dev eth1", "ip addr add 10.0.2.1/30 dev eth2"]
+    pc1: {kind: linux, image: "alpine:3", exec: ["ip addr add 192.168.0.2/24 dev eth1", "ip route replace default via 192.168.0.1"]}
+    pc2: {kind: linux, image: "alpine:3", exec: ["ip addr add 192.168.1.2/24 dev eth1", "ip route replace default via 192.168.1.1"]}
+    pc3: {kind: linux, image: "alpine:3", exec: ["ip addr add 192.168.10.2/24 dev eth1", "ip route replace default via 192.168.10.1"]}
+    pc4: {kind: linux, image: "alpine:3", exec: ["ip addr add 192.168.11.2/24 dev eth1", "ip route replace default via 192.168.11.1"]}
   links:
     - endpoints: ["vyos:eth1", "isp:eth1"]
     - endpoints: ["cisco:eth1", "isp:eth2"]

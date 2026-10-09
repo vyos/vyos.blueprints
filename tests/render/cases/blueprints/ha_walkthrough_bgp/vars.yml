@@ -5,38 +5,22 @@ route_policy_prefix_lists:
   - name: BGPOUT
     description: BGP Export List
     rules:
-      - {
-          sequence: 10,
-          action: deny,
-          description: Do not advertise short masks,
-          ge: 25,
-          prefix: 0.0.0.0/0,
-        }
-      - {
-          sequence: 100,
-          action: permit,
-          description: Our network,
-          prefix: 203.0.113.0/24,
-        }
-      - { sequence: 10000, action: deny, prefix: 0.0.0.0/0 }
+      - {sequence: 10, action: deny, description: Do not advertise short masks, ge: 25, prefix: 0.0.0.0/0}
+      - {sequence: 100, action: permit, description: Our network, prefix: 203.0.113.0/24}
+      - {sequence: 10000, action: deny, prefix: 0.0.0.0/0}
 route_policy_route_maps:
   - name: BGPOUT
     description: BGP Export Filter
     rules:
-      - { sequence: 10, action: permit, match_prefix_list: BGPOUT }
-      - { sequence: 10000, action: deny }
+      - {sequence: 10, action: permit, match_prefix_list: BGPOUT}
+      - {sequence: 10000, action: deny}
   - name: BGPPREPENDOUT
     description: BGP Export Filter
     rules:
-      - {
-          sequence: 10,
-          action: permit,
-          set_as_path_prepend: "65551 65551 65551",
-          match_prefix_list: BGPOUT,
-        }
-      - { sequence: 10000, action: deny }
+      - {sequence: 10, action: permit, set_as_path_prepend: "65551 65551 65551", match_prefix_list: BGPOUT}
+      - {sequence: 10000, action: deny}
 bgp_asn: 65551
 bgp_networks: [192.0.2.0/24]
 bgp_redistribute:
-  - { type: connected, metric: 50 }
-  - { type: ospf, metric: 50 }
+  - {type: connected, metric: 50}
+  - {type: ospf, metric: 50}

@@ -8,38 +8,26 @@ all:
             r1:
               ansible_host: clab-bp-ha-r1
               ha_vrrp_priority: 200
-              ha_vrrp_local_addresses:
-                { int: 10.200.201.2, public: 203.0.113.2 }
+              ha_vrrp_local_addresses: {int: 10.200.201.2, public: 203.0.113.2}
               ha_vrrp_conntrack_sync_local_address: 10.200.201.2
               base_interfaces:
-                - { name: eth1.201, addresses: [10.200.201.2/24] }
-                - { name: eth1.100, addresses: [203.0.113.2/24] }
+                - {name: eth1.201, addresses: [10.200.201.2/24]}
+                - {name: eth1.100, addresses: [203.0.113.2/24]}
             r2:
               ansible_host: clab-bp-ha-r2
               ha_vrrp_priority: 100
-              ha_vrrp_local_addresses:
-                { int: 10.200.201.3, public: 203.0.113.3 }
+              ha_vrrp_local_addresses: {int: 10.200.201.3, public: 203.0.113.3}
               ha_vrrp_conntrack_sync_local_address: 10.200.201.3
               base_interfaces:
-                - { name: eth1.201, addresses: [10.200.201.3/24] }
-                - { name: eth1.100, addresses: [203.0.113.3/24] }
+                - {name: eth1.201, addresses: [10.200.201.3/24]}
+                - {name: eth1.100, addresses: [203.0.113.3/24]}
           vars:
             ha_vrrp_pair_group: ha_pair
             ha_vrrp_groups:
-              - {
-                  name: int,
-                  vrid: 201,
-                  interface: eth1.201,
-                  address: [10.200.201.1/24],
-                }
-              - {
-                  name: public,
-                  vrid: 113,
-                  interface: eth1.100,
-                  address: [203.0.113.1/24],
-                }
-            ha_vrrp_sync_group: { name: sync, members: [int] }
-            ha_vrrp_conntrack_sync: { interface: eth1.201, sync_queue_size: 8 }
+              - {name: int, vrid: 201, interface: eth1.201, address: [10.200.201.1/24]}
+              - {name: public, vrid: 113, interface: eth1.100, address: [203.0.113.1/24]}
+            ha_vrrp_sync_group: {name: sync, members: [int]}
+            ha_vrrp_conntrack_sync: {interface: eth1.201, sync_queue_size: 8}
       vars:
         ansible_network_os: vyos.vyos.vyos
         ansible_connection: ansible.netcommon.network_cli

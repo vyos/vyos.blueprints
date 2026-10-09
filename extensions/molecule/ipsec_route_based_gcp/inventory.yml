@@ -23,7 +23,7 @@ all:
                     interface: vti10
                     address: 169.254.10.1/30
                     description: Google Cloud HA VPN tunnel 0
-                    adjust_mss: "1350"
+                    adjust_mss: '1350'
               ipsec_route_based_interface_routes:
                 - dest: 169.254.10.2/32
                   interface: vti10
@@ -64,7 +64,7 @@ all:
                     interface: vti11
                     address: 169.254.10.5/30
                     description: Google Cloud HA VPN tunnel 1
-                    adjust_mss: "1350"
+                    adjust_mss: '1350'
               ipsec_route_based_interface_routes:
                 - dest: 169.254.10.6/32
                   interface: vti11

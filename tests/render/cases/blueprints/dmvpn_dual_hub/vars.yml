@@ -3,31 +3,13 @@
 # (Spoke-1 is the Cisco router on the page). Shared IPsec settings:
 dmvpn_ipsec:
   interfaces: [eth0]
-  ike_group:
-    {
-      name: IKE-HUB,
-      key_exchange: ikev1,
-      lifetime: 3600,
-      proposal_id: 1,
-      dh_group: 2,
-      encryption: aes256,
-      hash: sha1,
-    }
-  esp_group:
-    {
-      name: ESP-HUB,
-      lifetime: 1800,
-      mode: transport,
-      pfs: disable,
-      proposal_id: 1,
-      encryption: aes256,
-      hash: sha1,
-    }
+  ike_group: {name: IKE-HUB, key_exchange: ikev1, lifetime: 3600, proposal_id: 1, dh_group: 2, encryption: aes256, hash: sha1}
+  esp_group: {name: ESP-HUB, lifetime: 1800, mode: transport, pfs: disable, proposal_id: 1, encryption: aes256, hash: sha1}
   profile:
     name: NHRPVPN
     # the page's PSK is the word "secret"; Ansible would also mask that word inside
     # "pre-shared-secret", so another example value keeps the golden file readable
     psk: dmvpn-example-psk
     bind_tunnels: "{{ gre_tunnel_interfaces | map(attribute='name') | list }}"
-dmvpn_drop_unprotected_gre: { rule: 10 }
+dmvpn_drop_unprotected_gre: {rule: 10}
 ospf_passive_interface_default: true

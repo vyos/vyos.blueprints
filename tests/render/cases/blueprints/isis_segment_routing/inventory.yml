@@ -5,33 +5,33 @@ all:
       ansible_host: 192.0.2.1
       base_hostname: P1-VyOS
       base_interfaces:
-        - { name: dum0, addresses: [192.0.2.1/32] }
-        - { name: eth1, mtu: 8000, addresses: [192.0.2.5/30] }
-        - { name: eth3, mtu: 8000, addresses: [192.0.2.21/30] }
+        - {name: dum0, addresses: [192.0.2.1/32]}
+        - {name: eth1, mtu: 8000, addresses: [192.0.2.5/30]}
+        - {name: eth3, mtu: 8000, addresses: [192.0.2.21/30]}
       isis_net: 49.0000.0000.0000.0001.00
       isis_interfaces:
-        - { name: dum0, passive: true }
-        - { name: eth1, network: point-to-point }
-        - { name: eth3, network: point-to-point }
+        - {name: dum0, passive: true}
+        - {name: eth1, network: point-to-point}
+        - {name: eth3, network: point-to-point}
       isis_segment_routing:
         maximum_label_depth: 8
-        prefixes: [{ prefix: 192.0.2.1/32, index: 1 }]
+        prefixes: [{prefix: 192.0.2.1/32, index: 1}]
       isis_mpls_interfaces: [eth1, eth3]
     P2-VyOS:
       ansible_host: 192.0.2.2
       base_hostname: P2-VyOS
       base_interfaces:
-        - { name: dum0, addresses: [192.0.2.2/32] }
-        - { name: eth2, mtu: 8000, addresses: [192.0.2.17/30] }
-        - { name: eth3, mtu: 8000, addresses: [192.0.2.26/30] }
+        - {name: dum0, addresses: [192.0.2.2/32]}
+        - {name: eth2, mtu: 8000, addresses: [192.0.2.17/30]}
+        - {name: eth3, mtu: 8000, addresses: [192.0.2.26/30]}
       isis_net: 49.0000.0000.0000.0002.00
       isis_interfaces:
-        - { name: dum0, passive: true }
-        - { name: eth2, network: point-to-point }
-        - { name: eth3, network: point-to-point }
+        - {name: dum0, passive: true}
+        - {name: eth2, network: point-to-point}
+        - {name: eth3, network: point-to-point}
       isis_segment_routing:
         maximum_label_depth: 8
-        prefixes: [{ prefix: 192.0.2.2/32, index: 2 }]
+        prefixes: [{prefix: 192.0.2.2/32, index: 2}]
       isis_mpls_interfaces: [eth2, eth3]
   vars:
     ansible_network_os: vyos.vyos.vyos

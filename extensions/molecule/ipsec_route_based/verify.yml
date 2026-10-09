@@ -23,7 +23,7 @@
       become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
       changed_when: false
       loop:
-        - { from: pc1, to: 192.168.10.2 }
-        - { from: pc3, to: 192.168.0.2 }
+        - {from: pc1, to: 192.168.10.2}
+        - {from: pc3, to: 192.168.0.2}
       loop_control:
         label: "{{ item.from }} -> {{ item.to }}"

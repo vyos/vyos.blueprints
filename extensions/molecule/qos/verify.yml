@@ -14,14 +14,10 @@
   vars:
     _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
     _flows:
-      - {
-          src: 172.17.1.2,
-          tos: "0xa0",
-          why: "CS4 at vyos3, re-marked CS4 -> CS5 at vyos2",
-        }
-      - { src: 172.17.1.3, tos: "0xa0", why: "CS5 at vyos3" }
-      - { src: 172.17.1.4, tos: "0xc0", why: "CS6 at vyos3" }
-      - { src: 172.17.1.40, tos: "0x0", why: "CS0 by default" }
+      - {src: 172.17.1.2, tos: "0xa0", why: "CS4 at vyos3, re-marked CS4 -> CS5 at vyos2"}
+      - {src: 172.17.1.3, tos: "0xa0", why: "CS5 at vyos3"}
+      - {src: 172.17.1.4, tos: "0xc0", why: "CS6 at vyos3"}
+      - {src: 172.17.1.40, tos: "0x0", why: "CS0 by default"}
   tasks:
     - name: Capture on the sink while pinging from each source
       ansible.builtin.shell:

@@ -5,10 +5,10 @@ topology:
     vyosnetworks_vyos:
       image: ${VYOS_IMAGE:=vyos:latest}
   nodes:
-    hub1: { kind: vyosnetworks_vyos }
-    hub2: { kind: vyosnetworks_vyos }
-    spoke2: { kind: vyosnetworks_vyos }
-    spoke3: { kind: vyosnetworks_vyos }
+    hub1: {kind: vyosnetworks_vyos}
+    hub2: {kind: vyosnetworks_vyos}
+    spoke2: {kind: vyosnetworks_vyos}
+    spoke3: {kind: vyosnetworks_vyos}
     # the "internet" between all WAN links (10.0.X.1 on each /30)
     isp:
       kind: linux
@@ -22,19 +22,11 @@ topology:
     pc2:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 192.168.12.2/24 dev eth1",
-          "ip route replace default via 192.168.12.1",
-        ]
+      exec: ["ip addr add 192.168.12.2/24 dev eth1", "ip route replace default via 192.168.12.1"]
     pc3:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 192.168.13.2/24 dev eth1",
-          "ip route replace default via 192.168.13.1",
-        ]
+      exec: ["ip addr add 192.168.13.2/24 dev eth1", "ip route replace default via 192.168.13.1"]
   links:
     # WAN eth1 / LAN eth2 here = eth0 / eth1 on the page (containerlab uses eth0 for management)
     - endpoints: ["hub1:eth1", "isp:eth1"]

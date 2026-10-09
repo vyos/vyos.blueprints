@@ -11,62 +11,56 @@ all:
             core:
               base_interfaces:
                 - name: eth1
-                  addresses: [10.1.1.1/30, "2001:db8::/127"]
+                  addresses: [10.1.1.1/30, '2001:db8::/127']
                 - name: eth2
-                  addresses: [172.16.2.1/30, "2001:db8::2/127"]
+                  addresses: [172.16.2.1/30, '2001:db8::2/127']
                 - name: eth3
-                  addresses: [192.168.3.1/30, "2001:db8::4/127"]
+                  addresses: [192.168.3.1/30, '2001:db8::4/127']
                 - name: eth4
-                  addresses: [10.2.2.1/30, "2001:db8::6/127"]
+                  addresses: [10.2.2.1/30, '2001:db8::6/127']
               vrf_lite_asn: 64496
               vrf_lite_vrfs:
                 - name: Internet
                   table: 104
                   interfaces: [eth4]
                   rd: 64496:100
-                  route_targets_export: ["64496:100"]
-                  route_targets_import: ["64496:1", "64496:2"]
+                  route_targets_export: ['64496:100']
+                  route_targets_import: ['64496:1', '64496:2']
                   neighbors:
-                    - { address: 10.2.2.2, remote_as: 64497 }
-                    - { address: "2001:db8::7", remote_as: 64497 }
+                    - {address: 10.2.2.2, remote_as: 64497}
+                    - {address: '2001:db8::7', remote_as: 64497}
                 - name: LAN1
                   table: 101
                   interfaces: [eth1]
                   routes:
-                    - { dest: 10.0.0.0/24, next_hop: 10.1.1.2 }
-                    - { dest: "2001:db8:0:1::/64", next_hop: "2001:db8::1" }
-                  rd: "64496:1"
-                  route_targets_export: ["64496:1"]
-                  route_targets_import: ["64496:100", "64496:50", "64496:2"]
+                    - {dest: 10.0.0.0/24, next_hop: 10.1.1.2}
+                    - {dest: '2001:db8:0:1::/64', next_hop: '2001:db8::1'}
+                  rd: '64496:1'
+                  route_targets_export: ['64496:1']
+                  route_targets_import: ['64496:100', '64496:50', '64496:2']
                   redistribute: [static]
                 - name: LAN2
                   table: 102
                   interfaces: [eth2]
                   routes:
-                    - { dest: 172.16.0.0/24, next_hop: 172.16.2.2 }
-                    - { dest: "2001:db8:0:2::/64", next_hop: "2001:db8::3" }
-                  rd: "64496:2"
-                  route_targets_export: ["64496:2"]
-                  route_targets_import: ["64496:100", "64496:50", "64496:1"]
+                    - {dest: 172.16.0.0/24, next_hop: 172.16.2.2}
+                    - {dest: '2001:db8:0:2::/64', next_hop: '2001:db8::3'}
+                  rd: '64496:2'
+                  route_targets_export: ['64496:2']
+                  route_targets_import: ['64496:100', '64496:50', '64496:1']
                   redistribute: [static]
                 - name: Management
                   table: 103
                   interfaces: [eth3]
                   routes:
-                    - { dest: 192.168.0.0/24, next_hop: 192.168.3.2 }
-                    - { dest: "2001:db8:0:3::/64", next_hop: "2001:db8::5" }
-                  rd: "64496:50"
-                  route_targets_export: ["64496:50"]
-                  route_targets_import: ["64496:1", "64496:2"]
+                    - {dest: 192.168.0.0/24, next_hop: 192.168.3.2}
+                    - {dest: '2001:db8:0:3::/64', next_hop: '2001:db8::5'}
+                  rd: '64496:50'
+                  route_targets_export: ['64496:50']
+                  route_targets_import: ['64496:1', '64496:2']
                   redistribute: [static]
               ansible_host: clab-bp-ivrf-core
         provider:
           hosts:
-            isp: { ansible_host: clab-bp-ivrf-isp }
-      vars:
-        {
-          ansible_network_os: vyos.vyos.vyos,
-          ansible_connection: ansible.netcommon.network_cli,
-          ansible_user: admin,
-          ansible_password: admin,
-        }
+            isp: {ansible_host: clab-bp-ivrf-isp}
+      vars: {ansible_network_os: vyos.vyos.vyos, ansible_connection: ansible.netcommon.network_cli, ansible_user: admin, ansible_password: admin}

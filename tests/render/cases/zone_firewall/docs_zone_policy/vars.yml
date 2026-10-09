@@ -5,111 +5,67 @@
 # 500 SMTP, 600 DNS, 700 DHCP, 800 SSH, 900 IMAPS). Protocols are as listed
 # on the page (it lists NTP and DHCP as tcp).
 zone_firewall_zones:
-  - { name: wan, interfaces: [eth0.10] }
-  - { name: lan, interfaces: [eth0.20] }
-  - { name: dmz, interfaces: [eth0.30] }
-  - { name: local, local: true }
+  - {name: wan, interfaces: [eth0.10]}
+  - {name: lan, interfaces: [eth0.20]}
+  - {name: dmz, interfaces: [eth0.30]}
+  - {name: local, local: true}
 
 zone_firewall_policies:
   - from: wan
     to: dmz
     rules:
-      - {
-          number: 200,
-          protocol: tcp,
-          destination: { address: 192.168.200.200, port: "80,443" },
-        }
-      - {
-          number: 200,
-          protocol: tcp,
-          destination: { address: "2001:db8:0:bbbb::200", port: "80,443" },
-        }
-      - {
-          number: 500,
-          protocol: tcp,
-          destination: { address: 192.168.200.200, port: "25" },
-        }
-      - {
-          number: 500,
-          protocol: tcp,
-          destination: { address: "2001:db8:0:bbbb::200", port: "25" },
-        }
-      - {
-          number: 600,
-          protocol: tcp,
-          destination: { address: 192.168.200.200, port: "53" },
-        }
-      - {
-          number: 600,
-          protocol: tcp,
-          destination: { address: "2001:db8:0:bbbb::200", port: "53" },
-        }
+      - {number: 200, protocol: tcp, destination: {address: 192.168.200.200, port: "80,443"}}
+      - {number: 200, protocol: tcp, destination: {address: "2001:db8:0:bbbb::200", port: "80,443"}}
+      - {number: 500, protocol: tcp, destination: {address: 192.168.200.200, port: "25"}}
+      - {number: 500, protocol: tcp, destination: {address: "2001:db8:0:bbbb::200", port: "25"}}
+      - {number: 600, protocol: tcp, destination: {address: 192.168.200.200, port: "53"}}
+      - {number: 600, protocol: tcp, destination: {address: "2001:db8:0:bbbb::200", port: "53"}}
   - from: dmz
     to: local
     rules:
-      - { number: 400, protocol: tcp, destination: { port: "123" } }
-      - { number: 600, protocol: tcp, destination: { port: "53" } }
-      - { number: 700, protocol: tcp, destination: { port: "67,68" } }
+      - {number: 400, protocol: tcp, destination: {port: "123"}}
+      - {number: 600, protocol: tcp, destination: {port: "53"}}
+      - {number: 700, protocol: tcp, destination: {port: "67,68"}}
   - from: lan
     to: local
     rules:
-      - { number: 400, protocol: tcp, destination: { port: "123" } }
-      - { number: 600, protocol: tcp, destination: { port: "53" } }
-      - { number: 700, protocol: tcp, destination: { port: "67,68" } }
-      - {
-          number: 800,
-          protocol: tcp,
-          source: { address: 192.168.100.10 },
-          destination: { port: "22" },
-        }
-      - {
-          number: 800,
-          protocol: tcp,
-          source: { address: "2001:db8:0:aaaa::10" },
-          destination: { port: "22" },
-        }
+      - {number: 400, protocol: tcp, destination: {port: "123"}}
+      - {number: 600, protocol: tcp, destination: {port: "53"}}
+      - {number: 700, protocol: tcp, destination: {port: "67,68"}}
+      - {number: 800, protocol: tcp, source: {address: 192.168.100.10}, destination: {port: "22"}}
+      - {number: 800, protocol: tcp, source: {address: "2001:db8:0:aaaa::10"}, destination: {port: "22"}}
   - from: lan
     to: wan
     rules:
-      - { number: 200, protocol: tcp, destination: { port: "80,443" } }
-      - { number: 300, protocol: tcp, destination: { port: "20,21" } }
-      - { number: 800, protocol: tcp, destination: { port: "22" } }
+      - {number: 200, protocol: tcp, destination: {port: "80,443"}}
+      - {number: 300, protocol: tcp, destination: {port: "20,21"}}
+      - {number: 800, protocol: tcp, destination: {port: "22"}}
   - from: dmz
     to: wan
     rules:
-      - { number: 200, protocol: tcp, destination: { port: "80,443" } }
-      - { number: 300, protocol: tcp, destination: { port: "20,21" } }
-      - { number: 600, protocol: tcp_udp, destination: { port: "53" } }
-      - { number: 800, protocol: tcp, destination: { port: "22" } }
+      - {number: 200, protocol: tcp, destination: {port: "80,443"}}
+      - {number: 300, protocol: tcp, destination: {port: "20,21"}}
+      - {number: 600, protocol: tcp_udp, destination: {port: "53"}}
+      - {number: 800, protocol: tcp, destination: {port: "22"}}
   - from: local
     to: wan
     rules:
-      - { number: 200, protocol: tcp, destination: { port: "80,443" } }
-      - { number: 300, protocol: tcp, destination: { port: "20,21" } }
+      - {number: 200, protocol: tcp, destination: {port: "80,443"}}
+      - {number: 300, protocol: tcp, destination: {port: "20,21"}}
   - from: local
     to: dmz
     rules:
-      - { number: 500, protocol: tcp, destination: { port: "25" } }
-      - { number: 600, protocol: tcp_udp, destination: { port: "53" } }
-      - { number: 700, protocol: tcp, destination: { port: "67,68" } }
+      - {number: 500, protocol: tcp, destination: {port: "25"}}
+      - {number: 600, protocol: tcp_udp, destination: {port: "53"}}
+      - {number: 700, protocol: tcp, destination: {port: "67,68"}}
   - from: local
     to: lan
     rules:
-      - { number: 700, protocol: tcp, destination: { port: "67,68" } }
+      - {number: 700, protocol: tcp, destination: {port: "67,68"}}
   - from: lan
     to: dmz
     rules:
-      - { number: 200, protocol: tcp, destination: { port: "80,443" } }
-      - {
-          number: 800,
-          protocol: tcp,
-          source: { address: 192.168.100.10 },
-          destination: { address: 192.168.200.200, port: "22" },
-        }
-      - {
-          number: 800,
-          protocol: tcp,
-          source: { address: "2001:db8:0:aaaa::10" },
-          destination: { address: "2001:db8:0:bbbb::200", port: "22" },
-        }
-      - { number: 900, protocol: tcp, destination: { port: "993" } }
+      - {number: 200, protocol: tcp, destination: {port: "80,443"}}
+      - {number: 800, protocol: tcp, source: {address: 192.168.100.10}, destination: {address: 192.168.200.200, port: "22"}}
+      - {number: 800, protocol: tcp, source: {address: "2001:db8:0:aaaa::10"}, destination: {address: "2001:db8:0:bbbb::200", port: "22"}}
+      - {number: 900, protocol: tcp, destination: {port: "993"}}

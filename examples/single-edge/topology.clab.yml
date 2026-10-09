@@ -11,11 +11,7 @@ topology:
     pc:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 192.168.10.10/24 dev eth1",
-          "ip route replace default via 192.168.10.1",
-        ]
+      exec: ["ip addr add 192.168.10.10/24 dev eth1", "ip route replace default via 192.168.10.1"]
   links:
     - endpoints: ["edge1:eth1", "isp:eth1"]
     - endpoints: ["edge1:eth2", "pc:eth1"]

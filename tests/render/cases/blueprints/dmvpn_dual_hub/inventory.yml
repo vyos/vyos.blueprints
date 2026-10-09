@@ -17,7 +17,7 @@ all:
             - 10.100.100.1/32
           enable_multicast: true
           encapsulation: gre
-          adjust_mss: "1360"
+          adjust_mss: '1360'
           mtu: 1436
           key: 42
           source_interface: eth0
@@ -31,7 +31,7 @@ all:
           registration_no_unique: true
       ospf_interfaces:
         - name: tun100
-          area: "0"
+          area: '0'
           network: point-to-multipoint
           passive: false
       ansible_host: 192.0.2.1
@@ -50,7 +50,7 @@ all:
             - 10.100.101.1/32
           enable_multicast: true
           encapsulation: gre
-          adjust_mss: "1360"
+          adjust_mss: '1360'
           mtu: 1436
           key: 43
           source_interface: eth0
@@ -64,7 +64,7 @@ all:
           registration_no_unique: true
       ospf_interfaces:
         - name: tun101
-          area: "0"
+          area: '0'
           network: point-to-multipoint
           passive: false
       ansible_host: 192.0.2.2
@@ -86,7 +86,7 @@ all:
             - 10.100.100.12/32
           enable_multicast: true
           encapsulation: gre
-          adjust_mss: "1360"
+          adjust_mss: '1360'
           mtu: 1436
           key: 42
           source_interface: eth0
@@ -95,7 +95,7 @@ all:
             - 10.100.101.12/32
           enable_multicast: true
           encapsulation: gre
-          adjust_mss: "1360"
+          adjust_mss: '1360'
           mtu: 1436
           key: 43
           source_interface: eth0
@@ -122,13 +122,13 @@ all:
           shortcut: true
       ospf_interfaces:
         - name: eth1
-          area: "0"
+          area: '0'
         - name: tun100
-          area: "0"
+          area: '0'
           network: point-to-multipoint
           passive: false
         - name: tun101
-          area: "0"
+          area: '0'
           network: point-to-multipoint
           passive: false
       ansible_host: 192.0.2.3
@@ -150,7 +150,7 @@ all:
             - 10.100.100.13/32
           enable_multicast: true
           encapsulation: gre
-          adjust_mss: "1360"
+          adjust_mss: '1360'
           mtu: 1436
           key: 42
           source_interface: eth0
@@ -159,7 +159,7 @@ all:
             - 10.100.101.13/32
           enable_multicast: true
           encapsulation: gre
-          adjust_mss: "1360"
+          adjust_mss: '1360'
           mtu: 1436
           key: 43
           source_interface: eth0
@@ -186,13 +186,13 @@ all:
           shortcut: true
       ospf_interfaces:
         - name: eth1
-          area: "0"
+          area: '0'
         - name: tun100
-          area: "0"
+          area: '0'
           network: point-to-multipoint
           passive: false
         - name: tun101
-          area: "0"
+          area: '0'
           network: point-to-multipoint
           passive: false
       ansible_host: 192.0.2.4

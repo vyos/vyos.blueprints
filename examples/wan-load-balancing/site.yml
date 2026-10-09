@@ -3,8 +3,8 @@
   hosts: wan
   gather_facts: false
   roles:
-    - vyos.blueprints.base # addresses and routes to the ping targets
-    - vyos.blueprints.wan_load_balance # health checks and rules
+    - vyos.blueprints.base               # addresses and routes to the ping targets
+    - vyos.blueprints.wan_load_balance   # health checks and rules
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

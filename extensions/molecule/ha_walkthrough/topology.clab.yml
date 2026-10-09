@@ -45,11 +45,7 @@ topology:
     internal:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 10.200.201.10/24 dev eth1",
-          "ip route replace default via 10.200.201.1",
-        ]
+      exec: ["ip addr add 10.200.201.10/24 dev eth1", "ip route replace default via 10.200.201.1"]
   links:
     - endpoints: ["router1:eth1", "sw:eth1"]
     - endpoints: ["router2:eth1", "sw:eth2"]

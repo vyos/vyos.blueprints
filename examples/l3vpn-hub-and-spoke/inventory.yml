@@ -7,37 +7,37 @@ all:
     p_routers:
       hosts:
         VyOS-P1:
-          ansible_host: 192.0.2.1 # your router's address
+          ansible_host: 192.0.2.1   # your router's address
         VyOS-P2:
-          ansible_host: 192.0.2.2 # your router's address
+          ansible_host: 192.0.2.2   # your router's address
         VyOS-P3:
-          ansible_host: 192.0.2.3 # your router's address
+          ansible_host: 192.0.2.3   # your router's address
         VyOS-P4:
-          ansible_host: 192.0.2.4 # your router's address
+          ansible_host: 192.0.2.4   # your router's address
     route_reflectors:
       hosts:
         VyOS-RR1:
-          ansible_host: 192.0.2.1 # your router's address
+          ansible_host: 192.0.2.1   # your router's address
         VyOS-RR2:
-          ansible_host: 192.0.2.2 # your router's address
+          ansible_host: 192.0.2.2   # your router's address
     pe_routers:
       hosts:
         VyOS-PE1:
-          ansible_host: 192.0.2.1 # your router's address
+          ansible_host: 192.0.2.1   # your router's address
         VyOS-PE2:
-          ansible_host: 192.0.2.2 # your router's address
+          ansible_host: 192.0.2.2   # your router's address
         VyOS-PE3:
-          ansible_host: 192.0.2.3 # your router's address
+          ansible_host: 192.0.2.3   # your router's address
     ce_routers:
       hosts:
         VyOS-CE1-SPOKE:
-          ansible_host: 192.0.2.1 # your router's address
+          ansible_host: 192.0.2.1   # your router's address
         VyOS-CE1-HUB:
-          ansible_host: 192.0.2.2 # your router's address
+          ansible_host: 192.0.2.2   # your router's address
         VyOS-CE2-SPOKE:
-          ansible_host: 192.0.2.3 # your router's address
+          ansible_host: 192.0.2.3   # your router's address
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli
     ansible_user: vyos
-    ansible_password: vyos # use ansible-vault for real devices
+    ansible_password: vyos   # use ansible-vault for real devices

@@ -12,21 +12,17 @@ all:
         ansible_password: admin
         # internet uplink: eth8 here, eth0 on the docs page (management in containerlab)
         base_interfaces:
-          - { name: eth8, addresses: [203.0.113.1/24] }
+          - {name: eth8, addresses: [203.0.113.1/24]}
         bridge_firewall_bridges:
           - name: br0
             description: Isolated L2 bridge
             members:
-              - { interface: eth1, description: br0 }
-              - { interface: eth2, description: br0 }
+              - {interface: eth1, description: br0}
+              - {interface: eth2, description: br0}
             prerouting:
               default_action: drop
               rules:
-                - {
-                    number: 10,
-                    description: Accept IPv6 traffic,
-                    ethernet_type: ipv6,
-                  }
+                - {number: 10, description: Accept IPv6 traffic, ethernet_type: ipv6}
             forward:
               default_action: accept
 
@@ -34,8 +30,8 @@ all:
             description: L3 bridge br1
             addresses: [10.1.1.1/24]
             members:
-              - { interface: eth3, description: br1 }
-              - { interface: eth4, description: br1 }
+              - {interface: eth3, description: br1}
+              - {interface: eth4, description: br1}
             prerouting:
               default_action: accept
               rules:
@@ -43,83 +39,56 @@ all:
                   description: Drop DHCP discover
                   action: drop
                   protocol: udp
-                  source: { port: "68" }
-                  destination: { port: "67", mac_address: "ff:ff:ff:ff:ff:ff" }
+                  source: {port: "68"}
+                  destination: {port: "67", mac_address: "ff:ff:ff:ff:ff:ff"}
                   log: true
-                - {
-                    number: 20,
-                    description: Drop IPv6 traffic,
-                    action: drop,
-                    ethernet_type: ipv6,
-                  }
+                - {number: 20, description: Drop IPv6 traffic, action: drop, ethernet_type: ipv6}
             forward:
               default_action: drop
               rules:
-                - { number: 10, description: Accept ARP, ethernet_type: arp }
-                - {
-                    number: 20,
-                    description: Accept ipv4 from host,
-                    source: { address: 10.1.1.102 },
-                    state: [new],
-                  }
+                - {number: 10, description: Accept ARP, ethernet_type: arp}
+                - {number: 20, description: Accept ipv4 from host, source: {address: 10.1.1.102}, state: [new]}
             ip_forward:
               rules:
-                - {
-                    number: 10,
-                    description: br1 - allow internet access,
-                    outbound_interface: eth8,
-                  }
+                - {number: 10, description: br1 - allow internet access, outbound_interface: eth8}
             router_access: accept
 
           - name: br2
             description: L3 bridge br2
             addresses: [10.2.2.1/24]
             members:
-              - { interface: eth5, description: br2 - Host }
-              - { interface: eth6, description: br2 - Trusted DHCP Server }
-              - { interface: eth7, description: br2 }
+              - {interface: eth5, description: br2 - Host}
+              - {interface: eth6, description: br2 - Trusted DHCP Server}
+              - {interface: eth7, description: br2}
             prerouting:
               default_action: accept
               rules:
-                - {
-                    number: 10,
-                    description: Drop IPv6 traffic,
-                    action: drop,
-                    ethernet_type: ipv6,
-                  }
+                - {number: 10, description: Drop IPv6 traffic, action: drop, ethernet_type: ipv6}
             forward:
               default_action: drop
               rules:
                 - number: 10
                   description: Accept DHCP discover
                   protocol: udp
-                  source: { port: "68" }
-                  destination: { port: "67", mac_address: "ff:ff:ff:ff:ff:ff" }
+                  source: {port: "68"}
+                  destination: {port: "67", mac_address: "ff:ff:ff:ff:ff:ff"}
                 - number: 20
                   description: Accept DHCP offers from trusted interface
                   protocol: udp
-                  source: { port: "67" }
-                  destination: { port: "68" }
+                  source: {port: "67"}
+                  destination: {port: "68"}
                   inbound_interface: eth6
                 - number: 22
                   description: Drop all other DHCP offers
                   action: drop
                   protocol: udp
-                  source: { port: "67" }
-                  destination: { port: "68" }
+                  source: {port: "67"}
+                  destination: {port: "68"}
                   log: true
-                - { number: 30, description: Accept ARP, ethernet_type: arp }
-                - { number: 40, description: Accept ipv4, ethernet_type: ipv4 }
+                - {number: 30, description: Accept ARP, ethernet_type: arp}
+                - {number: 40, description: Accept ipv4, ethernet_type: ipv4}
             ip_forward:
               rules:
-                - {
-                    number: 10,
-                    description: br2 - allow internet access,
-                    outbound_interface: eth8,
-                  }
-                - {
-                    number: 20,
-                    description: br2 - allow access to br1,
-                    outbound_bridge: br1,
-                  }
+                - {number: 10, description: br2 - allow internet access, outbound_interface: eth8}
+                - {number: 20, description: br2 - allow access to br1, outbound_bridge: br1}
             router_access: drop

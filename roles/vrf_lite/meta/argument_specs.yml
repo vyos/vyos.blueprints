@@ -22,87 +22,33 @@ argument_specs:
       - Interface addressing belongs to C(vyos.blueprints.base); route-maps for
         import filtering to C(vyos.blueprints.route_policy).
     options:
-      vrf_lite_asn:
-        {
-          type: int,
-          description: "Global BGP AS (C(protocols bgp system-as)). Nothing is configured when unset.",
-        }
-      vrf_lite_bind_to_all:
-        { type: bool, default: false, description: Set C(vrf bind-to-all). }
+      vrf_lite_asn: {type: int, description: "Global BGP AS (C(protocols bgp system-as)). Nothing is configured when unset."}
+      vrf_lite_bind_to_all: {type: bool, default: false, description: Set C(vrf bind-to-all).}
       vrf_lite_vrfs:
         type: list
         elements: dict
         default: []
         description: VRFs.
         options:
-          name:
-            {
-              type: str,
-              required: true,
-              description: "VRF name, e.g. C(LAN1).",
-            }
-          table: { type: int, required: true, description: Routing table id. }
-          description: { type: str, description: VRF description. }
-          interfaces:
-            {
-              type: list,
-              elements: str,
-              default: [],
-              description: Member interfaces.,
-            }
+          name: {type: str, required: true, description: "VRF name, e.g. C(LAN1)."}
+          table: {type: int, required: true, description: Routing table id.}
+          description: {type: str, description: VRF description.}
+          interfaces: {type: list, elements: str, default: [], description: Member interfaces.}
           routes:
             type: list
             elements: dict
             default: []
             description: Static routes in the VRF; IPv6 when C(dest) contains C(:).
             options:
-              dest:
-                { type: str, required: true, description: Destination prefix. }
-              next_hop:
-                { type: str, required: true, description: Next-hop address. }
-          rd:
-            { type: str, description: "Route distinguisher, e.g. C(64496:1)." }
-          route_targets_export:
-            {
-              type: list,
-              elements: str,
-              default: [],
-              description: Export route targets.,
-            }
-          route_targets_import:
-            {
-              type: list,
-              elements: str,
-              default: [],
-              description: Import route targets (routes from VRFs exporting these).,
-            }
-          families:
-            {
-              type: list,
-              elements: str,
-              choices: [ipv4, ipv6],
-              default: [ipv4, ipv6],
-              description: Address families to leak.,
-            }
-          redistribute:
-            {
-              type: list,
-              elements: str,
-              default: [],
-              description: "Route types redistributed into the VRF's BGP, e.g. C([static]).",
-            }
-          networks:
-            {
-              type: list,
-              elements: str,
-              default: [],
-              description: Prefixes announced from the VRF (C(network)); IPv6 when they contain C(:).,
-            }
-          label_vpn_export:
-            {
-              type: str,
-              description: "VPN label allocation, e.g. C(auto) for MPLS L3VPN.",
-            }
+              dest: {type: str, required: true, description: Destination prefix.}
+              next_hop: {type: str, required: true, description: Next-hop address.}
+          rd: {type: str, description: "Route distinguisher, e.g. C(64496:1)."}
+          route_targets_export: {type: list, elements: str, default: [], description: Export route targets.}
+          route_targets_import: {type: list, elements: str, default: [], description: Import route targets (routes from VRFs exporting these).}
+          families: {type: list, elements: str, choices: [ipv4, ipv6], default: [ipv4, ipv6], description: Address families to leak.}
+          redistribute: {type: list, elements: str, default: [], description: "Route types redistributed into the VRF's BGP, e.g. C([static])."}
+          networks: {type: list, elements: str, default: [], description: Prefixes announced from the VRF (C(network)); IPv6 when they contain C(:).}
+          label_vpn_export: {type: str, description: "VPN label allocation, e.g. C(auto) for MPLS L3VPN."}
           import_route_map:
             type: dict
             default: {}
@@ -113,16 +59,9 @@ argument_specs:
             default: []
             description: eBGP neighbours inside this VRF; the address family follows the address.
             options:
-              address:
-                { type: str, required: true, description: Neighbour address. }
-              remote_as:
-                { type: int, required: true, description: Neighbour AS. }
-              as_override:
-                {
-                  type: bool,
-                  default: false,
-                  description: Replace the neighbour's AS in the AS path with ours (sites sharing one AS).,
-                }
+              address: {type: str, required: true, description: Neighbour address.}
+              remote_as: {type: int, required: true, description: Neighbour AS.}
+              as_override: {type: bool, default: false, description: Replace the neighbour's AS in the AS path with ours (sites sharing one AS).}
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -131,10 +70,4 @@ argument_specs:
     short_description: Post-deployment checks for the vrf_lite role
     description: Run with C(tasks_from=verify). Checks every VRF exists and every VRF BGP session is established.
     options:
-      vrf_lite_vrfs:
-        {
-          type: list,
-          elements: dict,
-          default: [],
-          description: Same value as for C(main).,
-        }
+      vrf_lite_vrfs: {type: list, elements: dict, default: [], description: Same value as for C(main).}

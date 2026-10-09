@@ -88,7 +88,7 @@ route_policy_route_maps:
     rules:
       - sequence: 100
         action: deny
-        match_access_list: "100"
+        match_access_list: '100'
       - sequence: 500
         action: permit
   - name: BGPOUT

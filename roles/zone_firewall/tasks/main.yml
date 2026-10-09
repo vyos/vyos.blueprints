@@ -7,7 +7,7 @@
         | difference(_zone_firewall_names) | length == 0
       - not (zone_firewall_base_rules | bool)
         or (zone_firewall_policies | map(attribute='rules', default=[]) | flatten
-        | map(attribute='number') | select('in', [1, 2]) | list | length == 0)
+            | map(attribute='number') | select('in', [1, 2]) | list | length == 0)
     fail_msg: >-
       At most one local zone; every policy must reference defined zones;
       rule numbers 1 and 2 are reserved for the base rules.
@@ -25,7 +25,7 @@
     state: "{{ _zone_firewall_state }}"
   register: _zone_firewall_r_zones
 
-- name: Collect rendered commands # noqa: var-naming[no-role-prefix] - shared across roles by design
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
   ansible.builtin.set_fact:
     vyos_blueprints_rendered: >-
       {{ vyos_blueprints_rendered | default([])

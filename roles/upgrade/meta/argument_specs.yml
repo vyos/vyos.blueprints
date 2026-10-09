@@ -31,47 +31,11 @@ argument_specs:
           - Routers already running it are skipped. Strongly recommended for bulk runs.
           - The skip ends the router's play (C(meta end_host)); put tasks that must
             still run for up-to-date routers in a separate play.
-      upgrade_vrf:
-        { type: str, default: "", description: VRF used to download the image. }
-      upgrade_set_default:
-        {
-          type: bool,
-          default: true,
-          description: Make the new image the default boot image.,
-        }
-      upgrade_copy_config:
-        {
-          type: bool,
-          default: true,
-          description: Copy the active configuration to the new image.,
-        }
-      upgrade_copy_ssh_keys:
-        {
-          type: bool,
-          default: true,
-          description: Copy SSH host keys to the new image.,
-        }
-      upgrade_backup:
-        {
-          type: bool,
-          default: true,
-          description: Back up the configuration first with vyos.blueprints.backup.,
-        }
-      upgrade_reboot:
-        {
-          type: bool,
-          default: true,
-          description: Reboot into the new image and verify it. Without it the image is only installed.,
-        }
-      upgrade_command_timeout:
-        {
-          type: int,
-          default: 1800,
-          description: Seconds allowed for downloading and installing the image.,
-        }
-      upgrade_reboot_timeout:
-        {
-          type: int,
-          default: 900,
-          description: Seconds to wait for the router to come back after the reboot.,
-        }
+      upgrade_vrf: {type: str, default: "", description: VRF used to download the image.}
+      upgrade_set_default: {type: bool, default: true, description: Make the new image the default boot image.}
+      upgrade_copy_config: {type: bool, default: true, description: Copy the active configuration to the new image.}
+      upgrade_copy_ssh_keys: {type: bool, default: true, description: Copy SSH host keys to the new image.}
+      upgrade_backup: {type: bool, default: true, description: Back up the configuration first with vyos.blueprints.backup.}
+      upgrade_reboot: {type: bool, default: true, description: Reboot into the new image and verify it. Without it the image is only installed.}
+      upgrade_command_timeout: {type: int, default: 1800, description: Seconds allowed for downloading and installing the image.}
+      upgrade_reboot_timeout: {type: int, default: 900, description: Seconds to wait for the router to come back after the reboot.}

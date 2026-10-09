@@ -6,12 +6,12 @@ all:
         router1:
           ansible_host: 192.0.2.1
           ha_vrrp_priority: 200
-          ha_vrrp_local_addresses: { int: 10.200.201.2, public: 203.0.113.2 }
+          ha_vrrp_local_addresses: {int: 10.200.201.2, public: 203.0.113.2}
           ha_vrrp_conntrack_sync_local_address: 10.200.201.2
         router2:
           ansible_host: 192.0.2.2
           ha_vrrp_priority: 100
-          ha_vrrp_local_addresses: { int: 10.200.201.3, public: 203.0.113.3 }
+          ha_vrrp_local_addresses: {int: 10.200.201.3, public: 203.0.113.3}
           ha_vrrp_conntrack_sync_local_address: 10.200.201.3
   vars:
     ansible_network_os: vyos.vyos.vyos

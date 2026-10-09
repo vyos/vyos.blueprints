@@ -11,7 +11,7 @@ base_interfaces:
       - 10.50.50.1/24
 ospf_router_id: 10.0.0.7
 ospf_areas:
-  - id: "0"
+  - id: '0'
     networks:
       - 0.0.0.0/0
 ospf_abr_type: cisco

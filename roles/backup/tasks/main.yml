@@ -65,7 +65,7 @@
   ansible.builtin.include_tasks: retention.yml
   when: backup_keep | int > 0
 
-- name: Commit the backups to git # noqa: command-instead-of-module - ansible.builtin.git cannot commit
+- name: Commit the backups to git  # noqa: command-instead-of-module - ansible.builtin.git cannot commit
   ansible.builtin.shell:
     cmd: >-
       git add -A &&

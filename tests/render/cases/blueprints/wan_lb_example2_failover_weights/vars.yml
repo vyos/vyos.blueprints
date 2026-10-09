@@ -3,27 +3,27 @@
 # (the end state after applying the page's steps up to this example)
 base_hostname: r1
 base_static_routes:
-  - { dest: 33.44.55.66/32, next_hop: 11.22.33.1 }
-  - { dest: 44.55.66.77/32, next_hop: 11.22.33.1 }
-  - { dest: 55.66.77.88/32, next_hop: 22.33.44.1 }
-  - { dest: 66.77.88.99/32, next_hop: 22.33.44.1 }
+  - {dest: 33.44.55.66/32, next_hop: 11.22.33.1}
+  - {dest: 44.55.66.77/32, next_hop: 11.22.33.1}
+  - {dest: 55.66.77.88/32, next_hop: 22.33.44.1}
+  - {dest: 66.77.88.99/32, next_hop: 22.33.44.1}
 wan_load_balance_interfaces:
   - name: eth0
     failure_count: 5
     nexthop: 11.22.33.1
     tests:
-      - { id: 10, type: ping, target: 33.44.55.66 }
-      - { id: 20, type: ping, target: 44.55.66.77 }
+      - {id: 10, type: ping, target: 33.44.55.66}
+      - {id: 20, type: ping, target: 44.55.66.77}
   - name: eth1
     failure_count: 4
     nexthop: 22.33.44.1
     tests:
-      - { id: 10, type: ping, target: 55.66.77.88 }
-      - { id: 20, type: ping, target: 66.77.88.99 }
+      - {id: 10, type: ping, target: 55.66.77.88}
+      - {id: 20, type: ping, target: 66.77.88.99}
 wan_load_balance_rules:
   - number: 10
     failover: true
     inbound_interface: eth2
     interfaces:
-      - { name: eth0, weight: 10 }
-      - { name: eth1, weight: 1 }
+      - {name: eth0, weight: 10}
+      - {name: eth1, weight: 1}

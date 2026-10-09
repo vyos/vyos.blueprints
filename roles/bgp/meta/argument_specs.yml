@@ -13,78 +13,37 @@ argument_specs:
         referenced route-maps first, e.g. with C(vyos.blueprints.route_policy).
       - Nothing is configured when C(bgp_asn) is not set.
     options:
-      bgp_asn:
-        {
-          type: int,
-          description: Local AS number. Nothing is configured when unset.,
-        }
-      bgp_router_id: { type: str, default: "", description: BGP router-id. }
-      bgp_networks:
-        {
-          type: list,
-          elements: str,
-          default: [],
-          description: IPv4 prefixes to announce.,
-        }
-      bgp_log_neighbor_changes:
-        { type: bool, default: false, description: Log neighbour changes. }
+      bgp_asn: {type: int, description: Local AS number. Nothing is configured when unset.}
+      bgp_router_id: {type: str, default: "", description: BGP router-id.}
+      bgp_networks: {type: list, elements: str, default: [], description: IPv4 prefixes to announce.}
+      bgp_log_neighbor_changes: {type: bool, default: false, description: Log neighbour changes.}
       bgp_redistribute:
         type: list
         elements: dict
         default: []
         description: Redistribution into BGP (IPv4 unicast).
         options:
-          type:
-            {
-              type: str,
-              required: true,
-              description: "Protocol, e.g. C(connected), C(static), C(ospf).",
-            }
-          metric: { type: int, description: MED for redistributed routes. }
-          route_map:
-            {
-              type: str,
-              description: Route-map applied to redistributed routes.,
-            }
+          type: {type: str, required: true, description: "Protocol, e.g. C(connected), C(static), C(ospf)."}
+          metric: {type: int, description: MED for redistributed routes.}
+          route_map: {type: str, description: Route-map applied to redistributed routes.}
       bgp_neighbors:
         type: list
         elements: dict
         default: []
         description: Neighbours.
         options:
-          address:
-            { type: str, required: true, description: Neighbour address. }
-          remote_as:
-            { type: int, required: true, description: Neighbour AS number. }
-          description: { type: str, description: Neighbour description. }
-          update_source:
-            { type: str, description: Source address or interface. }
-          ebgp_multihop: { type: int, description: eBGP multihop TTL. }
-          password: { type: str, no_log: true, description: TCP MD5 password. }
-          holdtime: { type: int, description: Hold time in seconds. }
-          keepalive: { type: int, description: Keepalive in seconds. }
-          disable_connected_check:
-            {
-              type: bool,
-              default: false,
-              description: Allow peering with a neighbour that is not directly connected.,
-            }
-          soft_reconfiguration_inbound:
-            {
-              type: bool,
-              default: false,
-              description: Keep received routes for soft reconfiguration.,
-            }
-          route_map_import:
-            {
-              type: str,
-              description: Route-map for routes received from this neighbour.,
-            }
-          route_map_export:
-            {
-              type: str,
-              description: Route-map for routes sent to this neighbour.,
-            }
+          address: {type: str, required: true, description: Neighbour address.}
+          remote_as: {type: int, required: true, description: Neighbour AS number.}
+          description: {type: str, description: Neighbour description.}
+          update_source: {type: str, description: Source address or interface.}
+          ebgp_multihop: {type: int, description: eBGP multihop TTL.}
+          password: {type: str, no_log: true, description: TCP MD5 password.}
+          holdtime: {type: int, description: Hold time in seconds.}
+          keepalive: {type: int, description: Keepalive in seconds.}
+          disable_connected_check: {type: bool, default: false, description: Allow peering with a neighbour that is not directly connected.}
+          soft_reconfiguration_inbound: {type: bool, default: false, description: Keep received routes for soft reconfiguration.}
+          route_map_import: {type: str, description: Route-map for routes received from this neighbour.}
+          route_map_export: {type: str, description: Route-map for routes sent to this neighbour.}
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -93,10 +52,4 @@ argument_specs:
     short_description: Post-deployment checks for the bgp role
     description: Run with C(tasks_from=verify). Checks every BGP session is established.
     options:
-      bgp_neighbors:
-        {
-          type: list,
-          elements: dict,
-          default: [],
-          description: Same value as for C(main).,
-        }
+      bgp_neighbors: {type: list, elements: dict, default: [], description: Same value as for C(main).}

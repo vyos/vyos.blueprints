@@ -8,7 +8,7 @@ pppoe_interfaces:
   - name: pppoe0
     source_interface: eth1
     username: molecule
-    password: "{{ vault_pppoe_password }}"
+    password: '{{ vault_pppoe_password }}'
     service_name: ISP
     ipv6_autoconf: true
     prefix_delegation:
@@ -16,7 +16,7 @@ pppoe_interfaces:
         length: 56
         interfaces:
           - name: eth2
-            address: "100"
+            address: '100'
             sla_id: 0
 router_advert_interfaces:
   - name: eth2
@@ -54,9 +54,9 @@ firewall_ipv6:
           action: accept
           protocol: udp
           source:
-            port: "547"
+            port: '547'
           destination:
-            port: "546"
+            port: '546'
   forward:
     rules:
       - number: 10

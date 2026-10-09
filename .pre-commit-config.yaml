@@ -24,3 +24,6 @@ repos:
     rev: v3.9.9
     hooks:
       - id: prettier
+        # YAML is formatted and checked by ansible-lint (yamllint); prettier wraps long
+        # flow mappings in a way yamllint rejects, so it only handles Markdown and JSON.
+        types_or: [markdown, json]

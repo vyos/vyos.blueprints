@@ -3,8 +3,8 @@
   hosts: routers
   gather_facts: false
   roles:
-    - vyos.blueprints.base # interface addressing
-    - vyos.blueprints.management # SNMP, traps, syslog, NTP, RADIUS login
+    - vyos.blueprints.base         # interface addressing
+    - vyos.blueprints.management   # SNMP, traps, syslog, NTP, RADIUS login
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

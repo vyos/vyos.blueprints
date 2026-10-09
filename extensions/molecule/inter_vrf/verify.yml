@@ -17,48 +17,12 @@
   gather_facts: false
   vars:
     _flows:
-      - {
-          from: mgmt,
-          src: 192.168.0.1,
-          to: 10.0.0.1,
-          allowed: true,
-          why: "Management reaches LAN1",
-        }
-      - {
-          from: mgmt,
-          src: 192.168.0.1,
-          to: 172.16.0.1,
-          allowed: true,
-          why: "Management reaches LAN2",
-        }
-      - {
-          from: mgmt,
-          src: 192.168.0.1,
-          to: 192.0.2.1,
-          allowed: false,
-          why: "Management has no access to the outside",
-        }
-      - {
-          from: lan1,
-          src: 10.0.0.1,
-          to: 192.0.2.1,
-          allowed: true,
-          why: "LAN1 reaches the Internet",
-        }
-      - {
-          from: lan1,
-          src: 10.0.0.1,
-          to: 172.16.0.1,
-          allowed: true,
-          why: "LAN1 reaches LAN2",
-        }
-      - {
-          from: lan1,
-          src: "2001:db8:0:1::1",
-          to: "2001:db8:1::1",
-          allowed: true,
-          why: "LAN1 reaches the Internet over IPv6",
-        }
+      - {from: mgmt, src: 192.168.0.1, to: 10.0.0.1, allowed: true, why: "Management reaches LAN1"}
+      - {from: mgmt, src: 192.168.0.1, to: 172.16.0.1, allowed: true, why: "Management reaches LAN2"}
+      - {from: mgmt, src: 192.168.0.1, to: 192.0.2.1, allowed: false, why: "Management has no access to the outside"}
+      - {from: lan1, src: 10.0.0.1, to: 192.0.2.1, allowed: true, why: "LAN1 reaches the Internet"}
+      - {from: lan1, src: 10.0.0.1, to: 172.16.0.1, allowed: true, why: "LAN1 reaches LAN2"}
+      - {from: lan1, src: "2001:db8:0:1::1", to: "2001:db8:1::1", allowed: true, why: "LAN1 reaches the Internet over IPv6"}
   tasks:
     - name: Ping with a source address, as on the page
       ansible.builtin.command:

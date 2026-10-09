@@ -17,10 +17,9 @@ argument_specs:
         default: []
         description: Shaper policies.
         options:
-          name: { type: str, required: true, description: Policy name. }
-          bandwidth:
-            { type: str, description: "Available bandwidth, e.g. C(100mbit)." }
-          description: { type: str, description: Policy description. }
+          name: {type: str, required: true, description: Policy name.}
+          bandwidth: {type: str, description: "Available bandwidth, e.g. C(100mbit)."}
+          description: {type: str, description: Policy description.}
           default:
             type: dict
             description: Default class (bandwidth, ceiling, burst, priority, queue_type).
@@ -30,21 +29,14 @@ argument_specs:
             default: []
             description: Classes.
             options:
-              id: { type: int, required: true, description: Class number. }
-              description: { type: str, description: Class description. }
-              bandwidth:
-                {
-                  type: str,
-                  description: "Guaranteed bandwidth, e.g. C(5mbit) or C(100%).",
-                }
-              ceiling: { type: str, description: Maximum bandwidth. }
-              burst: { type: str, description: "Burst size, e.g. C(15k)." }
-              priority:
-                { type: int, description: Priority (lower is served first). }
-              queue_type:
-                { type: str, description: "Queue type, e.g. C(fair-queue)." }
-              set_dscp:
-                { type: str, description: "DSCP value to set, e.g. C(CS4)." }
+              id: {type: int, required: true, description: Class number.}
+              description: {type: str, description: Class description.}
+              bandwidth: {type: str, description: "Guaranteed bandwidth, e.g. C(5mbit) or C(100%)."}
+              ceiling: {type: str, description: Maximum bandwidth.}
+              burst: {type: str, description: "Burst size, e.g. C(15k)."}
+              priority: {type: int, description: Priority (lower is served first).}
+              queue_type: {type: str, description: "Queue type, e.g. C(fair-queue)."}
+              set_dscp: {type: str, description: "DSCP value to set, e.g. C(CS4)."}
               matches:
                 type: list
                 elements: dict
@@ -56,9 +48,9 @@ argument_specs:
         default: []
         description: Policy attachment.
         options:
-          name: { type: str, required: true, description: Interface. }
-          egress: { type: str, description: Policy for outgoing traffic. }
-          ingress: { type: str, description: Policy for incoming traffic. }
+          name: {type: str, required: true, description: Interface.}
+          egress: {type: str, description: Policy for outgoing traffic.}
+          ingress: {type: str, description: Policy for incoming traffic.}
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -67,10 +59,4 @@ argument_specs:
     short_description: Post-deployment checks for the qos role
     description: Run with C(tasks_from=verify). Checks every attached policy is active on its interface.
     options:
-      qos_interfaces:
-        {
-          type: list,
-          elements: dict,
-          default: [],
-          description: Same value as for C(main).,
-        }
+      qos_interfaces: {type: list, elements: dict, default: [], description: Same value as for C(main).}

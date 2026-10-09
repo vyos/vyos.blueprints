@@ -4,6 +4,6 @@
 # router2 hardware with an LACP bond0; the page uses the same commands with
 # eth0 replaced by bond0 on router2.
 ha_vrrp_pair_group: routers
-ha_vrrp_sync_group: { name: sync, members: [int] }
+ha_vrrp_sync_group: {name: sync, members: [int]}
 base_static_routes:
-  - { dest: 0.0.0.0/0, next_hop: 192.0.2.11 }
+  - {dest: 0.0.0.0/0, next_hop: 192.0.2.11}

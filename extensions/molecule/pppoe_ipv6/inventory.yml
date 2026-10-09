@@ -20,13 +20,13 @@ all:
                     - id: 0
                       length: 56
                       interfaces:
-                        - { name: eth2, address: "100", sla_id: 0 }
+                        - {name: eth2, address: '100', sla_id: 0}
               router_advert_interfaces:
                 - name: eth2
                   link_mtu: 1492
-                  name_servers: ["2001:db8::53"]
+                  name_servers: ['2001:db8::53']
                   prefixes:
-                    - { prefix: "::/64", valid_lifetime: 172800 }
+                    - {prefix: '::/64', valid_lifetime: 172800}
               firewall_ipv6:
                 names:
                   WAN_IN:
@@ -34,40 +34,34 @@ all:
                     rules:
                       - number: 10
                         action: accept
-                        state: { established: true, related: true }
-                      - { number: 20, action: accept, protocol: icmpv6 }
+                        state: {established: true, related: true}
+                      - {number: 20, action: accept, protocol: icmpv6}
                   WAN_LOCAL:
                     default_action: drop
                     rules:
                       - number: 10
                         action: accept
-                        state: { established: true, related: true }
-                      - { number: 20, action: accept, protocol: icmpv6 }
+                        state: {established: true, related: true}
+                      - {number: 20, action: accept, protocol: icmpv6}
                       - number: 30
                         action: accept
                         protocol: udp
-                        source: { port: "547" }
-                        destination: { port: "546" }
+                        source: {port: '547'}
+                        destination: {port: '546'}
                 forward:
                   rules:
                     - number: 10
                       action: jump
                       jump_target: WAN_IN
-                      inbound_interface: { name: pppoe0 }
+                      inbound_interface: {name: pppoe0}
                 input:
                   rules:
                     - number: 10
                       action: jump
                       jump_target: WAN_LOCAL
-                      inbound_interface: { name: pppoe0 }
+                      inbound_interface: {name: pppoe0}
               ansible_host: clab-bp-pppoe-r1
         provider:
           hosts:
-            isp: { ansible_host: clab-bp-pppoe-isp }
-      vars:
-        {
-          ansible_network_os: vyos.vyos.vyos,
-          ansible_connection: ansible.netcommon.network_cli,
-          ansible_user: admin,
-          ansible_password: admin,
-        }
+            isp: {ansible_host: clab-bp-pppoe-isp}
+      vars: {ansible_network_os: vyos.vyos.vyos, ansible_connection: ansible.netcommon.network_cli, ansible_user: admin, ansible_password: admin}

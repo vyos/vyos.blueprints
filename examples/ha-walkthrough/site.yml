@@ -3,14 +3,14 @@
   hosts: routers
   gather_facts: false
   roles:
-    - vyos.blueprints.bonding # router2 only (bond0)
-    - vyos.blueprints.base # VLAN addresses, temporary default route
-    - vyos.blueprints.ha_vrrp # VRRP groups, sync-group, conntrack-sync
-    - vyos.blueprints.nat # masquerade 10.200.201.0/24 to 203.0.113.1
-    - vyos.blueprints.wireguard # links to the offsite routers
+    - vyos.blueprints.bonding      # router2 only (bond0)
+    - vyos.blueprints.base         # VLAN addresses, temporary default route
+    - vyos.blueprints.ha_vrrp      # VRRP groups, sync-group, conntrack-sync
+    - vyos.blueprints.nat          # masquerade 10.200.201.0/24 to 203.0.113.1
+    - vyos.blueprints.wireguard    # links to the offsite routers
     - vyos.blueprints.route_policy # access-lists 100/150, route-map PUBOSPF
-    - vyos.blueprints.ospf # OSPF over WireGuard with import/export filters
-    - vyos.blueprints.bgp # BGP to the provider, BGPOUT / BGPPREPENDOUT
+    - vyos.blueprints.ospf         # OSPF over WireGuard with import/export filters
+    - vyos.blueprints.bgp          # BGP to the provider, BGPOUT / BGPPREPENDOUT
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

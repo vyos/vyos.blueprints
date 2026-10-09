@@ -46,7 +46,7 @@
   register: _base_r_routes
   when: base_static_routes | length > 0
 
-- name: Collect rendered commands # noqa: var-naming[no-role-prefix] - shared across roles by design
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
   ansible.builtin.set_fact:
     vyos_blueprints_rendered: >-
       {{ vyos_blueprints_rendered | default([])

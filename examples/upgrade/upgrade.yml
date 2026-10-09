@@ -4,11 +4,11 @@
 - name: Upgrade VyOS routers one at a time
   hosts: routers
   gather_facts: false
-  serial: 1 # HA pairs never reboot together
-  max_fail_percentage: 0 # stop the rollout at the first failure
+  serial: 1                 # HA pairs never reboot together
+  max_fail_percentage: 0    # stop the rollout at the first failure
   vars:
     upgrade_image_url: https://example.com/vyos-1.5.1-generic-amd64.iso
     upgrade_expected_version: "1.5.1"
-    backup_root: /srv/vyos-backups # pre-upgrade backups (vyos.blueprints.backup)
+    backup_root: /srv/vyos-backups   # pre-upgrade backups (vyos.blueprints.backup)
   roles:
     - vyos.blueprints.upgrade

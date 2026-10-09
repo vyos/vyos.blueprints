@@ -3,10 +3,10 @@
   hosts: dmvpn
   gather_facts: false
   roles:
-    - vyos.blueprints.base # underlay addresses and default route
-    - vyos.blueprints.gre_tunnel # multipoint GRE tunnels
-    - vyos.blueprints.dmvpn # NHRP, IPsec profile, GRE protection rule
-    - vyos.blueprints.ospf # OSPF over the tunnels
+    - vyos.blueprints.base         # underlay addresses and default route
+    - vyos.blueprints.gre_tunnel   # multipoint GRE tunnels
+    - vyos.blueprints.dmvpn        # NHRP, IPsec profile, GRE protection rule
+    - vyos.blueprints.ospf         # OSPF over the tunnels
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

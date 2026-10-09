@@ -26,7 +26,7 @@ all:
             - 172.16.100.1/24
       ospf_router_id: 10.0.0.3
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -58,7 +58,7 @@ all:
             - 172.16.60.1/24
       ospf_router_id: 10.0.0.4
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -89,7 +89,7 @@ all:
             - 172.16.70.1/24
       ospf_router_id: 10.0.0.5
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -123,7 +123,7 @@ all:
             - 172.16.140.1/24
       ospf_router_id: 10.0.0.6
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -149,7 +149,7 @@ all:
             - 10.50.50.1/24
       ospf_router_id: 10.0.0.7
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -210,7 +210,7 @@ all:
             - 10.80.80.1/24
       ospf_router_id: 10.0.0.8
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -265,7 +265,7 @@ all:
             - 10.60.60.1/24
       ospf_router_id: 10.0.0.10
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -317,7 +317,7 @@ all:
             - 172.16.10.2/24
       ospf_router_id: 10.0.0.1
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco
@@ -351,7 +351,7 @@ all:
             - 172.16.70.2/24
       ospf_router_id: 10.0.0.2
       ospf_areas:
-        - id: "0"
+        - id: '0'
           networks:
             - 0.0.0.0/0
       ospf_abr_type: cisco

@@ -1,17 +1,6 @@
 ---
 _vrf_lite_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
-_vrf_lite_iftypes:
-  {
-    eth: ethernet,
-    bond: bonding,
-    br: bridge,
-    dum: dummy,
-    pppoe: pppoe,
-    vtun: openvpn,
-    wg: wireguard,
-    tun: tunnel,
-    vti: vti,
-  }
+_vrf_lite_iftypes: {eth: ethernet, bond: bonding, br: bridge, dum: dummy, pppoe: pppoe, vtun: openvpn, wg: wireguard, tun: tunnel, vti: vti}
 _vrf_lite_eth_bindings: >-
   {%- set out = [] -%}
   {%- for v in vrf_lite_vrfs -%}

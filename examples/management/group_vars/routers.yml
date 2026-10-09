@@ -10,12 +10,12 @@ management_snmp:
   contact: molecule@example.net
   location: containerlab
   communities:
-    - name: "{{ vault_snmp_community }}"
+    - name: '{{ vault_snmp_community }}'
       clients:
         - 192.0.2.50
   trap_targets:
     - address: 192.0.2.50
-      community: "{{ vault_snmp_trap_community }}"
+      community: '{{ vault_snmp_trap_community }}'
 management_syslog_hosts:
   - host: 192.0.2.50
 management_ntp_servers:
@@ -23,5 +23,5 @@ management_ntp_servers:
 management_radius:
   servers:
     - address: 192.0.2.50
-      key: "{{ vault_radius_key }}"
+      key: '{{ vault_radius_key }}'
       timeout: 2

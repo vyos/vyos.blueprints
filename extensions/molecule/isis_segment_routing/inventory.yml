@@ -19,12 +19,12 @@ all:
                   addresses: [192.0.2.5/30]
               isis_net: 49.0000.0000.0000.0001.00
               isis_interfaces:
-                - { name: dum0, passive: true }
-                - { name: eth1, network: point-to-point }
+                - {name: dum0, passive: true}
+                - {name: eth1, network: point-to-point}
               isis_segment_routing:
                 maximum_label_depth: 8
                 prefixes:
-                  - { prefix: 192.0.2.1/32, index: 1 }
+                  - {prefix: 192.0.2.1/32, index: 1}
               isis_mpls_interfaces: [eth1]
             P2-VyOS:
               ansible_host: clab-bp-isis-p2
@@ -37,12 +37,12 @@ all:
                   addresses: [192.0.2.17/30]
               isis_net: 49.0000.0000.0000.0002.00
               isis_interfaces:
-                - { name: dum0, passive: true }
-                - { name: eth2, network: point-to-point }
+                - {name: dum0, passive: true}
+                - {name: eth2, network: point-to-point}
               isis_segment_routing:
                 maximum_label_depth: 8
                 prefixes:
-                  - { prefix: 192.0.2.2/32, index: 2 }
+                  - {prefix: 192.0.2.2/32, index: 2}
               isis_mpls_interfaces: [eth2]
             P3:
               ansible_host: clab-bp-isis-p3
@@ -58,24 +58,13 @@ all:
                   addresses: [192.0.2.18/30]
               isis_net: 49.0000.0000.0000.0003.00
               isis_interfaces:
-                - { name: dum0, passive: true }
-                - { name: eth1, network: point-to-point }
-                - { name: eth2, network: point-to-point }
+                - {name: dum0, passive: true}
+                - {name: eth1, network: point-to-point}
+                - {name: eth2, network: point-to-point}
               isis_segment_routing:
                 maximum_label_depth: 8
                 prefixes:
-                  - { prefix: 192.0.2.3/32, index: 3 }
+                  - {prefix: 192.0.2.3/32, index: 3}
               isis_mpls_interfaces: [eth1, eth2]
-          vars:
-            {
-              isis_level: level-2,
-              isis_log_adjacency_changes: true,
-              isis_metric_style: wide,
-            }
-      vars:
-        {
-          ansible_network_os: vyos.vyos.vyos,
-          ansible_connection: ansible.netcommon.network_cli,
-          ansible_user: admin,
-          ansible_password: admin,
-        }
+          vars: {isis_level: level-2, isis_log_adjacency_changes: true, isis_metric_style: wide}
+      vars: {ansible_network_os: vyos.vyos.vyos, ansible_connection: ansible.netcommon.network_cli, ansible_user: admin, ansible_password: admin}

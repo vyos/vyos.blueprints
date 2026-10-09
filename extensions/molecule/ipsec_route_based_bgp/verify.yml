@@ -23,7 +23,7 @@
       become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
       changed_when: false
       loop:
-        - { from: onprem, to: 10.0.1.10 }
-        - { from: vm, to: 10.10.2.10 }
+        - {from: onprem, to: 10.0.1.10}
+        - {from: vm, to: 10.10.2.10}
       loop_control:
         label: "{{ item.from }} -> {{ item.to }}"

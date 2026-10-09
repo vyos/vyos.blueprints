@@ -22,8 +22,8 @@ dmvpn_ipsec:
     hash: sha1
   profile:
     name: NHRPVPN
-    psk: "{{ vault_dmvpn_psk }}"
-    bind_tunnels: "{{ gre_tunnel_interfaces | map(attribute='name') | list }}"
+    psk: '{{ vault_dmvpn_psk }}'
+    bind_tunnels: '{{ gre_tunnel_interfaces | map(attribute=''name'') | list }}'
 dmvpn_drop_unprotected_gre:
   rule: 10
 ospf_passive_interface_default: true

@@ -14,40 +14,18 @@ argument_specs:
         default: []
         description: Interfaces to advertise on. Nothing is configured when empty.
         options:
-          name:
-            {
-              type: str,
-              required: true,
-              description: "LAN interface, e.g. C(eth1).",
-            }
-          link_mtu:
-            {
-              type: int,
-              description: "MTU to advertise, e.g. C(1492) behind PPPoE.",
-            }
-          name_servers:
-            {
-              type: list,
-              elements: str,
-              default: [],
-              description: DNS servers to advertise.,
-            }
+          name: {type: str, required: true, description: "LAN interface, e.g. C(eth1)."}
+          link_mtu: {type: int, description: "MTU to advertise, e.g. C(1492) behind PPPoE."}
+          name_servers: {type: list, elements: str, default: [], description: DNS servers to advertise.}
           prefixes:
             type: list
             elements: dict
             default: []
             description: Prefixes to advertise; C(::/64) means any /64 on the interface.
             options:
-              prefix:
-                {
-                  type: str,
-                  required: true,
-                  description: "Prefix, e.g. C(::/64).",
-                }
-              valid_lifetime:
-                { type: int, description: Valid lifetime in seconds. }
-              preferred_lifetime:
-                { type: int, description: Preferred lifetime in seconds. }
+              prefix: {type: str, required: true, description: "Prefix, e.g. C(::/64)."}
+              valid_lifetime: {type: int, description: Valid lifetime in seconds.}
+              preferred_lifetime: {type: int, description: Preferred lifetime in seconds.}
       vyos_blueprints_render_only:
         type: bool
         default: false

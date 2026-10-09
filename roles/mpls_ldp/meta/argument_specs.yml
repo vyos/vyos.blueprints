@@ -9,25 +9,9 @@ argument_specs:
       - Configured with vyos.vyos.vyos_config, because vyos.vyos has no MPLS
         module. MPLS forwarding needs the kernel MPLS modules.
     options:
-      mpls_ldp_router_id:
-        {
-          type: str,
-          default: "",
-          description: LDP router-id. Nothing is configured when empty.,
-        }
-      mpls_ldp_transport_address:
-        {
-          type: str,
-          default: "",
-          description: LDP IPv4 transport address; defaults to the router-id.,
-        }
-      mpls_ldp_interfaces:
-        {
-          type: list,
-          elements: str,
-          default: [],
-          description: Core interfaces to run MPLS and LDP on.,
-        }
+      mpls_ldp_router_id: {type: str, default: "", description: LDP router-id. Nothing is configured when empty.}
+      mpls_ldp_transport_address: {type: str, default: "", description: LDP IPv4 transport address; defaults to the router-id.}
+      mpls_ldp_interfaces: {type: list, elements: str, default: [], description: Core interfaces to run MPLS and LDP on.}
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -36,10 +20,4 @@ argument_specs:
     short_description: Post-deployment checks for the mpls_ldp role
     description: Run with C(tasks_from=verify). Checks that LDP has at least one OPERATIONAL neighbour.
     options:
-      mpls_ldp_interfaces:
-        {
-          type: list,
-          elements: str,
-          default: [],
-          description: Same value as for C(main).,
-        }
+      mpls_ldp_interfaces: {type: list, elements: str, default: [], description: Same value as for C(main).}

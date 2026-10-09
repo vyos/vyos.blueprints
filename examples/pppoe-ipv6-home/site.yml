@@ -3,9 +3,9 @@
   hosts: home
   gather_facts: false
   roles:
-    - vyos.blueprints.pppoe # PPPoE client, IPv6 autoconf, prefix delegation
-    - vyos.blueprints.router_advert # SLAAC and RDNSS on the LAN
-    - vyos.blueprints.firewall # WAN_IN / WAN_LOCAL IPv6 firewall
+    - vyos.blueprints.pppoe          # PPPoE client, IPv6 autoconf, prefix delegation
+    - vyos.blueprints.router_advert  # SLAAC and RDNSS on the LAN
+    - vyos.blueprints.firewall       # WAN_IN / WAN_LOCAL IPv6 firewall
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

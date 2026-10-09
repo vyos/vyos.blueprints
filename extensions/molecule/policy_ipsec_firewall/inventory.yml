@@ -16,26 +16,10 @@ all:
                   remote_address: 192.0.2.130
                   connection_type: initiate
                   tunnels:
-                    - {
-                        id: 0,
-                        local_prefix: 10.1.11.0/24,
-                        remote_prefix: 10.2.21.0/24,
-                      }
-                    - {
-                        id: 1,
-                        local_prefix: 10.1.11.0/24,
-                        remote_prefix: 10.2.22.0/24,
-                      }
-                    - {
-                        id: 2,
-                        local_prefix: 10.1.12.0/24,
-                        remote_prefix: 10.2.21.0/24,
-                      }
-                    - {
-                        id: 3,
-                        local_prefix: 10.1.12.0/24,
-                        remote_prefix: 10.2.22.0/24,
-                      }
+                    - {id: 0, local_prefix: 10.1.11.0/24, remote_prefix: 10.2.21.0/24}
+                    - {id: 1, local_prefix: 10.1.11.0/24, remote_prefix: 10.2.22.0/24}
+                    - {id: 2, local_prefix: 10.1.12.0/24, remote_prefix: 10.2.21.0/24}
+                    - {id: 3, local_prefix: 10.1.12.0/24, remote_prefix: 10.2.22.0/24}
               ipsec_policy_based_default_gateway: 198.51.100.13
               firewall_groups:
                 network:
@@ -44,78 +28,72 @@ all:
                   - name: REMOTE-NETS
                     networks: [10.2.21.0/24, 10.2.22.0/24]
                   - name: TRUSTED
-                    networks:
-                      [
-                        198.51.100.125/32,
-                        203.0.113.0/24,
-                        10.1.11.0/24,
-                        192.168.70.0/24,
-                      ]
+                    networks: [198.51.100.125/32, 203.0.113.0/24, 10.1.11.0/24, 192.168.70.0/24]
               firewall_ipv4:
                 forward:
                   default_action: drop
                   rules:
                     - number: 1
                       action: accept
-                      state: { established: true, related: true }
+                      state: {established: true, related: true}
                     - number: 2
                       action: drop
-                      state: { invalid: true }
+                      state: {invalid: true}
                     - number: 10
                       action: accept
                       source:
-                        group: { network_group: LOCAL-NETS }
+                        group: {network_group: LOCAL-NETS}
                     - number: 20
                       action: accept
                       source:
-                        group: { network_group: REMOTE-NETS }
+                        group: {network_group: REMOTE-NETS}
                       destination:
-                        group: { network_group: LOCAL-NETS }
+                        group: {network_group: LOCAL-NETS}
                 input:
                   default_action: drop
                   rules:
                     - number: 1
                       action: accept
-                      state: { established: true, related: true }
+                      state: {established: true, related: true}
                     - number: 2
                       action: drop
-                      state: { invalid: true }
+                      state: {invalid: true}
                     - number: 5
                       action: accept
                       description: containerlab management
-                      inbound_interface: { name: eth0 }
+                      inbound_interface: {name: eth0}
                     - number: 10
                       action: accept
                       protocol: udp
-                      destination: { port: "500,4500" }
-                      inbound_interface: { name: eth3 }
+                      destination: {port: '500,4500'}
+                      inbound_interface: {name: eth3}
                     - number: 15
                       action: accept
                       protocol: esp
-                      inbound_interface: { name: eth3 }
+                      inbound_interface: {name: eth3}
                     - number: 20
                       action: accept
                       protocol: tcp
-                      destination: { port: "22" }
+                      destination: {port: '22'}
                       source:
-                        group: { network_group: TRUSTED }
+                        group: {network_group: TRUSTED}
                     - number: 25
                       action: accept
                       protocol: udp
-                      destination: { port: "53" }
+                      destination: {port: '53'}
                       source:
-                        group: { network_group: LOCAL-NETS }
-                    - { number: 30, action: accept, protocol: icmp }
+                        group: {network_group: LOCAL-NETS}
+                    - {number: 30, action: accept, protocol: icmp}
               nat_source_rules:
                 - id: 10
                   exclude: true
-                  outbound_interface: { name: eth3 }
-                  source: { network_group: LOCAL-NETS }
-                  destination: { network_group: REMOTE-NETS }
+                  outbound_interface: {name: eth3}
+                  source: {network_group: LOCAL-NETS}
+                  destination: {network_group: REMOTE-NETS}
                 - id: 20
-                  outbound_interface: { name: eth3 }
-                  source: { network_group: LOCAL-NETS }
-                  translation: { address: masquerade }
+                  outbound_interface: {name: eth3}
+                  source: {network_group: LOCAL-NETS}
+                  translation: {address: masquerade}
               base_interfaces:
                 - name: eth3
                   addresses: [198.51.100.14/30]
@@ -134,26 +112,10 @@ all:
                   remote_address: 198.51.100.14
                   connection_type: none
                   tunnels:
-                    - {
-                        id: 0,
-                        local_prefix: 10.2.21.0/24,
-                        remote_prefix: 10.1.11.0/24,
-                      }
-                    - {
-                        id: 1,
-                        local_prefix: 10.2.22.0/24,
-                        remote_prefix: 10.1.11.0/24,
-                      }
-                    - {
-                        id: 2,
-                        local_prefix: 10.2.21.0/24,
-                        remote_prefix: 10.1.12.0/24,
-                      }
-                    - {
-                        id: 3,
-                        local_prefix: 10.2.22.0/24,
-                        remote_prefix: 10.1.12.0/24,
-                      }
+                    - {id: 0, local_prefix: 10.2.21.0/24, remote_prefix: 10.1.11.0/24}
+                    - {id: 1, local_prefix: 10.2.22.0/24, remote_prefix: 10.1.11.0/24}
+                    - {id: 2, local_prefix: 10.2.21.0/24, remote_prefix: 10.1.12.0/24}
+                    - {id: 3, local_prefix: 10.2.22.0/24, remote_prefix: 10.1.12.0/24}
               base_interfaces:
                 - name: eth3
                   addresses: [192.0.2.130/30]
@@ -163,28 +125,7 @@ all:
                   addresses: [10.2.22.1/24]
               ipsec_policy_based_default_gateway: 192.0.2.129
           vars:
-            ipsec_policy_based_ike_group:
-              {
-                name: IKE-GROUP,
-                key_exchange: ikev2,
-                proposal_id: 1,
-                dh_group: 14,
-                encryption: aes256,
-                hash: sha256,
-              }
-            ipsec_policy_based_esp_group:
-              {
-                name: ESP-GROUP,
-                mode: tunnel,
-                proposal_id: 1,
-                encryption: aes256,
-                hash: sha256,
-              }
+            ipsec_policy_based_ike_group: {name: IKE-GROUP, key_exchange: ikev2, proposal_id: 1, dh_group: 14, encryption: aes256, hash: sha256}
+            ipsec_policy_based_esp_group: {name: ESP-GROUP, mode: tunnel, proposal_id: 1, encryption: aes256, hash: sha256}
             ipsec_policy_based_interfaces: [eth3]
-      vars:
-        {
-          ansible_network_os: vyos.vyos.vyos,
-          ansible_connection: ansible.netcommon.network_cli,
-          ansible_user: admin,
-          ansible_password: admin,
-        }
+      vars: {ansible_network_os: vyos.vyos.vyos, ansible_connection: ansible.netcommon.network_cli, ansible_user: admin, ansible_password: admin}

@@ -11,36 +11,20 @@ topology:
     internal:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 10.200.201.10/24 dev eth1",
-          "ip route replace default via 10.200.201.1",
-        ]
+      exec: ["ip addr add 10.200.201.10/24 dev eth1", "ip route replace default via 10.200.201.1"]
     public:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 203.0.113.10/24 dev eth1",
-          "ip route replace default via 203.0.113.2",
-        ]
+      exec: ["ip addr add 203.0.113.10/24 dev eth1", "ip route replace default via 203.0.113.2"]
     remote:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 10.201.1.10/24 dev eth1",
-          "ip route replace default via 10.201.1.1",
-        ]
+      exec: ["ip addr add 10.201.1.10/24 dev eth1", "ip route replace default via 10.201.1.1"]
     # a network the remote site must NOT be allowed to inject (outside 10.201.0.0/16)
     rogue:
       kind: linux
       image: alpine:3
-      exec:
-        [
-          "ip addr add 10.99.0.10/24 dev eth1",
-          "ip route replace default via 10.99.0.1",
-        ]
+      exec: ["ip addr add 10.99.0.10/24 dev eth1", "ip route replace default via 10.99.0.1"]
   links:
     - endpoints: ["router1:eth1", "offsite1:eth1"]
     - endpoints: ["router1:eth2", "internal:eth1"]

@@ -24,8 +24,8 @@ all:
                       address: 192.0.2.31
                       port: 50001
                       persistent_keepalive: 15
-                      public_key: "{{ _lab_wg_keys['offsite1'].public }}"
-                  private_key: "{{ _lab_wg_keys[inventory_hostname].private }}"
+                      public_key: '{{ _lab_wg_keys[''offsite1''].public }}'
+                  private_key: '{{ _lab_wg_keys[inventory_hostname].private }}'
               route_policy_access_lists:
                 - number: 150
                   description: Outbound OSPF Redistribution
@@ -71,7 +71,7 @@ all:
                   rules:
                     - sequence: 100
                       action: deny
-                      match_access_list: "100"
+                      match_access_list: '100'
                     - sequence: 500
                       action: permit
               ospf_router_id: 10.254.60.1
@@ -124,8 +124,8 @@ all:
                       address: 192.0.2.21
                       port: 50001
                       persistent_keepalive: 15
-                      public_key: "{{ _lab_wg_keys['router1'].public }}"
-                  private_key: "{{ _lab_wg_keys[inventory_hostname].private }}"
+                      public_key: '{{ _lab_wg_keys[''router1''].public }}'
+                  private_key: '{{ _lab_wg_keys[inventory_hostname].private }}'
               ospf_router_id: 10.254.60.2
               ospf_interfaces:
                 - name: wg01

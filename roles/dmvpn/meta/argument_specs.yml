@@ -21,120 +21,42 @@ argument_specs:
         default: []
         description: NHRP per tunnel.
         options:
-          name:
-            {
-              type: str,
-              required: true,
-              description: "Tunnel interface, e.g. C(tun100).",
-            }
-          network_id:
-            {
-              type: int,
-              required: true,
-              description: NHRP network id (one per cloud).,
-            }
-          authentication:
-            {
-              type: str,
-              no_log: true,
-              description: NHRP authentication string.,
-            }
-          holdtime: { type: int, description: Hold time in seconds. }
-          multicast:
-            {
-              type: str,
-              description: "C(dynamic) on hubs, the hub's NBMA address on spokes.",
-            }
-          redirect:
-            {
-              type: bool,
-              default: false,
-              description: "Send NHRP redirects (hubs, DMVPN phase 3).",
-            }
-          shortcut:
-            {
-              type: bool,
-              default: false,
-              description: "Accept NHRP shortcuts (spokes, DMVPN phase 3).",
-            }
-          registration_no_unique:
-            {
-              type: bool,
-              default: false,
-              description: Allow re-registration from a changed NBMA address.,
-            }
+          name: {type: str, required: true, description: "Tunnel interface, e.g. C(tun100)."}
+          network_id: {type: int, required: true, description: NHRP network id (one per cloud).}
+          authentication: {type: str, no_log: true, description: NHRP authentication string.}
+          holdtime: {type: int, description: Hold time in seconds.}
+          multicast: {type: str, description: "C(dynamic) on hubs, the hub's NBMA address on spokes."}
+          redirect: {type: bool, default: false, description: "Send NHRP redirects (hubs, DMVPN phase 3)."}
+          shortcut: {type: bool, default: false, description: "Accept NHRP shortcuts (spokes, DMVPN phase 3)."}
+          registration_no_unique: {type: bool, default: false, description: Allow re-registration from a changed NBMA address.}
           nhs:
             type: list
             elements: dict
             default: []
             description: Next-hop servers (spokes).
             options:
-              tunnel_ip:
-                {
-                  type: str,
-                  default: dynamic,
-                  description: "Hub tunnel address, or C(dynamic).",
-                }
-              nbma:
-                {
-                  type: str,
-                  required: true,
-                  description: Hub's public (NBMA) address.,
-                }
+              tunnel_ip: {type: str, default: dynamic, description: "Hub tunnel address, or C(dynamic)."}
+              nbma: {type: str, required: true, description: Hub's public (NBMA) address.}
       dmvpn_ipsec:
         type: dict
         description: IPsec protection of the tunnels. Omit for unencrypted DMVPN.
         options:
-          interfaces:
-            {
-              type: list,
-              elements: str,
-              default: [],
-              description: "Interfaces IPsec listens on, e.g. C([eth0]).",
-            }
-          ike_group:
-            {
-              type: dict,
-              required: true,
-              description: "IKE group - name, key_exchange, lifetime, proposal_id, dh_group, encryption, hash.",
-            }
-          esp_group:
-            {
-              type: dict,
-              required: true,
-              description: "ESP group - name, lifetime, mode (transport), pfs, proposal_id, encryption, hash.",
-            }
+          interfaces: {type: list, elements: str, default: [], description: "Interfaces IPsec listens on, e.g. C([eth0])."}
+          ike_group: {type: dict, required: true, description: "IKE group - name, key_exchange, lifetime, proposal_id, dh_group, encryption, hash."}
+          esp_group: {type: dict, required: true, description: "ESP group - name, lifetime, mode (transport), pfs, proposal_id, encryption, hash."}
           profile:
             type: dict
             required: true
             description: IPsec profile bound to the tunnels.
             options:
-              name:
-                {
-                  type: str,
-                  required: true,
-                  description: "Profile name, e.g. C(NHRPVPN).",
-                }
-              psk:
-                {
-                  type: str,
-                  required: true,
-                  no_log: true,
-                  description: Pre-shared secret.,
-                }
-              bind_tunnels:
-                {
-                  type: list,
-                  elements: str,
-                  required: true,
-                  description: Tunnels the profile protects.,
-                }
+              name: {type: str, required: true, description: "Profile name, e.g. C(NHRPVPN)."}
+              psk: {type: str, required: true, no_log: true, description: Pre-shared secret.}
+              bind_tunnels: {type: list, elements: str, required: true, description: Tunnels the profile protects.}
       dmvpn_drop_unprotected_gre:
         type: dict
         description: "Drop GRE not protected by an outbound IPsec policy, e.g. C({rule: 10}). Put it before any rule permitting GRE."
         options:
-          rule:
-            { type: int, default: 10, description: Output-filter rule number. }
+          rule: {type: int, default: 10, description: Output-filter rule number.}
       vyos_blueprints_render_only:
         type: bool
         default: false
@@ -145,11 +67,5 @@ argument_specs:
       - Run with C(tasks_from=verify). On spokes, checks the NHRP registration
         to every NHS; with IPsec, checks an SA is up for every protected tunnel.
     options:
-      dmvpn_nhrp_tunnels:
-        {
-          type: list,
-          elements: dict,
-          default: [],
-          description: Same value as for C(main).,
-        }
-      dmvpn_ipsec: { type: dict, description: Same value as for C(main). }
+      dmvpn_nhrp_tunnels: {type: list, elements: dict, default: [], description: Same value as for C(main).}
+      dmvpn_ipsec: {type: dict, description: Same value as for C(main).}

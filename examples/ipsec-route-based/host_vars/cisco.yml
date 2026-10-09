@@ -1,9 +1,9 @@
 ---
 # Lab stand-in for the page's Cisco router, using the page's Cisco values
 base_interfaces:
-  - { name: eth1, addresses: [10.0.2.2/30] }
-  - { name: eth2, addresses: [192.168.10.1/24] }
-  - { name: eth3, addresses: [192.168.11.1/24] }
+  - {name: eth1, addresses: [10.0.2.2/30]}
+  - {name: eth2, addresses: [192.168.10.1/24]}
+  - {name: eth3, addresses: [192.168.11.1/24]}
 ipsec_route_based_peers:
   - name: VYOS
     local_address: 10.0.2.2
@@ -12,7 +12,7 @@ ipsec_route_based_peers:
     psk_type: base64
     psk_name: AUTH-PSK
     connection_type: none
-    vti: { interface: vti1, address: 10.100.100.2/30, mtu: 1438 }
+    vti: {interface: vti1, address: 10.100.100.2/30, mtu: 1438}
 ipsec_route_based_ospf:
   router_id: 1.1.1.1
   networks: [10.100.100.0/30, 192.168.10.0/24, 192.168.11.0/24]

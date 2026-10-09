@@ -123,7 +123,7 @@
   register: _ipsec_route_based_r_ospf_if
   when: _ipsec_route_based_ospf | length > 0
 
-- name: Collect rendered commands # noqa: var-naming[no-role-prefix] - shared across roles by design
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
   ansible.builtin.set_fact:
     vyos_blueprints_rendered: >-
       {{ vyos_blueprints_rendered | default([])

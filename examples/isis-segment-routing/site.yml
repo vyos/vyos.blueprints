@@ -3,8 +3,8 @@
   hosts: p_routers
   gather_facts: false
   roles:
-    - vyos.blueprints.base # loopback, link addresses and MTU, hostname
-    - vyos.blueprints.isis # IS-IS, segment routing, MPLS interfaces
+    - vyos.blueprints.base   # loopback, link addresses and MTU, hostname
+    - vyos.blueprints.isis   # IS-IS, segment routing, MPLS interfaces
   post_tasks:
     - name: Show rendered commands
       ansible.builtin.debug:

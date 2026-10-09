@@ -12,98 +12,38 @@ all:
           remote_address: 192.0.2.130
           connection_type: initiate
           tunnels:
-            - { id: 0, local_prefix: 10.1.11.0/24, remote_prefix: 10.2.21.0/24 }
-            - { id: 1, local_prefix: 10.1.11.0/24, remote_prefix: 10.2.22.0/24 }
-            - { id: 2, local_prefix: 10.1.12.0/24, remote_prefix: 10.2.21.0/24 }
-            - { id: 3, local_prefix: 10.1.12.0/24, remote_prefix: 10.2.22.0/24 }
+            - {id: 0, local_prefix: 10.1.11.0/24, remote_prefix: 10.2.21.0/24}
+            - {id: 1, local_prefix: 10.1.11.0/24, remote_prefix: 10.2.22.0/24}
+            - {id: 2, local_prefix: 10.1.12.0/24, remote_prefix: 10.2.21.0/24}
+            - {id: 3, local_prefix: 10.1.12.0/24, remote_prefix: 10.2.22.0/24}
       ipsec_policy_based_default_gateway: 198.51.100.13
       # Firewall and NAT exist only on LEFT, as on the page
       firewall_groups:
         network:
-          - { name: LOCAL-NETS, networks: [10.1.11.0/24, 10.1.12.0/24] }
-          - { name: REMOTE-NETS, networks: [10.2.21.0/24, 10.2.22.0/24] }
-          - {
-              name: TRUSTED,
-              networks:
-                [
-                  198.51.100.125/32,
-                  203.0.113.0/24,
-                  10.1.11.0/24,
-                  192.168.70.0/24,
-                ],
-            }
+          - {name: LOCAL-NETS, networks: [10.1.11.0/24, 10.1.12.0/24]}
+          - {name: REMOTE-NETS, networks: [10.2.21.0/24, 10.2.22.0/24]}
+          - {name: TRUSTED, networks: [198.51.100.125/32, 203.0.113.0/24, 10.1.11.0/24, 192.168.70.0/24]}
       firewall_ipv4:
         forward:
           default_action: drop
           rules:
-            - {
-                number: 1,
-                action: accept,
-                state: { established: true, related: true },
-              }
-            - { number: 2, action: drop, state: { invalid: true } }
-            - {
-                number: 10,
-                action: accept,
-                source: { group: { network_group: LOCAL-NETS } },
-              }
-            - {
-                number: 20,
-                action: accept,
-                source: { group: { network_group: REMOTE-NETS } },
-                destination: { group: { network_group: LOCAL-NETS } },
-              }
+            - {number: 1, action: accept, state: {established: true, related: true}}
+            - {number: 2, action: drop, state: {invalid: true}}
+            - {number: 10, action: accept, source: {group: {network_group: LOCAL-NETS}}}
+            - {number: 20, action: accept, source: {group: {network_group: REMOTE-NETS}}, destination: {group: {network_group: LOCAL-NETS}}}
         input:
           default_action: drop
           rules:
-            - {
-                number: 1,
-                action: accept,
-                state: { established: true, related: true },
-              }
-            - { number: 2, action: drop, state: { invalid: true } }
-            - {
-                number: 10,
-                action: accept,
-                protocol: udp,
-                destination: { port: "500,4500" },
-                inbound_interface: { name: eth0 },
-              }
-            - {
-                number: 15,
-                action: accept,
-                protocol: esp,
-                inbound_interface: { name: eth0 },
-              }
-            - {
-                number: 20,
-                action: accept,
-                protocol: tcp,
-                destination: { port: "22" },
-                source: { group: { network_group: TRUSTED } },
-              }
-            - {
-                number: 25,
-                action: accept,
-                protocol: udp,
-                destination: { port: "53" },
-                source: { group: { network_group: LOCAL-NETS } },
-              }
-            - { number: 30, action: accept, protocol: icmp }
+            - {number: 1, action: accept, state: {established: true, related: true}}
+            - {number: 2, action: drop, state: {invalid: true}}
+            - {number: 10, action: accept, protocol: udp, destination: {port: "500,4500"}, inbound_interface: {name: eth0}}
+            - {number: 15, action: accept, protocol: esp, inbound_interface: {name: eth0}}
+            - {number: 20, action: accept, protocol: tcp, destination: {port: "22"}, source: {group: {network_group: TRUSTED}}}
+            - {number: 25, action: accept, protocol: udp, destination: {port: "53"}, source: {group: {network_group: LOCAL-NETS}}}
+            - {number: 30, action: accept, protocol: icmp}
       nat_source_rules:
-        - {
-            id: 10,
-            exclude: true,
-            outbound_interface: { name: eth0 },
-            source: { network_group: LOCAL-NETS },
-            destination: { network_group: REMOTE-NETS },
-          }
-        - {
-            id: 20,
-            outbound_interface: { name: eth0 },
-            source: { network_group: LOCAL-NETS },
-            translation: { address: masquerade },
-          }
+        - {id: 10, exclude: true, outbound_interface: {name: eth0}, source: {network_group: LOCAL-NETS}, destination: {network_group: REMOTE-NETS}}
+        - {id: 20, outbound_interface: {name: eth0}, source: {network_group: LOCAL-NETS}, translation: {address: masquerade}}
     RIGHT:
       ansible_host: 192.0.2.2
       ipsec_policy_based_peers:
@@ -115,10 +55,10 @@ all:
           remote_address: 198.51.100.14
           connection_type: none
           tunnels:
-            - { id: 0, local_prefix: 10.2.21.0/24, remote_prefix: 10.1.11.0/24 }
-            - { id: 1, local_prefix: 10.2.22.0/24, remote_prefix: 10.1.11.0/24 }
-            - { id: 2, local_prefix: 10.2.21.0/24, remote_prefix: 10.1.12.0/24 }
-            - { id: 3, local_prefix: 10.2.22.0/24, remote_prefix: 10.1.12.0/24 }
+            - {id: 0, local_prefix: 10.2.21.0/24, remote_prefix: 10.1.11.0/24}
+            - {id: 1, local_prefix: 10.2.22.0/24, remote_prefix: 10.1.11.0/24}
+            - {id: 2, local_prefix: 10.2.21.0/24, remote_prefix: 10.1.12.0/24}
+            - {id: 3, local_prefix: 10.2.22.0/24, remote_prefix: 10.1.12.0/24}
   vars:
     ansible_network_os: vyos.vyos.vyos
     ansible_connection: ansible.netcommon.network_cli

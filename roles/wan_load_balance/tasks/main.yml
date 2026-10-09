@@ -15,7 +15,7 @@
   vyos.vyos.vyos_config:
     lines: "{{ _wan_load_balance_deletes + _wan_load_balance_lines }}"
   vars:
-    _wan_load_balance_wanted: '{{ _wan_load_balance_lines | map(''replace'', "''", '''') | list }}'
+    _wan_load_balance_wanted: "{{ _wan_load_balance_lines | map('replace', \"'\", '') | list }}"
     _wan_load_balance_current: >-
       {{ (_wan_load_balance_running.stdout[0] | default('')).splitlines()
          | select('match', _wan_load_balance_rule_prefix ~ ' ') | map('replace', "'", '') | list }}
@@ -26,7 +26,7 @@
   register: _wan_load_balance_r_cli
   when: not (vyos_blueprints_render_only | default(false) | bool)
 
-- name: Collect rendered commands # noqa: var-naming[no-role-prefix] - shared across roles by design
+- name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
   ansible.builtin.set_fact:
     vyos_blueprints_rendered: "{{ vyos_blueprints_rendered | default([]) + _wan_load_balance_lines }}"
   when: vyos_blueprints_render_only | default(false) | bool

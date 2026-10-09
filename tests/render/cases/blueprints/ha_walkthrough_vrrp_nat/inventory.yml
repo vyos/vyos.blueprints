@@ -47,7 +47,7 @@ all:
               source:
                 address: 10.200.201.0/24
               destination:
-                address: "!192.0.2.0/24"
+                address: '!192.0.2.0/24'
               translation:
                 address: 203.0.113.1
         router2:
@@ -94,7 +94,7 @@ all:
               source:
                 address: 10.200.201.0/24
               destination:
-                address: "!192.0.2.0/24"
+                address: '!192.0.2.0/24'
               translation:
                 address: 203.0.113.1
           bonding_interfaces:

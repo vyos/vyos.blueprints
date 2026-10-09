@@ -21,7 +21,7 @@ all:
                     - 10.100.100.1/32
                   enable_multicast: true
                   encapsulation: gre
-                  adjust_mss: "1360"
+                  adjust_mss: '1360'
                   mtu: 1436
                   key: 42
                   source_interface: eth1
@@ -35,7 +35,7 @@ all:
                   registration_no_unique: true
               ospf_interfaces:
                 - name: tun100
-                  area: "0"
+                  area: '0'
                   network: point-to-multipoint
                   passive: false
               ansible_host: clab-bp-dmvpn-hub1
@@ -54,7 +54,7 @@ all:
                     - 10.100.101.1/32
                   enable_multicast: true
                   encapsulation: gre
-                  adjust_mss: "1360"
+                  adjust_mss: '1360'
                   mtu: 1436
                   key: 43
                   source_interface: eth1
@@ -68,7 +68,7 @@ all:
                   registration_no_unique: true
               ospf_interfaces:
                 - name: tun101
-                  area: "0"
+                  area: '0'
                   network: point-to-multipoint
                   passive: false
               ansible_host: clab-bp-dmvpn-hub2
@@ -90,7 +90,7 @@ all:
                     - 10.100.100.12/32
                   enable_multicast: true
                   encapsulation: gre
-                  adjust_mss: "1360"
+                  adjust_mss: '1360'
                   mtu: 1436
                   key: 42
                   source_interface: eth1
@@ -99,7 +99,7 @@ all:
                     - 10.100.101.12/32
                   enable_multicast: true
                   encapsulation: gre
-                  adjust_mss: "1360"
+                  adjust_mss: '1360'
                   mtu: 1436
                   key: 43
                   source_interface: eth1
@@ -126,13 +126,13 @@ all:
                   shortcut: true
               ospf_interfaces:
                 - name: eth2
-                  area: "0"
+                  area: '0'
                 - name: tun100
-                  area: "0"
+                  area: '0'
                   network: point-to-multipoint
                   passive: false
                 - name: tun101
-                  area: "0"
+                  area: '0'
                   network: point-to-multipoint
                   passive: false
               ansible_host: clab-bp-dmvpn-spoke2
@@ -154,7 +154,7 @@ all:
                     - 10.100.100.13/32
                   enable_multicast: true
                   encapsulation: gre
-                  adjust_mss: "1360"
+                  adjust_mss: '1360'
                   mtu: 1436
                   key: 42
                   source_interface: eth1
@@ -163,7 +163,7 @@ all:
                     - 10.100.101.13/32
                   enable_multicast: true
                   encapsulation: gre
-                  adjust_mss: "1360"
+                  adjust_mss: '1360'
                   mtu: 1436
                   key: 43
                   source_interface: eth1
@@ -190,13 +190,13 @@ all:
                   shortcut: true
               ospf_interfaces:
                 - name: eth2
-                  area: "0"
+                  area: '0'
                 - name: tun100
-                  area: "0"
+                  area: '0'
                   network: point-to-multipoint
                   passive: false
                 - name: tun101
-                  area: "0"
+                  area: '0'
                   network: point-to-multipoint
                   passive: false
               ansible_host: clab-bp-dmvpn-spoke3
@@ -224,7 +224,7 @@ all:
               profile:
                 name: NHRPVPN
                 psk: molecule-dmvpn-psk
-                bind_tunnels: "{{ gre_tunnel_interfaces | map(attribute='name') | list }}"
+                bind_tunnels: '{{ gre_tunnel_interfaces | map(attribute=''name'') | list }}'
             dmvpn_drop_unprotected_gre:
               rule: 10
             ospf_passive_interface_default: true

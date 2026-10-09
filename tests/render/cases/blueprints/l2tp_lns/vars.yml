@@ -3,22 +3,17 @@
 # the Cisco router on the page)
 base_hostname: vyos
 base_interfaces:
-  - { name: eth0, addresses: [192.168.139.100/24] }
+  - {name: eth0, addresses: [192.168.139.100/24]}
 base_static_routes:
-  - { dest: 0.0.0.0/0, next_hop: 192.168.139.2 }
+  - {dest: 0.0.0.0/0, next_hop: 192.168.139.2}
 nat_source_rules:
-  - {
-      id: 100,
-      outbound_interface: { name: eth0 },
-      source: { address: 10.0.0.0/24 },
-      translation: { address: masquerade },
-    }
+  - {id: 100, outbound_interface: {name: eth0}, source: {address: 10.0.0.0/24}, translation: {address: masquerade}}
 l2tp_lns_authentication:
   mode: radius
   radius_servers:
-    - { address: 192.168.139.110, key: radiustest }
+    - {address: 192.168.139.110, key: radiustest}
 l2tp_lns_pools:
-  - { name: TEST-POOL, range: 10.0.0.2-10.0.0.100 }
+  - {name: TEST-POOL, range: 10.0.0.2-10.0.0.100}
 l2tp_lns_default_pool: TEST-POOL
 l2tp_lns_gateway_address: 10.0.0.1
 l2tp_lns_lac_host_name: LAC

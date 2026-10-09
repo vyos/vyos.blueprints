@@ -7,7 +7,7 @@ ipsec_policy_based_ike_group:
   encryption: aes256
   hash: sha256
   close_action: start
-  dead_peer_detection: { action: restart, interval: 10, timeout: 30 }
+  dead_peer_detection: {action: restart, interval: 10, timeout: 30}
 ipsec_policy_based_esp_group:
   name: ESP-GROUP
   lifetime: 3600

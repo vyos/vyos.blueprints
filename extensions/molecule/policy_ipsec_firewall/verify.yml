@@ -19,27 +19,11 @@
   gather_facts: false
   vars:
     _flows:
-      - {
-          from: l11,
-          to: 10.2.21.10,
-          why: "LAN to LAN through the tunnel, without NAT",
-        }
-      - { from: l12, to: 10.2.22.10, why: "second LAN pair through the tunnel" }
-      - {
-          from: r21,
-          to: 10.1.11.10,
-          why: "remote LANs may connect to local LANs",
-        }
-      - {
-          from: l11,
-          to: 203.0.113.10,
-          why: "local subnets reach the internet using source NAT",
-        }
-      - {
-          from: internet,
-          to: 198.51.100.14,
-          why: "ICMP is allowed on all interfaces",
-        }
+      - {from: l11, to: 10.2.21.10, why: "LAN to LAN through the tunnel, without NAT"}
+      - {from: l12, to: 10.2.22.10, why: "second LAN pair through the tunnel"}
+      - {from: r21, to: 10.1.11.10, why: "remote LANs may connect to local LANs"}
+      - {from: l11, to: 203.0.113.10, why: "local subnets reach the internet using source NAT"}
+      - {from: internet, to: 198.51.100.14, why: "ICMP is allowed on all interfaces"}
   tasks:
     - name: Ping per requirement
       ansible.builtin.command:
