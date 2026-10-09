@@ -104,6 +104,7 @@ jobs:
     # optional variable MOLECULE_SCENARIOS (a JSON list) limits the scenarios.
     needs: [vyos-image]
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:

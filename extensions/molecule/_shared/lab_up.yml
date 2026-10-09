@@ -4,12 +4,43 @@
   gather_facts: false
   vars:
     _topology: "{{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_DIRECTORY') }}/topology.clab.yml"
+    _lab: "{{ (lookup('ansible.builtin.file', _topology) | from_yaml).name }}"
+    _log: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/containerlab-deploy.log"
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
   tasks:
-    - name: Deploy lab
-      ansible.builtin.command:
-        cmd: containerlab deploy --reconfigure --topo {{ _topology }}
-      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
-      changed_when: true
+    - name: Deploy the lab, with diagnostics if it fails or hangs
+      block:
+        - name: Deploy lab (containerlab waits until VyOS has loaded its boot configuration)
+          ansible.builtin.shell:
+            cmd: containerlab deploy --reconfigure --log-level debug --topo {{ _topology }} > {{ _log }} 2>&1
+          become: "{{ _become }}"
+          changed_when: true
+          timeout: "{{ lookup('ansible.builtin.env', 'CLAB_DEPLOY_TIMEOUT', default='900') | int }}"
+      rescue:
+        - name: Collect diagnostics from the lab's containers
+          ansible.builtin.shell:
+            cmd: |
+              echo "===== containerlab deploy log (last 60 lines)"; tail -n 60 {{ _log }}
+              echo "===== containers"; docker ps -a --filter label=containerlab={{ _lab }}
+              for c in $(docker ps -q --filter label=containerlab={{ _lab }} --filter label=clab-node-kind=vyosnetworks_vyos); do
+                n=$(docker inspect -f '{% raw %}{{.Name}}{% endraw %}' "$c")
+                echo "===== $n: systemctl is-system-running"; docker exec "$c" systemctl is-system-running
+                echo "===== $n: failed units"; docker exec "$c" systemctl --failed --no-pager
+                echo "===== $n: jobs still running"; docker exec "$c" systemctl list-jobs --no-pager
+                echo "===== $n: vyos-router (boot configuration)"; docker exec "$c" journalctl -u vyos-router --no-pager -n 40
+              done
+          become: "{{ _become }}"
+          register: _diag
+          changed_when: false
+          failed_when: false
+
+        - name: Show the diagnostics
+          ansible.builtin.debug:
+            msg: "{{ _diag.stdout_lines }}"
+
+        - name: The lab did not come up
+          ansible.builtin.fail:
+            msg: "containerlab deploy failed or timed out; see the diagnostics above ({{ _log }})"
 
 - name: Wait for VyOS nodes to accept configuration
   hosts: vyos
