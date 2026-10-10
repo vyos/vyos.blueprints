@@ -18,6 +18,10 @@ provisioner:
       host_key_checking: false
     persistent_connection:
       command_timeout: 60
+      # paramiko tries every address a name resolves to; libssh only the first.
+      # containerlab's management network is dual-stack, but VyOS's sshd (as
+      # configured by containerlab) listens on IPv4 only.
+      ssh_type: paramiko
   inventory:
     links:
       hosts: inventory.yml

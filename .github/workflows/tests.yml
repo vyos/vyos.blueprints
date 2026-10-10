@@ -117,7 +117,7 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-      - run: pip install ansible-core ansible-pylibssh molecule
+      - run: pip install ansible-core ansible-pylibssh paramiko molecule
       - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
       - name: Install containerlab
         run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.79.0
