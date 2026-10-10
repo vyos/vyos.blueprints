@@ -2,30 +2,61 @@
 - name: Deploy the scenario's containerlab topology
   hosts: localhost
   gather_facts: false
-  vars:
+  vars: &lab_vars
     _topology: "{{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_DIRECTORY') }}/topology.clab.yml"
+    _lab: "{{ (lookup('ansible.builtin.file', _topology) | from_yaml).name }}"
+    # MOLECULE_LOG_DIR (set in CI) survives the run; Molecule prunes its ephemeral directory.
+    _logdir: "{{ lookup('ansible.builtin.env', 'MOLECULE_LOG_DIR', default=lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY')) }}"
+    _log: "{{ _logdir }}/containerlab-deploy.log"
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
   tasks:
-    - name: Deploy lab
-      ansible.builtin.command:
-        cmd: containerlab deploy --reconfigure --topo {{ _topology }}
-      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
-      changed_when: true
+    - name: Create the log directory
+      ansible.builtin.file:
+        path: "{{ _logdir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Deploy the lab, with diagnostics if it fails or hangs
+      block:
+        - name: Deploy lab (containerlab waits until VyOS has loaded its boot configuration)
+          ansible.builtin.shell:
+            cmd: containerlab deploy --reconfigure --log-level debug --topo {{ _topology | quote }} > {{ _log | quote }} 2>&1
+          become: "{{ _become }}"
+          changed_when: true
+          timeout: "{{ lookup('ansible.builtin.env', 'CLAB_DEPLOY_TIMEOUT', default='900') | int }}"
+      rescue:
+        - name: Diagnose the lab
+          ansible.builtin.include_tasks: lab_diagnostics.yml
+
+        - name: The lab did not come up
+          ansible.builtin.fail:
+            msg: "containerlab deploy failed or timed out; see the diagnostics above and in {{ _logdir }}"
 
 - name: Wait for VyOS nodes to accept configuration
   hosts: vyos
   gather_facts: false
+  vars: *lab_vars
   tasks:
-    - name: Wait for SSH
-      ansible.builtin.wait_for:
-        host: "{{ ansible_host }}"
-        port: 22
-        timeout: 300
-      delegate_to: localhost
+    - name: Wait for SSH and the configuration system, with diagnostics if they do not come up
+      block:
+        - name: Wait for SSH
+          ansible.builtin.wait_for:
+            host: "{{ ansible_host }}"
+            port: 22
+            timeout: 300
+          delegate_to: localhost
 
-    - name: Wait for the configuration system
-      vyos.vyos.vyos_command:
-        commands: [show version]
-      register: _ready
-      until: _ready is succeeded
-      retries: 30
-      delay: 10
+        - name: Wait for the configuration system
+          vyos.vyos.vyos_command:
+            commands: [show version]
+          register: _ready
+          until: _ready is succeeded
+          retries: 30
+          delay: 10
+      rescue:
+        - name: Diagnose the lab
+          ansible.builtin.include_tasks: lab_diagnostics.yml
+
+        - name: The routers did not become reachable
+          ansible.builtin.fail:
+            msg: "the routers did not accept SSH sessions; see the diagnostics above and in {{ _logdir }}"

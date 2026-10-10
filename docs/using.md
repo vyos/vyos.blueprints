@@ -10,7 +10,7 @@ A role touches your environment in three places only:
    ansible_network_os: vyos.vyos.vyos
    ansible_connection: ansible.netcommon.network_cli
    ansible_user: vyos
-   ansible_password: "{{ vault_vyos_password }}"   # or ansible_ssh_private_key_file
+   ansible_password: "{{ vault_vyos_password }}" # or ansible_ssh_private_key_file
    ```
 
 2. **Role inputs** – the variables listed by `ansible-doc -t role vyos.blueprints.<role>`.
@@ -27,23 +27,23 @@ inventory comes from, not your directory layout.
 The same playbook works with any inventory source; only the place where you
 keep the variables changes.
 
-| Setup | Inventory | Role inputs |
-|---|---|---|
-| Single router / lab | static `inventory.yml` | `group_vars/` and `host_vars/` |
-| Trying things out | containerlab (`topology.clab.yml` in each example; clab also writes an Ansible inventory into the lab directory) | example `group_vars/` |
-| Netbox | `netbox.netbox.nb_inventory` | Netbox config contexts, or `group_vars/` keyed on Netbox-generated groups |
-| AWX / AAP | any of the above as an inventory source | same; build an execution environment containing `vyos.blueprints` |
+| Setup               | Inventory                                                                                                        | Role inputs                                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Single router / lab | static `inventory.yml`                                                                                           | `group_vars/` and `host_vars/`                                            |
+| Trying things out   | containerlab (`topology.clab.yml` in each example; clab also writes an Ansible inventory into the lab directory) | example `group_vars/`                                                     |
+| Netbox              | `netbox.netbox.nb_inventory`                                                                                     | Netbox config contexts, or `group_vars/` keyed on Netbox-generated groups |
+| AWX / AAP           | any of the above as an inventory source                                                                          | same; build an execution environment containing `vyos.blueprints`         |
 
 ## Multi-node blueprints
 
 Blueprints such as HA need to know which routers belong together.
 
-* Put the members of one pair in their **own inventory group** and pass its
+- Put the members of one pair in their **own inventory group** and pass its
   name, e.g. `ha_vrrp_pair_group: ha_pair`.
-* Keep **shared** settings (VRRP groups, sync-group) in that group's
+- Keep **shared** settings (VRRP groups, sync-group) in that group's
   `group_vars`, and **per-node** settings (priority, the node's own
   addresses) in `host_vars`.
-* Peer addresses are derived from the other member's `host_vars`. If the peer
+- Peer addresses are derived from the other member's `host_vars`. If the peer
   is not in your inventory, or you prefer to be explicit, set
   `ha_vrrp_peer_addresses` instead – explicit values always win.
 
