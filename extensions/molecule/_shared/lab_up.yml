@@ -2,7 +2,7 @@
 - name: Deploy the scenario's containerlab topology
   hosts: localhost
   gather_facts: false
-  vars:
+  vars: &lab_vars
     _topology: "{{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_DIRECTORY') }}/topology.clab.yml"
     _lab: "{{ (lookup('ansible.builtin.file', _topology) | from_yaml).name }}"
     # MOLECULE_LOG_DIR (set in CI) survives the run; Molecule prunes its ephemeral directory.
@@ -25,32 +25,8 @@
           changed_when: true
           timeout: "{{ lookup('ansible.builtin.env', 'CLAB_DEPLOY_TIMEOUT', default='900') | int }}"
       rescue:
-        - name: Collect diagnostics from the lab's containers
-          ansible.builtin.shell:
-            cmd: |
-              echo "===== containerlab deploy log (last 60 lines)"; tail -n 60 {{ _log | quote }}
-              echo "===== containers"; docker ps -a --filter label=containerlab={{ _lab | quote }}
-              for c in $(docker ps -q --filter label=containerlab={{ _lab | quote }} --filter label=clab-node-kind=vyosnetworks_vyos); do
-                n=$(docker inspect -f '{% raw %}{{.Name}}{% endraw %}' "$c")
-                echo "===== $n: systemctl is-system-running"; docker exec "$c" systemctl is-system-running
-                echo "===== $n: failed units"; docker exec "$c" systemctl --failed --no-pager
-                echo "===== $n: jobs still running"; docker exec "$c" systemctl list-jobs --no-pager
-                echo "===== $n: vyos-router (boot configuration)"; docker exec "$c" journalctl -u vyos-router --no-pager -n 40
-              done
-          become: "{{ _become }}"
-          register: _diag
-          changed_when: false
-          failed_when: false
-
-        - name: Save the diagnostics next to the deploy log
-          ansible.builtin.copy:
-            content: "{{ _diag.stdout }}\n"
-            dest: "{{ _logdir }}/diagnostics.txt"
-            mode: "0644"
-
-        - name: Show the diagnostics
-          ansible.builtin.debug:
-            msg: "{{ _diag.stdout_lines }}"
+        - name: Diagnose the lab
+          ansible.builtin.include_tasks: lab_diagnostics.yml
 
         - name: The lab did not come up
           ansible.builtin.fail:
@@ -59,18 +35,28 @@
 - name: Wait for VyOS nodes to accept configuration
   hosts: vyos
   gather_facts: false
+  vars: *lab_vars
   tasks:
-    - name: Wait for SSH
-      ansible.builtin.wait_for:
-        host: "{{ ansible_host }}"
-        port: 22
-        timeout: 300
-      delegate_to: localhost
+    - name: Wait for SSH and the configuration system, with diagnostics if they do not come up
+      block:
+        - name: Wait for SSH
+          ansible.builtin.wait_for:
+            host: "{{ ansible_host }}"
+            port: 22
+            timeout: 300
+          delegate_to: localhost
 
-    - name: Wait for the configuration system
-      vyos.vyos.vyos_command:
-        commands: [show version]
-      register: _ready
-      until: _ready is succeeded
-      retries: 30
-      delay: 10
+        - name: Wait for the configuration system
+          vyos.vyos.vyos_command:
+            commands: [show version]
+          register: _ready
+          until: _ready is succeeded
+          retries: 30
+          delay: 10
+      rescue:
+        - name: Diagnose the lab
+          ansible.builtin.include_tasks: lab_diagnostics.yml
+
+        - name: The routers did not become reachable
+          ansible.builtin.fail:
+            msg: "the routers did not accept SSH sessions; see the diagnostics above and in {{ _logdir }}"
