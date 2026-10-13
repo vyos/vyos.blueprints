@@ -1,16 +1,20 @@
 ---
-- name: Read hostname and interface state
+- name: Read the configured hostname and interface state
+  # The configured host-name, not "show host name": in containers the system
+  # hostname belongs to the container runtime and VyOS cannot change it.
   vyos.vyos.vyos_command:
     commands:
-      - show host name
+      - show configuration commands | match "system host-name"
       - show interfaces
   register: _base_v
 
 - name: Hostname matches
   ansible.builtin.assert:
-    that: _base_v.stdout[0] | trim == base_hostname
-    fail_msg: "hostname is '{{ _base_v.stdout[0] | trim }}', expected '{{ base_hostname }}'"
+    that: _base_hostname_configured == base_hostname
+    fail_msg: "configured host-name is '{{ _base_hostname_configured }}', expected '{{ base_hostname }}'"
     quiet: true
+  vars:
+    _base_hostname_configured: "{{ (_base_v.stdout[0] | regex_search(\"host-name '?([^'\\s]+)'?\", '\\1') or ['']) | first }}"
 
 - name: Static addresses are present
   ansible.builtin.assert:
