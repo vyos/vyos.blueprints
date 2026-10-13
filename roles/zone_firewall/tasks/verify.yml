@@ -7,7 +7,8 @@
 
 - name: Every zone is active
   ansible.builtin.assert:
-    that: _zone_firewall_v.stdout[0] is search('(?m)^\s*' ~ (item.name | regex_escape) ~ '\s')
+    # plain word/substring tests; regex escapes behave differently depending on how ansible-core evaluates the condition
+    that: item.name in (_zone_firewall_v.stdout[0].splitlines() | map('trim') | select | map('split') | map('first') | list)
     fail_msg: "zone {{ item.name }} is missing from 'show firewall zone-policy'"
     quiet: true
   loop: "{{ zone_firewall_zones }}"
@@ -16,7 +17,7 @@
 
 - name: Member interfaces are bound
   ansible.builtin.assert:
-    that: _zone_firewall_v.stdout[0] is search('\b' ~ (item.1 | regex_escape) ~ '\b')
+    that: item.1 in (_zone_firewall_v.stdout[0] | split)
     fail_msg: >-
       interface {{ item.1 }} of zone {{ item.0.name }} is not bound; 'show firewall zone-policy' returned:
       {{ _zone_firewall_v.stdout[0] | default('') | truncate(800) }}

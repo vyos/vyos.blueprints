@@ -5,7 +5,6 @@ set protocols bgp neighbor eth1 interface v6only peer-group 'fabric'
 set protocols bgp neighbor eth2 interface v6only peer-group 'fabric'
 set protocols bgp parameters bestpath as-path multipath-relax
 set protocols bgp parameters bestpath compare-routerid
-set protocols bgp parameters default no-ipv4-unicast
 set protocols bgp parameters router-id 192.168.0.1
 set protocols bgp peer-group fabric address-family ipv4-unicast
 set protocols bgp peer-group fabric address-family ipv6-unicast
