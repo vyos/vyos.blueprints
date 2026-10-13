@@ -1,9 +1,7 @@
 set interfaces loopback lo address '192.168.0.1/32'
 set protocols bgp address-family ipv4-unicast redistribute connected
 set protocols bgp address-family ipv6-unicast redistribute connected
-set protocols bgp neighbor eth1 interface v6only
 set protocols bgp neighbor eth1 interface v6only peer-group 'fabric'
-set protocols bgp neighbor eth2 interface v6only
 set protocols bgp neighbor eth2 interface v6only peer-group 'fabric'
 set protocols bgp parameters bestpath as-path multipath-relax
 set protocols bgp parameters bestpath compare-routerid

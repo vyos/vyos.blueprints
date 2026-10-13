@@ -1,5 +1,9 @@
 {% for t in _management_snmp.trap_targets | default([]) %}
+{#   bare node line only when it has no settings: "show configuration commands"
+     never prints it otherwise, so vyos_config would resend it on every run #}
+{%   if t.community is not defined and t.port is not defined %}
 set service snmp trap-target {{ t.address }}
+{%   endif %}
 {%   if t.community is defined %}
 set service snmp trap-target {{ t.address }} community '{{ t.community }}'
 {%   endif %}
