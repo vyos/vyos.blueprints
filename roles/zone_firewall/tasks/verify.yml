@@ -17,7 +17,9 @@
 - name: Member interfaces are bound
   ansible.builtin.assert:
     that: _zone_firewall_v.stdout[0] is search('\b' ~ (item.1 | regex_escape) ~ '\b')
-    fail_msg: "interface {{ item.1 }} of zone {{ item.0.name }} is not bound"
+    fail_msg: >-
+      interface {{ item.1 }} of zone {{ item.0.name }} is not bound; 'show firewall zone-policy' returned:
+      {{ _zone_firewall_v.stdout[0] | default('') | truncate(800) }}
     quiet: true
   loop: "{{ zone_firewall_zones | subelements('interfaces', skip_missing=true) }}"
   loop_control:
