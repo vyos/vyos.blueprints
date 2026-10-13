@@ -9,7 +9,9 @@
 - name: Masquerade rules are installed
   ansible.builtin.assert:
     that: _edge_nat_v.stdout[0] is search('(?m)^\s*' ~ item ~ '\b')
-    fail_msg: "source NAT rule {{ item }} missing from 'show nat source rules'"
+    fail_msg: >-
+      source NAT rule {{ item }} missing from 'show nat source rules', which returned:
+      {{ _edge_nat_v.stdout[0] | default('') | truncate(600) }}
     quiet: true
   loop: "{{ range(edge_nat_rule_base | int,
             edge_nat_rule_base | int + ([edge_nat_source_networks | length, 1] | max) * 10, 10) | list }}"
