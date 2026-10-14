@@ -39,23 +39,6 @@
   tasks:
     - name: Wait for SSH and the configuration system, with diagnostics if they do not come up
       block:
-        - name: Make the configured host name resolvable inside the container
-          # The base role sets "system host-name"; in a container /etc/hosts is
-          # Docker's and never gets the new name, so sudo (and with it many op-mode
-          # commands and the SSH login) fails with "unable to resolve host".
-          ansible.builtin.command:
-            argv:
-              - docker
-              - exec
-              - "{{ ansible_host }}"
-              - sh
-              - -c
-              - "grep -qw {{ base_hostname | quote }} /etc/hosts || echo '127.0.1.1 {{ base_hostname }}' >> /etc/hosts"
-          become: "{{ _become }}"
-          delegate_to: localhost
-          changed_when: false
-          when: base_hostname is defined
-
         - name: Wait for SSH
           ansible.builtin.wait_for:
             host: "{{ ansible_host }}"
@@ -70,6 +53,24 @@
           until: _ready is succeeded
           retries: 30
           delay: 10
+
+        - name: Read the container's hostname
+          # VyOS cannot set the kernel hostname in a container (hostnamectl is
+          # denied), so it stays the containerlab node name, while vyos-hostsd
+          # writes the *configured* host-name into /etc/hosts. When the two differ,
+          # sudo - and with it many op-mode commands - fails with "unable to
+          # resolve host".
+          ansible.builtin.command:
+            argv: [docker, exec, "{{ ansible_host }}", hostname]
+          become: "{{ _become }}"
+          delegate_to: localhost
+          register: _container_hostname
+          changed_when: false
+
+        - name: Keep the container's hostname resolvable (vyos-hostsd rewrites /etc/hosts)
+          vyos.vyos.vyos_config:
+            lines:
+              - set system static-host-mapping host-name {{ _container_hostname.stdout | trim }} inet 127.0.1.1
       rescue:
         - name: Diagnose the lab
           ansible.builtin.include_tasks: lab_diagnostics.yml

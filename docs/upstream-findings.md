@@ -97,10 +97,11 @@ vyos.vyos.vyos_config.
 
 ## 6. Test environment notes
 
-VyOS in a container cannot add a new `system host-name` to `/etc/hosts` (Docker manages
-the file), so `sudo` - and with it many op-mode commands - fails with "unable to resolve
-host". The lab's `prepare` step adds each router's configured name to its container's
-`/etc/hosts`.
+VyOS in a container cannot set the kernel hostname (`hostnamectl` is denied), so it stays
+the containerlab node name, while vyos-hostsd writes the *configured* `system host-name`
+into `/etc/hosts`. When the two differ, `sudo` - and with it many op-mode commands - fails
+with "unable to resolve host". The lab's `prepare` step maps the container's hostname to
+127.0.1.1 with `system static-host-mapping`, which vyos-hostsd keeps.
 
 GitHub's hosted runners (Azure kernel) ship `vrf`, `mpls_*` and `l2tp_*` only in
 `linux-modules-extra-<kernel>`, which the Molecule job installs before loading modules.

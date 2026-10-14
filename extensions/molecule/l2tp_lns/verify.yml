@@ -38,5 +38,5 @@
 
     - name: The RADIUS-authenticated session is active
       ansible.builtin.assert:
-        that: _l2tp_lns_v.stdout[0] is search('test@vyos\.io.*\bactive\b')
+        that: _l2tp_lns_v.stdout[0] is search('test@vyos\.io.*(?<![A-Za-z0-9_])active(?![A-Za-z0-9_])')
         quiet: true
