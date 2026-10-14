@@ -1,4 +1,7 @@
 ---
+- name: Load the lab WireGuard keys
+  ansible.builtin.import_playbook: wg_keys.yml
+
 - name: Verify role state
   hosts: ospf_sites
   gather_facts: false

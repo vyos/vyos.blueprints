@@ -8,7 +8,7 @@
 - name: The IPsec SA of every peer is up
   ansible.builtin.assert:
     that: _ipsec_route_based_v_sa.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '-vti\s+up(?![A-Za-z0-9_])')
-    fail_msg: "IPsec SA {{ item.name }}-vti is not up"
+    fail_msg: "IPsec SA {{ item.name }}-vti is not up; 'show vpn ipsec sa' returned: {{ _ipsec_route_based_v_sa.stdout[0] | default('') | truncate(800) }}"
     quiet: true
   loop: "{{ ipsec_route_based_peers }}"
   loop_control:

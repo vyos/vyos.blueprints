@@ -18,6 +18,6 @@
 - name: An IPsec SA is up for every protected tunnel
   ansible.builtin.assert:
     that: _dmvpn_v.stdout[1] is search('dmvpn-\S+-' ~ (item | regex_escape) ~ '-child\s+up')
-    fail_msg: "no IPsec SA up for {{ item }}"
+    fail_msg: "no IPsec SA up for {{ item }}; 'show vpn ipsec sa' returned: {{ _dmvpn_v.stdout[1] | default('') | truncate(800) }}"
     quiet: true
   loop: "{{ (dmvpn_ipsec | default({}, true)).profile.bind_tunnels | default([]) }}"

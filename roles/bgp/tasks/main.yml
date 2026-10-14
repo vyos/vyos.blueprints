@@ -28,10 +28,20 @@
         - bgp_log_neighbor_changes | bool
         - not (vyos_blueprints_render_only | default(false) | bool)
 
+    - name: Activate the address family of neighbours without AF options
+      # vyos_bgp_address_family renders nothing for an address family without options.
+      vyos.vyos.vyos_config:
+        lines: "{{ _bgp_af_activation_lines }}"
+      register: _bgp_r_af_activation
+      when:
+        - _bgp_af_activation_lines | length > 0
+        - not (vyos_blueprints_render_only | default(false) | bool)
+
     - name: Collect rendered commands  # noqa: var-naming[no-role-prefix] - shared across roles by design
       ansible.builtin.set_fact:
         vyos_blueprints_rendered: >-
           {{ vyos_blueprints_rendered | default([])
              + ([_bgp_r_global, _bgp_r_af] | selectattr('rendered', 'defined') | map(attribute='rendered') | flatten | unique)
-             + (['set protocols bgp parameters log-neighbor-changes'] if bgp_log_neighbor_changes | bool else []) }}
+             + (['set protocols bgp parameters log-neighbor-changes'] if bgp_log_neighbor_changes | bool else [])
+             + _bgp_af_activation_lines }}
       when: vyos_blueprints_render_only | default(false) | bool

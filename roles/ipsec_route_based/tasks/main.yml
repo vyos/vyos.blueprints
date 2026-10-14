@@ -1,4 +1,13 @@
 ---
+- name: Peer names are valid VyOS 1.5 connection names
+  # VyOS 1.5 rejects anything but letters, digits, hyphens and underscores
+  # (older docs pages name peers by IP address).
+  ansible.builtin.assert:
+    that: ipsec_route_based_peers | map(attribute='name') | reject('match', '^[A-Za-z0-9_-]+$') | list | length == 0
+    fail_msg: >-
+      invalid peer name(s): {{ ipsec_route_based_peers | map(attribute='name') | reject('match', '^[A-Za-z0-9_-]+$') | list }}
+      - use letters, digits, hyphens and underscores (e.g. azure, site-b)
+    quiet: true
 - name: Peers sharing a PSK entry use the same key
   ansible.builtin.assert:
     that: >-
