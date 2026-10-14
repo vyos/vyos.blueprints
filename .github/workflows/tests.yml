@@ -149,6 +149,22 @@ jobs:
           name: alpine
       - name: Load alpine:3 (containerlab then never pulls it)
         run: docker load -i alpine.tar
+      - name: Load kernel modules for the lab (containers cannot load modules)
+        # Non-fatal: reports what this runner's kernel provides, so a missing
+        # module shows up here rather than as an obscure failure in the scenario.
+        run: |
+          missing=""
+          for m in bonding 8021q wireguard ip_gre ip6_gre ip_vti ip6_vti xfrm_user xfrm_interface \
+                   esp4 esp6 af_key mpls_router mpls_iptunnel mpls_gso \
+                   ppp_generic pppoe pppox l2tp_core l2tp_netlink l2tp_ppp l2tp_eth; do
+            sudo modprobe "$m" 2>/dev/null || missing="$missing $m"
+          done
+          echo "kernel: $(uname -r)"
+          if [[ -n "$missing" ]]; then
+            echo "::warning title=Kernel modules not available on this runner::$missing"
+          else
+            echo "all lab kernel modules loaded"
+          fi
       - name: molecule test
         working-directory: ansible_collections/vyos/blueprints/extensions
         env:
