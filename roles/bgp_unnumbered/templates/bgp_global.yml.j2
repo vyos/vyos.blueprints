@@ -3,5 +3,6 @@ bgp_params:
   router_id: {{ bgp_unnumbered_router_id | to_json }}
   bestpath:
     compare_routerid: true
-  default:
-    no_ipv4_unicast: true
+{# "parameters default no-ipv4-unicast" (on the docs page) no longer exists:
+   VyOS 1.5 always configures FRR with "no bgp default ipv4-unicast" (vyos-1x
+   bgpd.frr.j2, T3463), and rejects the old path. #}

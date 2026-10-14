@@ -6,3 +6,6 @@ exclude_paths:
   - extensions/molecule/*/topology.clab.yml
   - extensions/molecule/*/inventory.yml
   - examples/*/topology.clab.yml
+kinds:
+  # a task list included by lab_up.yml, not a playbook
+  - tasks: "**/extensions/molecule/_shared/lab_diagnostics.yml"

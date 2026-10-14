@@ -8,15 +8,18 @@
 
 - name: Masquerade rules are installed
   ansible.builtin.assert:
-    that: _edge_nat_v.stdout[0] is search('(?m)^\s*' ~ item ~ '\b')
-    fail_msg: "source NAT rule {{ item }} missing from 'show nat source rules'"
+    # plain word/substring tests; regex escapes behave differently depending on how ansible-core evaluates the condition
+    that: (item | string) in (_edge_nat_v.stdout[0].splitlines() | map('trim') | select | map('split') | map('first') | list)
+    fail_msg: >-
+      source NAT rule {{ item }} missing from 'show nat source rules', which returned:
+      {{ _edge_nat_v.stdout[0] | default('') | truncate(600) }}
     quiet: true
   loop: "{{ range(edge_nat_rule_base | int,
             edge_nat_rule_base | int + ([edge_nat_source_networks | length, 1] | max) * 10, 10) | list }}"
 
 - name: A default route exists
   ansible.builtin.assert:
-    that: _edge_nat_v.stdout[1] is search('0\.0\.0\.0/0')
+    that: "'0.0.0.0/0' in _edge_nat_v.stdout[1]"
     fail_msg: no IPv4 default route installed
     quiet: true
 

@@ -9,7 +9,6 @@ rules:
         "*": hash-pin
   dangerous-triggers:
     ignore:
-      # pull_request_target is needed to comment on / label pull requests from
-      # forks. Neither workflow checks out or runs code from the pull request.
+      # pull_request_target is needed to comment on pull requests from forks; the
+      # CLA workflow does not check out or run code from the pull request.
       - cla-check.yml
-      - check_label.yaml

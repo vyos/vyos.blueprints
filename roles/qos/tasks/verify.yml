@@ -7,7 +7,7 @@
 
 - name: Every attached policy is active on its interface
   ansible.builtin.assert:
-    that: _qos_v.stdout[0] is search('\b' ~ (item.name | regex_escape) ~ '\b')
+    that: _qos_v.stdout[0] is search('(?<![A-Za-z0-9_])' ~ (item.name | regex_escape) ~ '(?![A-Za-z0-9_])')
     fail_msg: "no QoS policy active on {{ item.name }}"
     quiet: true
   loop: "{{ qos_interfaces }}"

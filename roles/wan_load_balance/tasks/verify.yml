@@ -7,7 +7,7 @@
 
 - name: Every WAN interface is managed by the load balancer
   ansible.builtin.assert:
-    that: _wan_load_balance_v.stdout[0] is search('Interface:\s+' ~ (item.name | regex_escape) ~ '\b')
+    that: _wan_load_balance_v.stdout[0] is search('Interface:\s+' ~ (item.name | regex_escape) ~ '(?![A-Za-z0-9_])')
     fail_msg: "{{ item.name }} is not listed by 'show wan-load-balance'"
     quiet: true
   loop: "{{ wan_load_balance_interfaces }}"

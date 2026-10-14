@@ -7,7 +7,7 @@
 
 - name: The IPsec SA of every peer is up
   ansible.builtin.assert:
-    that: _ipsec_route_based_v_sa.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '-vti\s+up\b')
+    that: _ipsec_route_based_v_sa.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '-vti\s+up(?![A-Za-z0-9_])')
     fail_msg: "IPsec SA {{ item.name }}-vti is not up"
     quiet: true
   loop: "{{ ipsec_route_based_peers }}"
@@ -43,7 +43,7 @@
   ansible.builtin.assert:
     that: >-
       _ipsec_route_based_v_bgp.stdout[0] is search('(?m)^' ~ (item.address | regex_escape)
-      ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+      ~ ' .* ([0-9]{2}:[0-9]{2}:[0-9]{2}|[0-9]+[dwh][0-9a-z]*) +[0-9]+( |$)')
     fail_msg: "BGP session to {{ item.address }} is not established"
     quiet: true
   loop: "{{ (ipsec_route_based_bgp | default({}, true)).neighbors | default([]) }}"

@@ -1,0 +1,7 @@
+---
+trivial:
+  - >-
+    CI - build the VyOS container image once per run with the official iso-to-oci tool,
+    verify the ISO's minisign signature, cache the image per ISO URL and share it with the
+    Molecule jobs; MOLECULE_SCENARIOS can limit the scenarios, and the run warns when a
+    newer VyOS Stream release than VYOS_ISO_URL is available.

@@ -102,4 +102,3 @@ Tested against VyOS versions:
 - [ ] I have updated the documentation accordingly
 - [ ] I have added unit tests to cover my changes
 - [ ] I have added a file to `changelogs/fragments` to describe the changes
-

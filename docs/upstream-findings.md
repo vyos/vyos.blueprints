@@ -19,8 +19,9 @@ is fixed upstream.
 | B7 | vyos_bgp_global | Neighbours with `peer_group: true` (peer-group definitions) render nothing. | Peer-groups silently missing. | BGP IPv6 unnumbered, L3VPN | `bgp_unnumbered`, `l3vpn`: vyos_config |
 | B8 | vyos_bgp_address_family | `default_originate` is typed as a string (route-map name); a plain `default-originate` renders `default-originate route-map {}`. | Bare default-originate impossible. | Inter-VRF (ISP side) | Lab ISP via vyos_config |
 | B9 | vyos_ospf_interfaces | `passive: false` renders nothing instead of `passive disable`. | Interfaces cannot be exempted from `passive-interface default`. | DMVPN | `ospf`: `passive disable` via vyos_config |
-| B10 | vyos_firewall_global | Zones render `member interface <if>`; the 1.5 zone docs use `interface <if>`. | **To confirm on a live 1.5 device** (module may be right for newer 1.5). | Zone-Policy | - |
+| B10 | vyos_firewall_global | ~~Zones render `member interface <if>`; the 1.5 zone docs use `interface <if>`.~~ **Resolved: not a bug.** VyOS 1.5 reads zone members from `member interface` (vyos-1x `op_mode/zone.py`), as the module renders, and live commits accept it. | - | Zone-Policy | - (the docs page's `interface` form is outdated) |
 | B11 | (deprecations) | `ansible.module_utils._text`, `_collections_compat` (removed in ansible-core 2.24), `exit_json(warnings=)` (removed in 2.23). | Modules break on upcoming ansible-core. | All (CI log) | - |
+| B12 | vyos_bgp_global | `bgp_params.default.no_ipv4_unicast` renders `protocols bgp parameters default no-ipv4-unicast`, a path VyOS 1.5 no longer has (it always configures FRR with `no bgp default ipv4-unicast`). | Commit fails: `Configuration path … is not valid`. | BGP IPv6 unnumbered (live Molecule run) | `bgp_unnumbered`: option dropped |
 
 ## 2. Missing vyos.vyos modules
 
@@ -81,6 +82,7 @@ vyos.vyos.vyos_config.
 | PPPoE IPv6 Basic Setup | `state established 'enable'` is pre-1.4 syntax. |
 | QoS example | Text says VyOS2 re-marks "CS4 -> CS6", configuration sets CS5; class 20 shown as `show` output only. |
 | Inter-VRF Routing over VRF Lite | Bare `set protocols bgp address-family ipv4-unicast` (no effect). |
+| BGP IPv6 unnumbered with extended nexthop | `set protocols bgp parameters default no-ipv4-unicast` no longer exists in 1.5 (VyOS always applies it) and is rejected. |
 | DMVPN Dual HUB Dual Cloud | Spoke-3's tunnel-interface block is missing (only its NHRP block is shown). |
 
 ## 5. Test environment notes

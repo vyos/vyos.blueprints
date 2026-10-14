@@ -7,7 +7,7 @@
 
 - name: Every bond is up
   ansible.builtin.assert:
-    that: _bonding_v.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '\s.*\bu/u\b')
+    that: _bonding_v.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '\s.*(?<![A-Za-z0-9_])u/u(?![A-Za-z0-9_])')
     fail_msg: "{{ item.name }} is not up"
     quiet: true
   loop: "{{ bonding_interfaces }}"

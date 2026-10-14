@@ -6,7 +6,8 @@
 {{ base }} peer-group {{ pg }} capability extended-nexthop
 {{ base }} peer-group {{ pg }} remote-as '{{ bgp_unnumbered_remote_as }}'
 {% for i in bgp_unnumbered_interfaces %}
-{{ base }} neighbor {{ i }} interface v6only
+{# only the full line: "show configuration commands" never prints the bare
+   "interface v6only" node, so vyos_config would resend it on every run #}
 {{ base }} neighbor {{ i }} interface v6only peer-group '{{ pg }}'
 {% endfor %}
 {% if bgp_unnumbered_multipath_relax | bool %}

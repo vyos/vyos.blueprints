@@ -18,10 +18,13 @@ rolling upgrades. What is tested today:
 |---|---|---|
 | ansible-lint, ansible-test sanity, Galaxy import | every pull request | passing |
 | Render tests - every role and blueprint rendered offline against vyos.vyos and compared with the docs page's commands | every pull request | passing |
-| Molecule - the roles applied to containerised VyOS 1.5, with traffic checks | not yet in CI | written, not yet run against live VyOS |
+| Molecule - the roles applied to VyOS 1.5 (VyOS Stream, in containerlab): converge, idempotence, and the blueprint's behaviour checked with traffic | every pull request | **passing for** `base`, `management`, `backup`, `edge_nat`, `ha_vrrp`, `ospf_unnumbered`, `bgp_unnumbered`, `zone_firewall`; the other scenarios are being enabled |
 
-Until the Molecule scenarios run in CI, test the roles in a lab before using them in
-production, for example with the render-only preview (see [docs/using.md](docs/using.md))
+Scenarios that depend on kernel features (IPsec, WireGuard, LACP bonding, MPLS,
+PPPoE/L2TP, DMVPN) come last: VyOS in a container uses the CI runner's kernel.
+Until a role's scenario passes, test it in a lab before using it in production, for
+example with the render-only preview (see
+[docs/using.md](https://github.com/vyos/vyos.blueprints/blob/main/docs/using.md))
 and the examples' containerlab topologies. Issues and fixes are welcome.
 
 ## Roles

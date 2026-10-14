@@ -1,17 +1,39 @@
 ---
+# Same rules as ansible/ansible-content-actions' check_label (which builds a
+# Docker Hub image on every run): a PR needs one of the valid labels below and
+# none of the blocking ones. Reads the labels from the event; no Docker, no API
+# calls, no write permissions, and plain pull_request instead of pull_request_target.
 name: Check label
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+
 on: # yamllint disable-line rule:truthy
-  pull_request_target:
-    types: [opened, labeled, unlabeled, synchronize]
+  pull_request:
+    types: [opened, reopened, labeled, unlabeled, synchronize]
+
+permissions: {}
+
 jobs:
   check_label:
-    # The reusable workflow requests these; the repository default token is
-    # read-only, so they have to be granted here explicitly.
-    permissions:
-      checks: write
-      contents: write
-      pull-requests: write
-    uses: ansible/ansible-content-actions/.github/workflows/check_label.yaml@cbdec1f72eeee38b7e60d0f2346c66e622eea02a # main
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check the pull request's labels
+        env:
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          valid = {"bug", "enhancement", "feature", "refactoring", "major", "deprecated",
+                   "skip-changelog", "bot:chronographer:skip"}
+          blocking = {"help wanted", "invalid", "feedback-needed", "incomplete"}
+          labels = set(json.loads(os.environ["LABELS"]))
+          if labels & blocking:
+              print(f"::error::Remove the blocking label(s): {', '.join(sorted(labels & blocking))}")
+              sys.exit(1)
+          if not labels & valid:
+              print(f"::error::Add one of these labels: {', '.join(sorted(valid))}")
+              sys.exit(1)
+          print(f"OK: {', '.join(sorted(labels & valid))}")
+          PY

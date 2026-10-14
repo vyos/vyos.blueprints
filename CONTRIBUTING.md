@@ -8,6 +8,8 @@
 - Add a changelog fragment in `changelogs/fragments/` (keys: `major_changes`,
   `minor_changes`, `bugfixes`, `breaking_changes`, `deprecated_features`,
   `removed_features`, `security_fixes`, `known_issues`, `doc_changes`, `trivial`).
+- In `assert` conditions (`that:`), never write `\b` with a single backslash: there it
+  becomes a backspace. `scripts/check-assert-escapes.py` (run in CI) explains the alternative.
 - After changing a role's `meta/argument_specs.yml`, regenerate its README with
   `python3 scripts/gen-role-readmes.py` (CI checks they match).
 - Optional: `pre-commit install` runs the same formatting checks locally.
@@ -63,7 +65,8 @@ cd ~/src/ansible_collections/vyos/blueprints
 pip install ansible-core ansible-lint ansible-pylibssh molecule
 ansible-galaxy collection install -r tests/requirements.yml -p ~/src
 export ANSIBLE_COLLECTIONS_PATH=~/src
-scripts/build-vyos-image.sh /path/to/vyos-1.5-*.iso    # once, for tier 2
+scripts/build-vyos-image.sh /path/to/vyos-1.5-*.iso    # once, for tier 2 (official iso-to-oci tool)
+# or reuse an image built per docs.vyos.io (Run VyOS as a container): docker tag <image> vyos:blueprints-ci
 ```
 
 Set `CLAB_BECOME=false` if you run containerlab without sudo.

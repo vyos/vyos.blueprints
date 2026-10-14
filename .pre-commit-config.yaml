@@ -19,13 +19,11 @@ repos:
         args: [--branch, main]
       - id: trailing-whitespace
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+  # pre-commit/mirrors-prettier is archived; rbubley/mirrors-prettier is the maintained mirror
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.9.9
     hooks:
       - id: prettier
-        entry: env CI=1 bash -c "prettier --list-different . || ec=$? && prettier --loglevel=error --write . && exit $ec"
-        pass_filenames: false
-        args: []
-        additional_dependencies:
-          - prettier
-          - prettier-plugin-toml
+        # YAML is formatted and checked by ansible-lint (yamllint); prettier wraps long
+        # flow mappings in a way yamllint rejects, so it only handles Markdown and JSON.
+        types_or: [markdown, json]

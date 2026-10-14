@@ -19,7 +19,7 @@
   ansible.builtin.assert:
     that: >-
       _vrf_lite_v.stdout[1:] | join('\n') is search('(?m)^' ~ (item.1.address | regex_escape)
-      ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+      ~ ' .* ([0-9]{2}:[0-9]{2}:[0-9]{2}|[0-9]+[dwh][0-9a-z]*) +[0-9]+( |$)')
     fail_msg: "BGP session to {{ item.1.address }} in VRF {{ item.0.name }} is not established"
     quiet: true
   loop: "{{ vrf_lite_vrfs | subelements('neighbors', skip_missing=true) }}"

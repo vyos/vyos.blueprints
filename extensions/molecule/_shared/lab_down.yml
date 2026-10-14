@@ -7,7 +7,7 @@
   tasks:
     - name: Destroy lab
       ansible.builtin.command:
-        cmd: containerlab destroy --cleanup --topo {{ _topology }}
+        argv: [containerlab, destroy, --cleanup, --topo, "{{ _topology }}"]
       become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
       changed_when: true
       failed_when: false

@@ -8,7 +8,7 @@
 
 - name: Every source NAT rule is installed
   ansible.builtin.assert:
-    that: _nat_v.stdout[0] is search('(?m)^\s*' ~ item.id ~ '\b')
+    that: _nat_v.stdout[0] is search('(?m)^\s*' ~ item.id ~ '(?![A-Za-z0-9_])')
     fail_msg: "source NAT rule {{ item.id }} is not installed"
     quiet: true
   loop: "{{ nat_source_rules }}"
@@ -17,7 +17,7 @@
 
 - name: Every destination NAT rule is installed
   ansible.builtin.assert:
-    that: _nat_v.stdout[1] is search('(?m)^\s*' ~ item.id ~ '\b')
+    that: _nat_v.stdout[1] is search('(?m)^\s*' ~ item.id ~ '(?![A-Za-z0-9_])')
     fail_msg: "destination NAT rule {{ item.id }} is not installed"
     quiet: true
   loop: "{{ nat_destination_rules }}"

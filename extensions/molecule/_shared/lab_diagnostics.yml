@@ -1,0 +1,38 @@
+---
+# Included from lab_up.yml when the lab does not come up. Needs _lab, _log,
+# _logdir and _become; runs on the controller.
+- name: Collect diagnostics from the lab's containers
+  ansible.builtin.shell:
+    cmd: |
+      echo "===== containerlab deploy log (last 60 lines)"; tail -n 60 {{ _log | quote }}
+      echo "===== containers"; docker ps -a --filter label=containerlab={{ _lab | quote }}
+      for c in $(docker ps -q --filter label=containerlab={{ _lab | quote }} --filter label=clab-node-kind=vyosnetworks_vyos); do
+        n=$(docker inspect -f '{% raw %}{{.Name}}{% endraw %}' "$c")
+        echo "===== $n: systemctl is-system-running"; docker exec "$c" systemctl is-system-running
+        echo "===== $n: failed units"; docker exec "$c" systemctl --failed --no-pager
+        echo "===== $n: jobs still running"; docker exec "$c" systemctl list-jobs --no-pager
+        echo "===== $n: addresses"; docker exec "$c" ip -br addr
+        echo "===== $n: listening TCP sockets"; docker exec "$c" ss -tlnp
+        echo "===== $n: ssh service"; docker exec "$c" systemctl status ssh --no-pager -l
+        echo "===== $n: ssh journal"; docker exec "$c" journalctl -u ssh --no-pager -n 40
+        echo "===== $n: vyos-router (boot configuration)"; docker exec "$c" journalctl -u vyos-router --no-pager -n 40
+      done
+  become: "{{ _become }}"
+  register: _diag
+  changed_when: false
+  failed_when: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Save the diagnostics next to the deploy log
+  ansible.builtin.copy:
+    content: "{{ _diag.stdout }}\n"
+    dest: "{{ _logdir }}/diagnostics.txt"
+    mode: "0644"
+  delegate_to: localhost
+  run_once: true
+
+- name: Show the diagnostics
+  ansible.builtin.debug:
+    msg: "{{ _diag.stdout_lines }}"
+  run_once: true
