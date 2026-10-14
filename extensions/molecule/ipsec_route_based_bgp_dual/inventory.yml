@@ -12,6 +12,10 @@ all:
           hosts:
             r1:
               ansible_host: clab-bp-azure2-vyos
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 203.0.113.2/32, next_hop: 198.51.100.1}
+                - {dest: 203.0.114.3/32, next_hop: 198.51.100.1}
               base_interfaces:
                 - name: eth1
                   addresses: [198.51.100.3/24]
@@ -51,6 +55,9 @@ all:
               ipsec_route_based_default_gateway: 198.51.100.1
             r2:
               ansible_host: clab-bp-azure2-azure1
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 198.51.100.3/32, next_hop: 203.0.113.1}
               base_interfaces:
                 - name: eth1
                   addresses: [203.0.113.2/24]
@@ -76,6 +83,9 @@ all:
               ipsec_route_based_default_gateway: 203.0.113.1
             r3:
               ansible_host: clab-bp-azure2-azure2
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 198.51.100.3/32, next_hop: 203.0.114.1}
               base_interfaces:
                 - name: eth1
                   addresses: [203.0.114.3/24]

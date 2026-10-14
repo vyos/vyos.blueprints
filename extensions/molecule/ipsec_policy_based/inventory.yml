@@ -1,0 +1,67 @@
+---
+all:
+  children:
+    vyos:
+      children:
+        vpn:
+          hosts:
+            r1:
+              ansible_host: clab-bp-ipsec-pol-vyos
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 10.0.2.2/32, next_hop: 10.0.1.1}
+              base_interfaces:
+                - {name: eth1, addresses: [10.0.1.2/30]}
+                - {name: eth2, addresses: [192.168.0.1/24]}
+                - {name: eth3, addresses: [192.168.1.1/24]}
+              ipsec_policy_based_peers:
+                - name: CISCO
+                  local_address: 10.0.1.2
+                  remote_address: 10.0.2.2
+                  psk: molecule-psk
+                  connection_type: initiate
+                  tunnels:
+                    - {local_prefix: 192.168.0.0/24, remote_prefix: 192.168.10.0/24}
+                    - {local_prefix: 192.168.1.0/24, remote_prefix: 192.168.11.0/24}
+              ipsec_policy_based_default_gateway: 10.0.1.1
+            r2:
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 10.0.1.2/32, next_hop: 10.0.2.1}
+              # second VyOS standing in for the page's Cisco router
+              ansible_host: clab-bp-ipsec-pol-cisco
+              base_interfaces:
+                - {name: eth1, addresses: [10.0.2.2/30]}
+                - {name: eth2, addresses: [192.168.10.1/24]}
+                - {name: eth3, addresses: [192.168.11.1/24]}
+              ipsec_policy_based_peers:
+                - name: VYOS
+                  local_address: 10.0.2.2
+                  remote_address: 10.0.1.2
+                  psk: molecule-psk
+                  connection_type: none
+                  tunnels:
+                    - {local_prefix: 192.168.10.0/24, remote_prefix: 192.168.0.0/24}
+                    - {local_prefix: 192.168.11.0/24, remote_prefix: 192.168.1.0/24}
+              ipsec_policy_based_default_gateway: 10.0.2.1
+          vars:
+            # proposals from the page's IKE and IPsec parameter tables
+            ipsec_policy_based_ike_group:
+              name: IKE-GROUP
+              key_exchange: ikev2
+              lifetime: 28800
+              dh_group: 14
+              encryption: aes256
+              hash: sha1
+              dead_peer_detection: {action: restart, interval: 10}
+            ipsec_policy_based_esp_group:
+              name: ESP-GROUP
+              lifetime: 3600
+              pfs: disable
+              encryption: aes256
+              hash: sha256
+      vars:
+        ansible_network_os: vyos.vyos.vyos
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_user: admin
+        ansible_password: admin
