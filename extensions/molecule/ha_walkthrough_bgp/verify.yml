@@ -20,9 +20,9 @@
     - name: Read the provider's BGP table
       vyos.vyos.vyos_command:
         commands:
-          - show ip bgp 203.0.113.0/24
-          - show ip bgp 10.200.201.0/24
-          - show ip bgp 192.0.2.0/24
+          - show bgp ipv4 203.0.113.0/24
+          - show bgp ipv4 10.200.201.0/24
+          - show bgp ipv4 192.0.2.0/24
       register: _rib
 
     - name: The public network arrives from both routers, preferred via router1, prepended via router2

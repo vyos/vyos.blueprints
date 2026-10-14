@@ -3,12 +3,16 @@
   vyos.vyos.vyos_command:
     commands:
       - show vpn ipsec sa
+      - show vpn ike sa
   register: _ipsec_route_based_v_sa
 
 - name: The IPsec SA of every peer is up
   ansible.builtin.assert:
     that: _ipsec_route_based_v_sa.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '-vti\s+up(?![A-Za-z0-9_])')
-    fail_msg: "IPsec SA {{ item.name }}-vti is not up; 'show vpn ipsec sa' returned: {{ _ipsec_route_based_v_sa.stdout[0] | default('') | truncate(800) }}"
+    fail_msg: >-
+      IPsec SA {{ item.name }}-vti is not up;
+      'show vpn ipsec sa' returned: {{ _ipsec_route_based_v_sa.stdout[0] | default('') | truncate(500) }};
+      'show vpn ike sa' returned: {{ _ipsec_route_based_v_sa.stdout[1] | default('') | truncate(500) }}
     quiet: true
   loop: "{{ ipsec_route_based_peers }}"
   loop_control:
