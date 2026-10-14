@@ -7,7 +7,7 @@
 
 - name: The IPsec SA of every tunnel is up
   ansible.builtin.assert:
-    that: _ipsec_policy_based_v_sa.stdout[0] is search('(?m)^' ~ (item | regex_escape) ~ '\s+up\b')
+    that: _ipsec_policy_based_v_sa.stdout[0] is search('(?m)^' ~ (item | regex_escape) ~ '\s+up(?![A-Za-z0-9_])')
     fail_msg: "IPsec SA {{ item }} is not up"
     quiet: true
   loop: "{{ _ipsec_policy_based_sa_names }}"

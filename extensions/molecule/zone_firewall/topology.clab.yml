@@ -8,25 +8,25 @@ topology:
       kind: linux
       image: alpine:3
       exec:
+        - apk add --no-cache busybox-extras
         - ip addr add 172.16.10.100/24 dev eth1
         - ip route replace default via 172.16.10.1
-        - apk add --no-cache busybox-extras
         - httpd -p 80 -h /tmp
     lan:
       kind: linux
       image: alpine:3
       exec:
+        - apk add --no-cache busybox-extras
         - ip addr add 192.168.100.10/24 dev eth1
         - ip route replace default via 192.168.100.1
-        - apk add --no-cache busybox-extras
         - httpd -p 80 -h /tmp
     dmz:
       kind: linux
       image: alpine:3
       exec:
+        - apk add --no-cache busybox-extras
         - ip addr add 192.168.200.200/24 dev eth1
         - ip route replace default via 192.168.200.1
-        - apk add --no-cache busybox-extras
         - httpd -p 80 -h /tmp
   links:
     - endpoints: ["r1:eth1", "wan:eth1"]

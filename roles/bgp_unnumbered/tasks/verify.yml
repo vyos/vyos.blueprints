@@ -9,7 +9,7 @@
   # An established neighbour shows its Up/Down time followed by a prefix
   # count; other states show their name (Active, Connect, ...) instead.
   ansible.builtin.assert:
-    that: _bgp_unnumbered_v_sum.stdout[0] is search('(?m)^' ~ item ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+    that: _bgp_unnumbered_v_sum.stdout[0] is search('(?m)^' ~ item ~ ' .* ([0-9]{2}:[0-9]{2}:[0-9]{2}|[0-9]+[dwh][0-9a-z]*) +[0-9]+( |$)')
     fail_msg: "BGP session on {{ item }} is not established"
     quiet: true
   loop: "{{ bgp_unnumbered_interfaces }}"

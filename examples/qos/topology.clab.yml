@@ -22,9 +22,9 @@ topology:
       kind: linux
       image: alpine:3
       exec:
+        - apk add --no-cache tcpdump
         - ip addr add 10.9.9.10/24 dev eth1
         - ip route replace default via 10.9.9.1
-        - apk add --no-cache tcpdump
   links:
     # interfaces shifted by one (containerlab uses eth0 for management)
     - endpoints: ["vyos3:eth1", "vyos2:eth1"]

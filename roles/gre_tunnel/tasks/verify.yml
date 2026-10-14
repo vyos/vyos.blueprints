@@ -7,7 +7,7 @@
 
 - name: Every tunnel interface is up
   ansible.builtin.assert:
-    that: _gre_tunnel_v.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '\s.*\bu/u\b')
+    that: _gre_tunnel_v.stdout[0] is search('(?m)^' ~ (item.name | regex_escape) ~ '\s.*(?<![A-Za-z0-9_])u/u(?![A-Za-z0-9_])')
     fail_msg: "tunnel {{ item.name }} is not up"
     quiet: true
   loop: "{{ gre_tunnel_interfaces }}"

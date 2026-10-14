@@ -10,7 +10,7 @@
   ansible.builtin.assert:
     that: >-
       _bridge_firewall_v.stdout[0] is search('set interfaces bridge ' ~ (item.0.name | regex_escape)
-      ~ ' member interface ' ~ (item.1.interface | regex_escape) ~ '\b')
+      ~ ' member interface ' ~ (item.1.interface | regex_escape) ~ '(?![A-Za-z0-9_])')
     fail_msg: "{{ item.1.interface }} is not a member of {{ item.0.name }}"
     quiet: true
   loop: "{{ bridge_firewall_bridges | subelements('members') }}"

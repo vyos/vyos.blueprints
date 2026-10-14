@@ -9,7 +9,7 @@
   ansible.builtin.assert:
     that: >-
       _l3vpn_v.stdout[0] is search('(?m)^' ~ (item.address | regex_escape)
-      ~ '\s.*\s(\d{2}:\d{2}:\d{2}|\d+[dwh]\S*)\s+\d+\b')
+      ~ ' .* ([0-9]{2}:[0-9]{2}:[0-9]{2}|[0-9]+[dwh][0-9a-z]*) +[0-9]+( |$)')
     fail_msg: "VPNv4 session to {{ item.address }} is not established"
     quiet: true
   loop: "{{ l3vpn_neighbors }}"

@@ -8,6 +8,8 @@
 - Add a changelog fragment in `changelogs/fragments/` (keys: `major_changes`,
   `minor_changes`, `bugfixes`, `breaking_changes`, `deprecated_features`,
   `removed_features`, `security_fixes`, `known_issues`, `doc_changes`, `trivial`).
+- In `assert` conditions (`that:`), never write `\b` with a single backslash: there it
+  becomes a backspace. `scripts/check-assert-escapes.py` (run in CI) explains the alternative.
 - After changing a role's `meta/argument_specs.yml`, regenerate its README with
   `python3 scripts/gen-role-readmes.py` (CI checks they match).
 - Optional: `pre-commit install` runs the same formatting checks locally.
@@ -46,11 +48,11 @@ or a building block several pages share.
 
 ## Test tiers
 
-| Tier         | Command                                    | Needs                                                                                              |
-| ------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| 0 – lint     | `ansible-lint`                             | nothing                                                                                            |
-| 1 – render   | `tests/render/run.sh`                      | nothing - a test-only connection reports the VyOS version (`VYOS_OFFLINE_OS_VERSION`, default 1.5) |
-| 2 – molecule | `cd extensions && molecule test -s <role>` | docker, containerlab, a VyOS image                                                                 |
+| Tier | Command | Needs |
+|---|---|---|
+| 0 – lint | `ansible-lint` | nothing |
+| 1 – render | `tests/render/run.sh` | nothing - a test-only connection reports the VyOS version (`VYOS_OFFLINE_OS_VERSION`, default 1.5) |
+| 2 – molecule | `cd extensions && molecule test -s <role>` | docker, containerlab, a VyOS image |
 
 Run tiers 0 and 1 before opening a PR; CI runs all three.
 

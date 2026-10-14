@@ -42,7 +42,7 @@
 - name: The image installer reported no error
   # The installer can print "Error: ..." after copying everything (vyos.dev T7668).
   ansible.builtin.assert:
-    that: _upgrade_add.stdout is not search('(?im)^\s*(error|failed)\b')
+    that: _upgrade_add.stdout is not search('(?im)^\s*(error|failed)(?![A-Za-z0-9_])')
     fail_msg: "add system image failed on {{ inventory_hostname }}: {{ _upgrade_add.stdout | regex_search('(?im)^\\s*(error|failed).*$') }}"
     quiet: true
 

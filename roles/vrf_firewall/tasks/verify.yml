@@ -18,7 +18,7 @@
   ansible.builtin.assert:
     that: >-
       _vrf_firewall_v.stdout[0] is search('(?m)^\s*' ~ (item.0.name | regex_escape)
-      ~ '\s.*\b' ~ (item.1 | regex_escape) ~ '\b')
+      ~ '\s.*(?<![A-Za-z0-9_])' ~ (item.1 | regex_escape) ~ '(?![A-Za-z0-9_])')
     fail_msg: "{{ item.1 }} is not a member of VRF {{ item.0.name }}"
     quiet: true
   loop: "{{ vrf_firewall_vrfs | subelements('interfaces', skip_missing=true) }}"
