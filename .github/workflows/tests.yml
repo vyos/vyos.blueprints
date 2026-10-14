@@ -156,7 +156,9 @@ jobs:
           missing=""
           for m in bonding 8021q wireguard ip_gre ip6_gre ip_vti ip6_vti xfrm_user xfrm_interface \
                    esp4 esp6 af_key mpls_router mpls_iptunnel mpls_gso \
-                   ppp_generic pppoe pppox l2tp_core l2tp_netlink l2tp_ppp l2tp_eth; do
+                   ppp_generic pppoe pppox l2tp_core l2tp_netlink l2tp_ppp l2tp_eth \
+                   vrf sch_htb sch_sfq sch_fq_codel sch_ingress sch_prio sch_tbf \
+                   cls_u32 cls_fw cls_basic act_police act_mirred act_skbedit; do
             sudo modprobe "$m" 2>/dev/null || missing="$missing $m"
           done
           echo "kernel: $(uname -r)"
