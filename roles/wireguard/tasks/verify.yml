@@ -5,12 +5,20 @@
   register: _wireguard_v
   when: wireguard_interfaces | length > 0
 
+- name: Read WireGuard peer status (only the summary shows handshakes)
+  vyos.vyos.vyos_command:
+    commands: "{{ wireguard_interfaces | map(attribute='name') | map('regex_replace', '^(.*)$', 'show interfaces wireguard \\1 summary') | list }}"
+  register: _wireguard_s
+  when: wireguard_interfaces | length > 0
+
 - name: Every WireGuard interface is up and every peer has a handshake
   ansible.builtin.assert:
     that:
       - _wireguard_v.stdout[idx] is search('state UP|,UP|(?<![A-Za-z0-9_])up(?![A-Za-z0-9_])')
-      - _wireguard_v.stdout[idx] is search('latest handshake')
-    fail_msg: "{{ item.name }} is down or has not completed a handshake"
+      - _wireguard_s.stdout[idx] is search('latest handshake')
+    fail_msg: >-
+      {{ item.name }} is down or has not completed a handshake;
+      summary: {{ _wireguard_s.stdout[idx] | default('') | truncate(600) }}
     quiet: true
   loop: "{{ wireguard_interfaces }}"
   loop_control:
