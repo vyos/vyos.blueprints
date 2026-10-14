@@ -155,6 +155,10 @@ jobs:
         # Non-fatal: reports what this runner's kernel provides, so a missing
         # module shows up here rather than as an obscure failure in the scenario.
         run: |
+          # GitHub's Azure kernel ships vrf, mpls_* and l2tp_* only in linux-modules-extra
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq "linux-modules-extra-$(uname -r)" \
+            || echo "::warning title=linux-modules-extra::not available for kernel $(uname -r)"
           missing=""
           for m in bonding 8021q wireguard ip_gre ip6_gre ip_vti ip6_vti xfrm_user xfrm_interface \
                    esp4 esp6 af_key mpls_router mpls_iptunnel mpls_gso \

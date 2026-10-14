@@ -83,9 +83,19 @@ vyos.vyos.vyos_config.
 | QoS example | Text says VyOS2 re-marks "CS4 -> CS6", configuration sets CS5; class 20 shown as `show` output only. |
 | Inter-VRF Routing over VRF Lite | Bare `set protocols bgp address-family ipv4-unicast` (no effect). |
 | BGP IPv6 unnumbered with extended nexthop | `set protocols bgp parameters default no-ipv4-unicast` no longer exists in 1.5 (VyOS always applies it) and is rejected. |
+| Route-Based Site-to-Site VPN to Azure (BGP), and the redundant variant | Peers are named by IP address (`site-to-site peer 51.105.0.2`); VyOS 1.5 requires names of letters, digits, hyphens and underscores. |
 | DMVPN Dual HUB Dual Cloud | Spoke-3's tunnel-interface block is missing (only its NHRP block is shown). |
 
-## 5. Test environment notes
+## 5. VyOS issues
+
+| Area | Issue | Seen in | Workaround |
+|---|---|---|---|
+| Bonding (vyos-1x `interfaces_bonding.py`) | A bond member whose `interfaces ethernet ethX` node exists but is empty is rejected with `it has a "" assigned!`: the empty node yields an empty option path, which is not in the allowed list. On hardware the node holds `hw-id`, so it mainly shows up in containers. | `ha_walkthrough` Molecule scenario | the scenario sets a `description` (an allowed option) on members before bonding |
+
+## 6. Test environment notes
+
+GitHub's hosted runners (Azure kernel) ship `vrf`, `mpls_*` and `l2tp_*` only in
+`linux-modules-extra-<kernel>`, which the Molecule job installs before loading modules.
 
 Molecule scenarios that depend on host kernel features (may need a VM-based
 runner): `ipsec_*`, `ha_walkthrough` (LACP bonding), `ha_walkthrough_ospf`
