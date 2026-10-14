@@ -67,10 +67,14 @@
           register: _container_hostname
           changed_when: false
 
-        - name: Keep the container's hostname resolvable (vyos-hostsd rewrites /etc/hosts)
+        - name: Keep the container's hostname resolvable; no DNS lookups during SSH logins
+          # disable-host-validation (sshd UseDNS no): a scenario's firewall can make
+          # Docker's DNS unreachable, and every later login then waits for the reverse
+          # lookup of the client until paramiko gives up ("Authentication timeout").
           vyos.vyos.vyos_config:
             lines:
               - set system static-host-mapping host-name {{ _container_hostname.stdout | trim }} inet 127.0.1.1
+              - set service ssh disable-host-validation
       rescue:
         - name: Diagnose the lab
           ansible.builtin.include_tasks: lab_diagnostics.yml
