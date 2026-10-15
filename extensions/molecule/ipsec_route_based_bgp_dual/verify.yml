@@ -31,6 +31,15 @@
         lines:
           - set vpn ipsec site-to-site peer azure-primary disable
 
+    - name: Route the VNet via the secondary gateway, as Azure's platform routing would
+      # The VNet host is plain Linux: its multipath route cannot notice that azure1 lost
+      # its tunnel. In Azure the VNet's routing follows the gateway instance with the tunnel.
+      ansible.builtin.command:
+        argv: [docker, exec, clab-bp-azure2-vm, ip, route, replace, 10.10.0.0/16, via, 10.0.1.2]
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: false
+
     - name: Wait for BGP to converge on the secondary path
       ansible.builtin.pause:
         seconds: 40
@@ -45,3 +54,11 @@
       vyos.vyos.vyos_config:
         lines:
           - delete vpn ipsec site-to-site peer azure-primary disable
+
+    - name: Restore the VNet's route over both gateways
+      ansible.builtin.command:
+        argv: [docker, exec, clab-bp-azure2-vm, ip, route, replace, 10.10.0.0/16,
+               nexthop, via, 10.0.1.1, nexthop, via, 10.0.1.2]
+      delegate_to: localhost
+      become: "{{ _become }}"
+      changed_when: false
