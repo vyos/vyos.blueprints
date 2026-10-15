@@ -56,7 +56,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install ansible-core ansible-pylibssh
-      - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
+      - name: Install collections (no response cache, with retries)
+        # The response cache can be corrupted by concurrent installs ("Missing expected
+        # 'results' in ansible-galaxy cache"); Galaxy's API also fails occasionally.
+        run: |
+          for i in 1 2 3; do
+            ansible-galaxy collection install --no-cache -r ansible_collections/vyos/blueprints/tests/requirements.yml -p . && break
+            [ "$i" = 3 ] && exit 1
+            sleep $((i * 15))
+          done
       - name: Lab topologies are valid
         run: python3 ansible_collections/vyos/blueprints/scripts/check-topologies.py
       - name: No single-backslash word boundaries in assert conditions
@@ -154,7 +162,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install ansible-core ansible-pylibssh paramiko molecule
-      - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
+      - name: Install collections (no response cache, with retries)
+        # The response cache can be corrupted by concurrent installs ("Missing expected
+        # 'results' in ansible-galaxy cache"); Galaxy's API also fails occasionally.
+        run: |
+          for i in 1 2 3; do
+            ansible-galaxy collection install --no-cache -r ansible_collections/vyos/blueprints/tests/requirements.yml -p . && break
+            [ "$i" = 3 ] && exit 1
+            sleep $((i * 15))
+          done
       - name: Install containerlab
         run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.79.0
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
