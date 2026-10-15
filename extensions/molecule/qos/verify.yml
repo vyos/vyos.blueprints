@@ -12,6 +12,10 @@
   hosts: localhost
   gather_facts: false
   vars:
+    # VyOS 1.5 (Stream / circinus) accepts "set-dscp" but does not rewrite packets: its
+    # tc layer has no remarking action (vyos-1x python/vyos/qos/base.py; rolling added
+    # pedit). Set LAB_QOS_EXPECT_REMARKING=true to check the marks on a VyOS that has it.
+    _expect_remarking: "{{ lookup('ansible.builtin.env', 'LAB_QOS_EXPECT_REMARKING', default='false') | bool }}"
     _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
     _flows:
       - {src: 172.17.1.2, tos: "0xa0", why: "CS4 at vyos3, re-marked CS4 -> CS5 at vyos2"}
@@ -29,11 +33,13 @@
       become: "{{ _become }}"
       register: _cap
       changed_when: false
-      # the echo request from this source, with the expected TOS byte; tcpdump -v prints
-      # the IP header (tos) and the addresses on two lines, so each line is joined with the next
+      # tcpdump -v prints the IP header (tos) and the addresses on two lines; each header
+      # line is paired with the address line after it. Always required: the echo requests
+      # from this source arrive at the sink. With remarking expected: with this TOS byte.
       failed_when: >-
         _cap.stdout_lines | zip(_cap.stdout_lines[1:])
-        | selectattr('0', 'search', 'tos ' ~ item.tos ~ ',') | selectattr('1', 'search', item.src ~ ' > 10[.]9[.]9[.]10')
+        | selectattr('0', 'search', ('tos ' ~ item.tos ~ ',') if _expect_remarking else 'tos ')
+        | selectattr('1', 'search', item.src ~ ' > 10[.]9[.]9[.]10')
         | list | length == 0
       loop: "{{ _flows }}"
       loop_control:

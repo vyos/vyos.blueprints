@@ -93,6 +93,7 @@ vyos.vyos.vyos_config.
 
 | Area | Issue | Seen in | Workaround |
 |---|---|---|---|
+| QoS `set-dscp` (vyos-1x `python/vyos/qos/base.py`, 1.5 / circinus) | `set-dscp` is accepted but packets are not re-marked: the 1.5 traffic-control layer has no remarking action (rolling added a `tc pedit` action). Packets are classified correctly and leave unchanged (`tos 0x0`). | `qos` Molecule scenario (live capture) | the scenario checks classification and delivery; the remarking check runs only with `LAB_QOS_EXPECT_REMARKING=true` |
 | Bonding (vyos-1x `interfaces_bonding.py`) | A bond member whose `interfaces ethernet ethX` node exists but is empty is rejected with `it has a "" assigned!`: the empty node yields an empty option path, which is not in the allowed list. On hardware the node holds `hw-id`, so it mainly shows up in containers. | `ha_walkthrough` Molecule scenario | the scenario sets a `description` (an allowed option) on members before bonding |
 
 ## 6. Test environment notes
