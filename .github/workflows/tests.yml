@@ -143,8 +143,8 @@ jobs:
       matrix:
         # Required: scenarios that pass live. Experimental: still being made to pass;
         # they run on every build but do not fail it (continue-on-error below).
-        scenario: ${{ fromJSON(inputs.scenarios || vars.MOLECULE_SCENARIOS || '["base","management","backup","edge_nat","ha_vrrp","ospf_unnumbered","bgp_unnumbered","zone_firewall","bridge_firewall","gre_tunnel","ha_walkthrough_bgp","ha_walkthrough_ospf","inter_vrf","wan_load_balance","qos","upgrade","isis_segment_routing","ipsec_route_based","ipsec_route_based_bgp","ipsec_route_based_bgp_dual","ipsec_route_based_gcp","dmvpn"]') }}
-        include: ${{ fromJSON((inputs.scenarios || vars.MOLECULE_SCENARIOS) && '[]' || '[{"scenario":"ha_walkthrough","experimental":true},{"scenario":"vrf_firewall","experimental":true},{"scenario":"l3vpn_hub_and_spoke","experimental":true},{"scenario":"policy_ipsec_firewall","experimental":true},{"scenario":"ipsec_policy_based","experimental":true},{"scenario":"pppoe_ipv6","experimental":true},{"scenario":"l2tp_lns","experimental":true}]') }}
+        scenario: ${{ fromJSON(inputs.scenarios || vars.MOLECULE_SCENARIOS || '["base","management","backup","edge_nat","ha_vrrp","ospf_unnumbered","bgp_unnumbered","zone_firewall","bridge_firewall","gre_tunnel","ha_walkthrough_bgp","ha_walkthrough_ospf","inter_vrf","wan_load_balance","qos","upgrade","isis_segment_routing","ipsec_route_based","ipsec_route_based_bgp","ipsec_route_based_bgp_dual","ipsec_route_based_gcp","dmvpn","ipsec_policy_based","policy_ipsec_firewall"]') }}
+        include: ${{ fromJSON((inputs.scenarios || vars.MOLECULE_SCENARIOS) && '[]' || '[{"scenario":"ha_walkthrough","experimental":true},{"scenario":"vrf_firewall","experimental":true},{"scenario":"l3vpn_hub_and_spoke","experimental":true},{"scenario":"pppoe_ipv6","experimental":true},{"scenario":"l2tp_lns","experimental":true}]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

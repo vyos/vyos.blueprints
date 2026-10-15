@@ -1,6 +1,25 @@
 ---
-- name: Converge
+# Responders are configured before initiators: an initiator that starts IKE while
+# its peer has no configuration yet gets NO_PROPOSAL_CHOSEN and does not retry.
+# (On real networks the far end normally exists first.)
+- name: Sort the VPN routers into responders and initiators
   hosts: vpn
+  gather_facts: false
+  tasks:
+    - name: Group by whether any peer initiates
+      ansible.builtin.group_by:
+        key: "ipsec_{{ 'initiators' if (ipsec_policy_based_peers | default([]) | selectattr('connection_type', 'defined')
+                                         | selectattr('connection_type', 'eq', 'initiate') | list) else 'responders' }}"
+
+- name: Converge the responders first
+  hosts: ipsec_responders
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ipsec_policy_based
+
+- name: Converge the initiators
+  hosts: ipsec_initiators
   gather_facts: false
   roles:
     - vyos.blueprints.base
