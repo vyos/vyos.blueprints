@@ -25,7 +25,7 @@ Back up VyOS configurations in bulk
 
 | Variable | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `backup_root` | str |  | `./backups` | Backup directory on the controller. Default: `backups` in the directory Ansible runs from. |
+| `backup_root` | str |  | `{{ lookup('ansible.builtin.env', 'PWD', default=lookup('ansible.builtin.pipe', 'pwd')) }}/backups` | Backup directory on the controller. The default is `backups` in the directory Ansible runs from (`PWD`; if that is not set, the directory Ansible reports as current). |
 | `backup_formats` | list |  | `[set, cfg]` | Formats to save. |
 | `backup_manifest` | bool |  | `true` | Write a facts manifest next to each backup. |
 | `backup_keep` | int |  | `10` | Backups to keep per router; `0` keeps all. |
