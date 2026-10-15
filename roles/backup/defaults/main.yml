@@ -1,5 +1,7 @@
 ---
-backup_root: "{{ playbook_dir }}/backups"
+# The directory Ansible runs from, not playbook_dir: for the collection playbook
+# (ansible-playbook vyos.blueprints.backup) playbook_dir is inside the installed collection.
+backup_root: "{{ lookup('ansible.builtin.env', 'PWD', default=lookup('ansible.builtin.pipe', 'pwd')) }}/backups"
 backup_formats: [set, cfg]
 backup_manifest: true
 backup_keep: 10
