@@ -8,3 +8,6 @@ bugfixes:
     established session that shows ``(Policy)`` instead of a prefix count.
   - bgp - neighbours without address-family options are activated for ipv4-unicast (or ipv6-unicast); VyOS 1.5 leaves them inactive otherwise.
   - vrf_lite - every VRF with BGP gets a ``system-as``, which VyOS 1.5 requires.
+  - ipsec_route_based - BGP neighbours without address-family options are activated for ipv4-unicast (or ipv6-unicast), as in the bgp role.
+  - firewall - the verify check matches the VyOS 1.5 ``show firewall`` header (lower-case family name).
+  - wireguard - the verify check reads handshakes from ``show interfaces wireguard <name> summary``.

@@ -118,6 +118,15 @@
     - _ipsec_route_based_bgp | length > 0
     - _ipsec_route_based_bgp_af | length > 1
 
+- name: Activate the address family of BGP neighbours without AF options
+  # vyos_bgp_address_family renders nothing for an address family without options.
+  vyos.vyos.vyos_config:
+    lines: "{{ _ipsec_route_based_af_activation_lines }}"
+  register: _ipsec_route_based_r_af_activation
+  when:
+    - _ipsec_route_based_af_activation_lines | length > 0
+    - not (vyos_blueprints_render_only | default(false) | bool)
+
 - name: Run OSPF over the VTIs
   vyos.vyos.vyos_ospfv2:
     config: "{{ lookup('ansible.builtin.template', 'ospfv2.yml.j2') | from_yaml }}"
@@ -139,6 +148,7 @@
          + (_ipsec_route_based_r_vti.rendered | default([]))
          + _ipsec_route_based_cli_lines
          + _ipsec_route_based_ike_cli_lines
+         + _ipsec_route_based_af_activation_lines
          + ([_ipsec_route_based_r_vti_l3, _ipsec_route_based_r_ipsec, _ipsec_route_based_r_s2s,
              _ipsec_route_based_r_pl, _ipsec_route_based_r_rm,
              _ipsec_route_based_r_route, _ipsec_route_based_r_ifroutes, _ipsec_route_based_r_bgp,
