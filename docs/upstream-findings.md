@@ -103,6 +103,10 @@ into `/etc/hosts`. When the two differ, `sudo` - and with it many op-mode comman
 with "unable to resolve host". The lab's `prepare` step maps the container's hostname to
 127.0.1.1 with `system static-host-mapping`, which vyos-hostsd keeps.
 
+Docker gives every container a default route via the management network, which shadows
+the default routes the blueprints configure. The lab's `prepare` step removes it from the
+router containers (Ansible keeps using the connected management subnet).
+
 GitHub's hosted runners (Azure kernel) ship `vrf`, `mpls_*` and `l2tp_*` only in
 `linux-modules-extra-<kernel>`, which the Molecule job installs before loading modules.
 
