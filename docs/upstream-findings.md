@@ -22,6 +22,7 @@ is fixed upstream.
 | B10 | vyos_firewall_global | ~~Zones render `member interface <if>`; the 1.5 zone docs use `interface <if>`.~~ **Resolved: not a bug.** VyOS 1.5 reads zone members from `member interface` (vyos-1x `op_mode/zone.py`), as the module renders, and live commits accept it. | - | Zone-Policy | - (the docs page's `interface` form is outdated) |
 | B11 | (deprecations) | `ansible.module_utils._text`, `_collections_compat` (removed in ansible-core 2.24), `exit_json(warnings=)` (removed in 2.23). | Modules break on upcoming ansible-core. | All (CI log) | - |
 | B12 | vyos_bgp_global | `bgp_params.default.no_ipv4_unicast` renders `protocols bgp parameters default no-ipv4-unicast`, a path VyOS 1.5 no longer has (it always configures FRR with `no bgp default ipv4-unicast`). | Commit fails: `Configuration path … is not valid`. | BGP IPv6 unnumbered (live Molecule run) | `bgp_unnumbered`: option dropped |
+| B13 | vyos_bgp_address_family | A neighbour address family without options (`neighbors: [{neighbor_address: X, address_family: [{afi: ipv4}]}]`) renders nothing, so a neighbour cannot be activated in an address family. In VyOS 1.5 (`no bgp default ipv4-unicast` always on) that leaves the neighbour inactive. | Sessions never come up: `No BGP neighbors found`. | L3VPN CEs, HA walkthrough upstream (live Molecule runs) | `bgp`: `vyos_config` adds `neighbor X address-family ipv4-unicast` for neighbours without AF options |
 
 ## 2. Missing vyos.vyos modules
 
@@ -56,7 +57,7 @@ vyos.vyos.vyos_config.
 | vyos_vrf | Static route next hop in another VRF (`interface X vrf Y`, route leaking) | `vrf_firewall` |
 | vyos_vrf | VRF BGP address families - `rd`, `route-target`, `import/export vpn`, `label vpn export`, `network`, `redistribute`, `route-map vpn import` | `vrf_lite` |
 | vyos_vrf | VRF BGP neighbour address-family options (`as-override`, activation) | `vrf_lite` |
-| vyos_vrf | VRF BGP without a per-VRF `system-as` (requires `as_number`, renders it) | - (harmless extra) |
+| vyos_vrf | ~~VRF BGP without a per-VRF `system-as`~~ **Not a gap:** VyOS 1.5 requires `system-as` in every VRF BGP instance (live commit: `BGP system-as number must be defined!`), so the module rendering it is right. | `vrf_lite` adds it for VRFs without neighbours |
 | vyos_bgp_global | `neighbor <if> interface v6only` (unnumbered) | `bgp_unnumbered` |
 | vyos_bgp_global | `remote-as external`/`internal` (integer only) | `bgp_unnumbered` |
 | vyos_bgp_global | `bestpath as-path multipath-relax` | `bgp_unnumbered` |
@@ -83,9 +84,32 @@ vyos.vyos.vyos_config.
 | QoS example | Text says VyOS2 re-marks "CS4 -> CS6", configuration sets CS5; class 20 shown as `show` output only. |
 | Inter-VRF Routing over VRF Lite | Bare `set protocols bgp address-family ipv4-unicast` (no effect). |
 | BGP IPv6 unnumbered with extended nexthop | `set protocols bgp parameters default no-ipv4-unicast` no longer exists in 1.5 (VyOS always applies it) and is rejected. |
+| Route-Based Site-to-Site VPN to Azure (BGP), and the redundant variant | Peers are named by IP address (`site-to-site peer 51.105.0.2`); VyOS 1.5 requires names of letters, digits, hyphens and underscores. |
+| L3VPN Hub-and-Spoke | The CE routers' BGP neighbours have no `address-family ipv4-unicast`; in VyOS 1.5 they then never become active. |
+| Inter-VRF Routing over VRF Lite | VRFs `LAN1`, `LAN2` and `Management` have BGP (`rd`, route targets) but no `protocols bgp system-as`, which VyOS 1.5 requires in every VRF BGP instance. |
 | DMVPN Dual HUB Dual Cloud | Spoke-3's tunnel-interface block is missing (only its NHRP block is shown). |
 
-## 5. Test environment notes
+## 5. VyOS issues
+
+| Area | Issue | Seen in | Workaround |
+|---|---|---|---|
+| QoS `set-dscp` (vyos-1x `python/vyos/qos/base.py`, 1.5 / circinus) | `set-dscp` is accepted but packets are not re-marked: the 1.5 traffic-control layer has no remarking action (rolling added a `tc pedit` action). Packets are classified correctly and leave unchanged (`tos 0x0`). | `qos` Molecule scenario (live capture) | the scenario checks classification and delivery; the remarking check runs only with `LAB_QOS_EXPECT_REMARKING=true` |
+| Bonding (vyos-1x `interfaces_bonding.py`) | A bond member whose `interfaces ethernet ethX` node exists but is empty is rejected with `it has a "" assigned!`: the empty node yields an empty option path, which is not in the allowed list. On hardware the node holds `hw-id`, so it mainly shows up in containers. | `ha_walkthrough` Molecule scenario | the scenario sets a `description` (an allowed option) on members before bonding |
+
+## 6. Test environment notes
+
+VyOS in a container cannot set the kernel hostname (`hostnamectl` is denied), so it stays
+the containerlab node name, while vyos-hostsd writes the *configured* `system host-name`
+into `/etc/hosts`. When the two differ, `sudo` - and with it many op-mode commands - fails
+with "unable to resolve host". The lab's `prepare` step maps the container's hostname to
+127.0.1.1 with `system static-host-mapping`, which vyos-hostsd keeps.
+
+Docker gives every container a default route via the management network, which shadows
+the default routes the blueprints configure. The lab's `prepare` step removes it from the
+router containers (Ansible keeps using the connected management subnet).
+
+GitHub's hosted runners (Azure kernel) ship `vrf`, `mpls_*` and `l2tp_*` only in
+`linux-modules-extra-<kernel>`, which the Molecule job installs before loading modules.
 
 Molecule scenarios that depend on host kernel features (may need a VM-based
 runner): `ipsec_*`, `ha_walkthrough` (LACP bonding), `ha_walkthrough_ospf`

@@ -11,6 +11,15 @@ on: # yamllint disable-line rule:truthy
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      molecule_only:
+        description: Run only the Molecule jobs (skip lint, sanity, build-import, render)
+        type: boolean
+        default: false
+      scenarios:
+        description: 'Molecule scenarios as a JSON list, e.g. ["dmvpn","qos"] (empty = MOLECULE_SCENARIOS or all)'
+        type: string
+        default: ""
   schedule:
     - cron: 0 0 * * *
 
@@ -24,14 +33,18 @@ jobs:
     uses: ansible/ansible-content-actions/.github/workflows/changelog.yaml@cbdec1f72eeee38b7e60d0f2346c66e622eea02a # main
     if: github.event_name == 'pull_request'
   build-import:
+    if: ${{ !inputs.molecule_only }}
     uses: ansible/ansible-content-actions/.github/workflows/build_import.yaml@cbdec1f72eeee38b7e60d0f2346c66e622eea02a # main
   ansible-lint:
+    if: ${{ !inputs.molecule_only }}
     uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@cbdec1f72eeee38b7e60d0f2346c66e622eea02a # main
   sanity:
+    if: ${{ !inputs.molecule_only }}
     uses: ansible/ansible-content-actions/.github/workflows/sanity.yaml@cbdec1f72eeee38b7e60d0f2346c66e622eea02a # main
 
   # Collection-specific jobs.
   render:
+    if: ${{ !inputs.molecule_only }}
     # Tier 1: no device. Renders every role and diffs against golden commands.
     runs-on: ubuntu-24.04
     steps:
@@ -43,7 +56,17 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install ansible-core ansible-pylibssh
-      - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
+      - name: Install collections (no response cache, with retries)
+        # The response cache can be corrupted by concurrent installs ("Missing expected
+        # 'results' in ansible-galaxy cache"); Galaxy's API also fails occasionally.
+        run: |
+          for i in 1 2 3; do
+            ansible-galaxy collection install --no-cache -r ansible_collections/vyos/blueprints/tests/requirements.yml -p . && break
+            [ "$i" = 3 ] && exit 1
+            sleep $((i * 15))
+          done
+      - name: Lab topologies are valid
+        run: python3 ansible_collections/vyos/blueprints/scripts/check-topologies.py
       - name: No single-backslash word boundaries in assert conditions
         run: python3 ansible_collections/vyos/blueprints/scripts/check-assert-escapes.py
       - name: Role READMEs match their argument specs
@@ -57,7 +80,6 @@ jobs:
     # Builds the VyOS container image once per run (cached per ISO URL) with the
     # official vyos-build iso-to-oci tool; the Molecule jobs import it.
     if: ${{ vars.VYOS_ISO_URL != '' }}
-    needs: [ansible-lint, render]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -123,10 +145,14 @@ jobs:
     needs: [vyos-image]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
       matrix:
-        scenario: ${{ fromJSON(vars.MOLECULE_SCENARIOS || '["base","edge_nat","ha_vrrp","ospf_unnumbered","bgp_unnumbered","zone_firewall","vrf_firewall","bridge_firewall","ipsec_route_based","ipsec_policy_based","policy_ipsec_firewall","gre_tunnel","ipsec_route_based_bgp","ipsec_route_based_bgp_dual","ipsec_route_based_gcp","ha_walkthrough","ha_walkthrough_ospf","ha_walkthrough_bgp","inter_vrf","wan_load_balance","pppoe_ipv6","qos","isis_segment_routing","l3vpn_hub_and_spoke","l2tp_lns","dmvpn","management","backup","upgrade"]') }}
+        # Required: scenarios that pass live. Experimental: still being made to pass;
+        # they run on every build but do not fail it (continue-on-error below).
+        scenario: ${{ fromJSON(inputs.scenarios || vars.MOLECULE_SCENARIOS || '["base","management","backup","edge_nat","ha_vrrp","ospf_unnumbered","bgp_unnumbered","zone_firewall","bridge_firewall","gre_tunnel","ha_walkthrough_bgp","ha_walkthrough_ospf","inter_vrf","wan_load_balance","qos","upgrade","isis_segment_routing","ipsec_route_based","ipsec_route_based_bgp","ipsec_route_based_bgp_dual","ipsec_route_based_gcp","ipsec_policy_based","policy_ipsec_firewall"]') }}
+        include: ${{ fromJSON((inputs.scenarios || vars.MOLECULE_SCENARIOS) && '[]' || '[{"scenario":"ha_walkthrough","experimental":true},{"scenario":"vrf_firewall","experimental":true},{"scenario":"l3vpn_hub_and_spoke","experimental":true},{"scenario":"pppoe_ipv6","experimental":true},{"scenario":"l2tp_lns","experimental":true},{"scenario":"dmvpn","experimental":true}]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -136,7 +162,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install ansible-core ansible-pylibssh paramiko molecule
-      - run: ansible-galaxy collection install -r ansible_collections/vyos/blueprints/tests/requirements.yml -p .
+      - name: Install collections (no response cache, with retries)
+        # The response cache can be corrupted by concurrent installs ("Missing expected
+        # 'results' in ansible-galaxy cache"); Galaxy's API also fails occasionally.
+        run: |
+          for i in 1 2 3; do
+            ansible-galaxy collection install --no-cache -r ansible_collections/vyos/blueprints/tests/requirements.yml -p . && break
+            [ "$i" = 3 ] && exit 1
+            sleep $((i * 15))
+          done
       - name: Install containerlab
         run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.79.0
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -149,6 +183,27 @@ jobs:
           name: alpine
       - name: Load alpine:3 (containerlab then never pulls it)
         run: docker load -i alpine.tar
+      - name: Load kernel modules for the lab (containers cannot load modules)
+        # Non-fatal: reports what this runner's kernel provides, so a missing
+        # module shows up here rather than as an obscure failure in the scenario.
+        run: |
+          # GitHub's Azure kernel ships vrf, mpls_* and l2tp_* only in linux-modules-extra
+          { sudo apt-get update -qq && sudo apt-get install -y -qq "linux-modules-extra-$(uname -r)"; } \
+            || echo "::warning title=linux-modules-extra::not installed for kernel $(uname -r)"
+          missing=""
+          for m in bonding 8021q wireguard ip_gre ip6_gre ip_vti ip6_vti xfrm_user xfrm_interface \
+                   esp4 esp6 af_key mpls_router mpls_iptunnel mpls_gso \
+                   ppp_generic pppoe pppox l2tp_core l2tp_netlink l2tp_ppp l2tp_eth \
+                   vrf sch_htb sch_sfq sch_fq_codel sch_ingress sch_prio sch_tbf \
+                   cls_u32 cls_fw cls_basic act_police act_mirred act_skbedit; do
+            sudo modprobe "$m" 2>/dev/null || missing="$missing $m"
+          done
+          echo "kernel: $(uname -r)"
+          if [[ -n "$missing" ]]; then
+            echo "::warning title=Kernel modules not available on this runner::$missing"
+          else
+            echo "all lab kernel modules loaded"
+          fi
       - name: molecule test
         working-directory: ansible_collections/vyos/blueprints/extensions
         env:

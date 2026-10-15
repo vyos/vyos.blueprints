@@ -1,2 +1,14 @@
 ---
 _bgp_state: "{{ 'rendered' if (vyos_blueprints_render_only | default(false) | bool) else 'merged' }}"
+# VyOS 1.5 runs FRR with "no bgp default ipv4-unicast": a neighbour is only
+# active in an address family that is configured for it. Neighbours with AF
+# options (route-maps, soft-reconfiguration) get it through vyos_bgp_address_family;
+# the others need the bare node, which that module cannot render (finding B13).
+_bgp_af_activation_lines: >-
+  {%- set out = [] -%}
+  {%- for n in bgp_neighbors if not ((n.soft_reconfiguration_inbound | default(false) | bool)
+                                     or n.route_map_import is defined or n.route_map_export is defined) -%}
+  {%-   set _ = out.append('set protocols bgp neighbor ' ~ n.address ~ ' address-family '
+                           ~ ('ipv6' if ':' in n.address else 'ipv4') ~ '-unicast') -%}
+  {%- endfor -%}
+  {{ out }}

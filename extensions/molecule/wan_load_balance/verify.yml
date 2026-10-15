@@ -72,4 +72,5 @@
     - name: The repeated run was idempotent
       ansible.builtin.assert:
         that: not _wan_load_balance_r_cli.changed
+        fail_msg: "the repeated run sent: {{ _wan_load_balance_r_cli.commands | default([]) }}"
         quiet: true

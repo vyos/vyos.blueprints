@@ -32,15 +32,15 @@ set vpn ipsec ike-group AZURE proposal 1 dh-group 2
 set vpn ipsec ike-group AZURE proposal 1 encryption aes256
 set vpn ipsec ike-group AZURE proposal 1 hash sha1
 set vpn ipsec interface eth0
-set vpn ipsec site-to-site peer 203.0.113.2
-set vpn ipsec site-to-site peer 203.0.113.2 authentication local-id '198.51.100.3'
-set vpn ipsec site-to-site peer 203.0.113.2 authentication mode 'pre-shared-secret'
-set vpn ipsec site-to-site peer 203.0.113.2 authentication remote-id '203.0.113.2'
-set vpn ipsec site-to-site peer 203.0.113.2 connection-type 'initiate'
-set vpn ipsec site-to-site peer 203.0.113.2 description 'AZURE PRIMARY TUNNEL'
-set vpn ipsec site-to-site peer 203.0.113.2 ike-group 'AZURE'
-set vpn ipsec site-to-site peer 203.0.113.2 ikev2-reauth 'inherit'
-set vpn ipsec site-to-site peer 203.0.113.2 local-address '10.10.0.5'
-set vpn ipsec site-to-site peer 203.0.113.2 remote-address '203.0.113.2'
-set vpn ipsec site-to-site peer 203.0.113.2 vti bind 'vti1'
-set vpn ipsec site-to-site peer 203.0.113.2 vti esp-group 'AZURE'
+set vpn ipsec site-to-site peer azure
+set vpn ipsec site-to-site peer azure authentication local-id '198.51.100.3'
+set vpn ipsec site-to-site peer azure authentication mode 'pre-shared-secret'
+set vpn ipsec site-to-site peer azure authentication remote-id '203.0.113.2'
+set vpn ipsec site-to-site peer azure connection-type 'initiate'
+set vpn ipsec site-to-site peer azure description 'AZURE PRIMARY TUNNEL'
+set vpn ipsec site-to-site peer azure ike-group 'AZURE'
+set vpn ipsec site-to-site peer azure ikev2-reauth 'inherit'
+set vpn ipsec site-to-site peer azure local-address '10.10.0.5'
+set vpn ipsec site-to-site peer azure remote-address '203.0.113.2'
+set vpn ipsec site-to-site peer azure vti bind 'vti1'
+set vpn ipsec site-to-site peer azure vti esp-group 'AZURE'

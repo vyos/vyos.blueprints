@@ -8,8 +8,8 @@
 - name: Every configured filter is active with its rules
   ansible.builtin.assert:
     that: >-
-      _firewall_v.stdout[0] is search((item.afi | upper | replace('V', 'v')) ~ ' Firewall "' ~ item.chain ~ ' filter"')
-    fail_msg: "{{ item.afi }} {{ item.chain }} filter is not active"
+      _firewall_v.stdout[0] is search(item.afi ~ ' Firewall "' ~ item.chain ~ ' filter"', ignorecase=true)
+    fail_msg: "{{ item.afi }} {{ item.chain }} filter is not active; 'show firewall' returned: {{ _firewall_v.stdout[0] | default('') | truncate(600) }}"
     quiet: true
   loop: >-
     {%- set out = [] -%}

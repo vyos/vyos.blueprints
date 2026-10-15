@@ -7,6 +7,9 @@ all:
           hosts:
             left:
               ansible_host: clab-bp-pif-left
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 192.0.2.130/32, next_hop: 198.51.100.13}
               ipsec_policy_based_peers:
                 - name: RIGHT
                   psk_name: RIGHT
@@ -103,6 +106,9 @@ all:
                   addresses: [10.1.12.1/24]
             right:
               ansible_host: clab-bp-pif-right
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 198.51.100.14/32, next_hop: 192.0.2.129}
               ipsec_policy_based_peers:
                 - name: LEFT
                   psk_name: LEFT

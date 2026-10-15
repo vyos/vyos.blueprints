@@ -1,6 +1,16 @@
 ---
-- name: Converge
-  hosts: vpn
+# The GCP stand-in (responder) is configured before the edges (initiators): an edge
+# that initiates while the stand-in has no configuration yet gets NO_PROPOSAL_CHOSEN
+# and does not retry. Against real Google Cloud the GCP side always exists first.
+- name: Converge the GCP stand-in first
+  hosts: gcp
+  gather_facts: false
+  roles:
+    - vyos.blueprints.base
+    - vyos.blueprints.ipsec_route_based
+
+- name: Converge the on-prem edges
+  hosts: vpn:!gcp
   gather_facts: false
   roles:
     - vyos.blueprints.base

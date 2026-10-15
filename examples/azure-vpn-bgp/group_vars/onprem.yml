@@ -1,7 +1,7 @@
 ---
 # docs.vyos.io/en/1.5/configexamples/azure-vpn-bgp.html
 ipsec_route_based_peers:
-  - name: 203.0.113.2
+  - name: azure
     description: AZURE PRIMARY TUNNEL
     psk_name: azure
     psk: ch00s3-4-s3cur3-psk        # use ansible-vault for real devices

@@ -2,6 +2,21 @@
 - name: Converge
   hosts: routers
   gather_facts: false
+  pre_tasks:
+    - name: Describe bond members first (lab workaround for a VyOS validation bug)
+      # In containers a member's "interfaces ethernet ethX" node exists but is
+      # empty, and VyOS then refuses it as a bond member ('it has a "" assigned').
+      # A description is an allowed bond-member option and makes the node non-empty.
+      vyos.vyos.vyos_config:
+        lines: >-
+          {%- set out = [] -%}
+          {%- for bond in bonding_interfaces | default([]) -%}
+          {%-   for member in bond.members -%}
+          {%-     set _ = out.append("set interfaces ethernet " ~ member ~ " description 'member of " ~ bond.name ~ "'") -%}
+          {%-   endfor -%}
+          {%- endfor -%}
+          {{ out }}
+      when: bonding_interfaces | default([]) | length > 0
   roles:
     - vyos.blueprints.bonding
     - vyos.blueprints.base

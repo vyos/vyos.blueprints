@@ -19,10 +19,24 @@
     _wan_load_balance_current: >-
       {{ (_wan_load_balance_running.stdout[0] | default('')).splitlines()
          | select('match', _wan_load_balance_rule_prefix ~ ' ') | map('replace', "'", '') | list }}
+    # For each stale line, delete the highest node no wanted line uses, so no
+    # empty node (e.g. "rule 10 interface eth2" after its weight) is left behind.
     _wan_load_balance_deletes: >-
-      {{ (_wan_load_balance_current | difference(_wan_load_balance_wanted)
-          | map('regex_replace', '^set ', 'delete ') | list)
-         if wan_load_balance_prune_rules | bool else [] }}
+      {%- set out = [] -%}
+      {%- if wan_load_balance_prune_rules | bool -%}
+      {%-   for line in _wan_load_balance_current if line not in _wan_load_balance_wanted -%}
+      {%-     set words = line.split(' ') -%}
+      {%-     set ns = namespace(done=false) -%}
+      {%-     for n in range(5, words | length + 1) if not ns.done -%}
+      {%-       set prefix = words[:n] | join(' ') -%}
+      {%-       if _wan_load_balance_wanted | select('search', '^' ~ (prefix | regex_escape) ~ '( |$)') | list | length == 0 -%}
+      {%-         set _ = out.append('delete' ~ prefix[3:]) -%}
+      {%-         set ns.done = true -%}
+      {%-       endif -%}
+      {%-     endfor -%}
+      {%-   endfor -%}
+      {%- endif -%}
+      {{ out | unique | list }}
   register: _wan_load_balance_r_cli
   when: not (vyos_blueprints_render_only | default(false) | bool)
 

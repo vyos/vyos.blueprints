@@ -12,6 +12,10 @@
   hosts: localhost
   gather_facts: false
   vars:
+    # VyOS 1.5 (Stream / circinus) accepts "set-dscp" but does not rewrite packets: its
+    # tc layer has no remarking action (vyos-1x python/vyos/qos/base.py; rolling added
+    # pedit). Set LAB_QOS_EXPECT_REMARKING=true to check the marks on a VyOS that has it.
+    _expect_remarking: "{{ lookup('ansible.builtin.env', 'LAB_QOS_EXPECT_REMARKING', default='false') | bool }}"
     _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
     _flows:
       - {src: 172.17.1.2, tos: "0xa0", why: "CS4 at vyos3, re-marked CS4 -> CS5 at vyos2"}
@@ -20,18 +24,23 @@
       - {src: 172.17.1.40, tos: "0x0", why: "CS0 by default"}
   tasks:
     - name: Capture on the sink while pinging from each source
+      # tcpdump in the foreground, line-buffered, all ICMP: the output shows
+      # everything the sink received, also when the check fails.
       ansible.builtin.shell:
         cmd: >-
-          docker exec -d clab-bp-qos-sink sh -c
-          'timeout 15 tcpdump -n -v -c 2 -i eth1 icmp and src {{ item.src }} > /tmp/cap-{{ item.src }} 2>&1';
-          sleep 2;
-          docker exec clab-bp-qos-vpcs ping -c 3 -W 2 -I {{ item.src }} 10.9.9.10 > /dev/null;
-          sleep 2;
-          docker exec clab-bp-qos-sink cat /tmp/cap-{{ item.src }}
+          ( sleep 2; docker exec clab-bp-qos-vpcs ping -c 3 -W 2 -I {{ item.src }} 10.9.9.10 > /dev/null 2>&1 ) &
+          docker exec clab-bp-qos-sink timeout 8 tcpdump -l -n -v -i eth1 icmp 2>&1; wait
       become: "{{ _become }}"
       register: _cap
       changed_when: false
-      failed_when: _cap.stdout is not search('tos ' ~ item.tos ~ '\b')
+      # tcpdump -v prints the IP header (tos) and the addresses on two lines; each header
+      # line is paired with the address line after it. Always required: the echo requests
+      # from this source arrive at the sink. With remarking expected: with this TOS byte.
+      failed_when: >-
+        _cap.stdout_lines | zip(_cap.stdout_lines[1:])
+        | selectattr('0', 'search', ('tos ' ~ item.tos ~ ',') if _expect_remarking else 'tos ')
+        | selectattr('1', 'search', item.src ~ ' > 10[.]9[.]9[.]10')
+        | list | length == 0
       loop: "{{ _flows }}"
       loop_control:
         label: "{{ item.src }} -> tos {{ item.tos }} ({{ item.why }})"

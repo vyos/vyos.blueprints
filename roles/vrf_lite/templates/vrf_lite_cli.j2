@@ -11,6 +11,11 @@ set interfaces {{ _vrf_lite_iftypes[m[0]] }} {{ i }} vrf '{{ v.name }}'
 {%     endif %}
 {%   endfor %}
 {%   set b = 'set vrf name ' ~ v.name ~ ' protocols bgp' %}
+{#   VyOS 1.5 needs system-as in every VRF BGP instance; vyos_vrf only sets it for
+     VRFs with neighbours, so it is added here for the others #}
+{%   if v.rd is defined and not v.neighbors | default([]) %}
+{{ b }} system-as '{{ vrf_lite_asn }}'
+{%   endif %}
 {%   if v.rd is defined %}
 {%     for f in v.families | default(['ipv4', 'ipv6']) %}
 {%       set af = b ~ ' address-family ' ~ f ~ '-unicast' %}

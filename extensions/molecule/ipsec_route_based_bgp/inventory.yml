@@ -13,11 +13,14 @@ all:
           hosts:
             r1:
               ansible_host: clab-bp-azure-vyos
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 203.0.113.2/32, next_hop: 198.51.100.1}
               base_interfaces:
                 - {name: eth1, addresses: [198.51.100.3/24]}
                 - {name: eth2, addresses: [10.10.2.1/24]}
               ipsec_route_based_peers:
-                - name: 203.0.113.2
+                - name: azure
                   description: AZURE PRIMARY TUNNEL
                   psk_name: azure
                   psk: molecule-psk
@@ -38,11 +41,14 @@ all:
               ipsec_route_based_default_gateway: 198.51.100.1
             r2:
               ansible_host: clab-bp-azure-azure
+              # route to the remote IPsec peer(s) via the stand-in ISP (lab only)
+              base_static_routes:
+                - {dest: 198.51.100.3/32, next_hop: 203.0.113.1}
               base_interfaces:
                 - {name: eth1, addresses: [203.0.113.2/24]}
                 - {name: eth2, addresses: [10.0.1.1/24]}
               ipsec_route_based_peers:
-                - name: 198.51.100.3
+                - name: onprem
                   psk_name: onprem
                   psk: molecule-psk
                   local_address: 203.0.113.2

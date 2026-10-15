@@ -53,6 +53,41 @@
           until: _ready is succeeded
           retries: 30
           delay: 10
+
+        - name: Remove Docker's default route from the router container
+          # Docker gives every container a default route via the management network.
+          # It shadows default routes the blueprints configure (traffic leaves via eth0
+          # and is lost). Ansible reaches the router over the connected management
+          # subnet, which stays, so the router's own routing now decides, as on hardware.
+          ansible.builtin.shell:
+            cmd: >-
+              docker exec {{ ansible_host | quote }} sh -c
+              'ip route del default 2>/dev/null; ip -6 route del default 2>/dev/null; true'
+          become: "{{ _become }}"
+          delegate_to: localhost
+          changed_when: false
+
+        - name: Read the container's hostname
+          # VyOS cannot set the kernel hostname in a container (hostnamectl is
+          # denied), so it stays the containerlab node name, while vyos-hostsd
+          # writes the *configured* host-name into /etc/hosts. When the two differ,
+          # sudo - and with it many op-mode commands - fails with "unable to
+          # resolve host".
+          ansible.builtin.command:
+            argv: [docker, exec, "{{ ansible_host }}", hostname]
+          become: "{{ _become }}"
+          delegate_to: localhost
+          register: _container_hostname
+          changed_when: false
+
+        - name: Keep the container's hostname resolvable; no DNS lookups during SSH logins
+          # disable-host-validation (sshd UseDNS no): a scenario's firewall can make
+          # Docker's DNS unreachable, and every later login then waits for the reverse
+          # lookup of the client until paramiko gives up ("Authentication timeout").
+          vyos.vyos.vyos_config:
+            lines:
+              - set system static-host-mapping host-name {{ _container_hostname.stdout | trim }} inet 127.0.1.1
+              - set service ssh disable-host-validation
       rescue:
         - name: Diagnose the lab
           ansible.builtin.include_tasks: lab_diagnostics.yml

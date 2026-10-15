@@ -4,10 +4,50 @@
   gather_facts: false
   vars:
     _topology: "{{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_DIRECTORY') }}/topology.clab.yml"
+    _lab: "{{ (lookup('ansible.builtin.file', _topology) | from_yaml).name }}"
+    _logdir: "{{ lookup('ansible.builtin.env', 'MOLECULE_LOG_DIR', default=lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY')) }}"
+    _become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
   tasks:
+    - name: Record the state of every lab node before it is destroyed (post-mortem)
+      # Runs after every scenario, failed or not; never fails the teardown.
+      ansible.builtin.shell:
+        executable: /bin/bash
+        cmd: |
+          set -o pipefail   # no set -e: every command may fail without stopping the post-mortem
+          hide='password|pre-shared-secret|private-key|secret| key |authentication'
+          mkdir -p {{ _logdir | quote }}
+          out={{ (_logdir ~ '/post-mortem.txt') | quote }}
+          : > "$out"
+          for c in $(docker ps -q --filter label=containerlab={{ _lab | quote }}); do
+            n=$(docker inspect -f '{% raw %}{{.Name}}{% endraw %}' "$c" | sed 's#^/##')
+            kind=$(docker inspect -f '{% raw %}{{index .Config.Labels "clab-node-kind"}}{% endraw %}' "$c")
+            {
+              echo "################ $n ($kind)"
+              echo "== addresses";  docker exec "$c" sh -c "ip -br addr 2>/dev/null || ip addr" 2>&1
+              echo "== routes";     docker exec "$c" ip route 2>&1
+              if [ "$kind" = "vyosnetworks_vyos" ]; then
+                echo "== configuration"
+                docker exec "$c" /opt/vyatta/bin/vyatta-op-cmd-wrapper show configuration commands 2>&1 | grep -v -E "$hide"
+                echo "== tc qdiscs";  docker exec "$c" tc -s qdisc 2>&1 | head -40
+                echo "== bgp";        docker exec "$c" vtysh -c 'show bgp summary' 2>&1 | head -30
+                echo "== ospf";       docker exec "$c" vtysh -c 'show ip ospf neighbor' 2>&1 | head -20
+                docker exec "$c" vtysh -c 'show ip ospf interface' 2>&1 | grep -E "is up|is down|Network Type|Hello|Neighbor Count|Adjacent" | head -30
+                echo "== nhrp";       docker exec "$c" vtysh -c 'show ip nhrp cache' 2>&1 | head -20
+                echo "== ipsec sas";  docker exec "$c" swanctl --list-sas 2>&1 | head -30
+                echo "== ipsec log";  docker exec "$c" journalctl -u strongswan -n 40 --no-pager 2>&1
+                echo "== warnings";   docker exec "$c" journalctl -p warning -n 40 --no-pager 2>&1
+              fi
+              echo
+            } >> "$out" 2>&1
+          done
+          true
+      become: "{{ _become }}"
+      changed_when: false
+      failed_when: false
+
     - name: Destroy lab
       ansible.builtin.command:
         argv: [containerlab, destroy, --cleanup, --topo, "{{ _topology }}"]
-      become: "{{ lookup('ansible.builtin.env', 'CLAB_BECOME', default='true') | bool }}"
+      become: "{{ _become }}"
       changed_when: true
       failed_when: false

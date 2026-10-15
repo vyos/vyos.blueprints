@@ -21,7 +21,7 @@ topology:
         - ip addr add 10.0.0.1/24 dev dum0
         - ip -6 addr add 2001:db8:0:1::1/64 dev dum0
         - ip route replace default via 10.1.1.1
-        - ip -6 route replace default via 2001:db8::
+        - "ip -6 route replace default via 2001:db8::"
     lan2:
       kind: linux
       image: alpine:3

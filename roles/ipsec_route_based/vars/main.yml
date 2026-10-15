@@ -23,3 +23,16 @@ _ipsec_route_based_psks: >-
   {{ out }}
 _ipsec_route_based_policy: "{{ ipsec_route_based_policy | default({}, true) }}"
 _ipsec_route_based_ike_cli_lines: "{{ (lookup('ansible.builtin.template', 'ike_cli.j2') or '').splitlines() | select | list }}"
+
+# VyOS 1.5 runs FRR with "no bgp default ipv4-unicast": a neighbour is only active in an
+# address family configured for it. Neighbours with AF options get one through
+# vyos_bgp_address_family; the others need the bare node (finding B13).
+_ipsec_route_based_af_activation_lines: >-
+  {%- set out = [] -%}
+  {%- for n in (_ipsec_route_based_bgp.neighbors | default([])) | selectattr('address', 'defined')
+      if not ((n.soft_reconfiguration_inbound | default(false) | bool)
+              or n.route_map_import is defined or n.route_map_export is defined) -%}
+  {%-   set _ = out.append('set protocols bgp neighbor ' ~ n.address ~ ' address-family '
+                           ~ ('ipv6' if ':' in n.address else 'ipv4') ~ '-unicast') -%}
+  {%- endfor -%}
+  {{ out if _ipsec_route_based_bgp | length > 0 else [] }}
