@@ -30,7 +30,11 @@
         that:
           - _rib.stdout[0] is search('Paths:[ ][(]2 available')
           - _rib.stdout[0] is search('(?m)^ +65551 65551 65551 65551(?![0-9])')
-          - _rib.stdout[0] is search('(?s)192[.]0[.]2[.]21 from 192[.]0[.]2[.]21.*?(?<![A-Za-z0-9_])best(?![A-Za-z0-9_])')
+          # router1's path line and the line right after it (its Origin/best line)
+          - >-
+            _rib.stdout[0].splitlines() | zip(_rib.stdout[0].splitlines()[1:])
+            | selectattr('0', 'search', '192[.]0[.]2[.]21 from 192[.]0[.]2[.]21')
+            | selectattr('1', 'search', '(?<![A-Za-z0-9_])best(?![A-Za-z0-9_])') | list | length > 0
         quiet: true
 
     - name: Nothing else is announced (BGPOUT only permits 203.0.113.0/24)

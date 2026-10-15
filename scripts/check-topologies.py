@@ -16,7 +16,13 @@ files = sorted(ROOT.glob("extensions/molecule/*/topology.clab.yml")) + sorted(RO
 for path in files:
     nodes = (yaml.safe_load(path.read_text()).get("topology") or {}).get("nodes") or {}
     for name, node in nodes.items():
-        for entry in (node or {}).get("exec") or []:
+        commands = (node or {}).get("exec")
+        if commands is None:
+            continue
+        if not isinstance(commands, list):
+            bad.append(f"{path.relative_to(ROOT)}: node {name}: exec must be a list, not a {type(commands).__name__}")
+            continue
+        for entry in commands:
             if not isinstance(entry, str):
                 bad.append(f"{path.relative_to(ROOT)}: node {name}: {entry!r} (quote it)")
 if bad:

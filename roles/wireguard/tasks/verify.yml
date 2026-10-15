@@ -15,11 +15,16 @@
   ansible.builtin.assert:
     that:
       - _wireguard_v.stdout[idx] is search('state UP|,UP|(?<![A-Za-z0-9_])up(?![A-Za-z0-9_])')
-      - _wireguard_s.stdout[idx] is search('latest handshake')
+      # each peer block in the summary starts with "  peer: <name>"
+      - item.peers | default([]) | map(attribute='name') | reject('in', _wireguard_handshaken) | list | length == 0
     fail_msg: >-
-      {{ item.name }} is down or has not completed a handshake;
+      {{ item.name }} is down or not every peer has completed a handshake;
       summary: {{ _wireguard_s.stdout[idx] | default('') | truncate(600) }}
     quiet: true
+  vars:
+    _wireguard_handshaken: >-
+      {{ (_wireguard_s.stdout[idx] | default('')).split('  peer: ')[1:]
+         | select('search', 'latest handshake') | map('split') | map('first') | list }}
   loop: "{{ wireguard_interfaces }}"
   loop_control:
     index_var: idx

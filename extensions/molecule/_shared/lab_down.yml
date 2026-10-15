@@ -14,7 +14,7 @@
         executable: /bin/bash
         cmd: |
           set -o pipefail   # no set -e: every command may fail without stopping the post-mortem
-          hide='encrypted-password|pre-shared-secret|private-key|secret'
+          hide='password|pre-shared-secret|private-key|secret| key |authentication'
           mkdir -p {{ _logdir | quote }}
           out={{ (_logdir ~ '/post-mortem.txt') | quote }}
           : > "$out"
