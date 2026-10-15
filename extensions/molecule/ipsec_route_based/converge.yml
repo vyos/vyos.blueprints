@@ -10,6 +10,7 @@
       ansible.builtin.group_by:
         key: "ipsec_{{ 'initiators' if (ipsec_route_based_peers | default([]) | selectattr('connection_type', 'defined')
                                          | selectattr('connection_type', 'eq', 'initiate') | list) else 'responders' }}"
+      changed_when: false   # only sorts hosts in memory; Molecule's idempotence step counts every change
 
 - name: Converge the responders first
   hosts: ipsec_responders
