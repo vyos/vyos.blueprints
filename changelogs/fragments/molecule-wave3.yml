@@ -11,3 +11,7 @@ bugfixes:
   - ipsec_route_based - BGP neighbours without address-family options are activated for ipv4-unicast (or ipv6-unicast), as in the bgp role.
   - firewall - the verify check matches the VyOS 1.5 ``show firewall`` header (lower-case family name).
   - wireguard - the verify check reads handshakes from ``show interfaces wireguard <name> summary``.
+trivial:
+  - >-
+    CI - Molecule runs the 22 scenarios that pass live as required and the other 7 as
+    experimental (non-blocking); Molecule-only manual runs; per-node post-mortems in the logs artifact.

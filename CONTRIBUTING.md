@@ -14,6 +14,21 @@
   `python3 scripts/gen-role-readmes.py` (CI checks they match).
 - Optional: `pre-commit install` runs the same formatting checks locally.
 
+### Molecule in CI
+
+The Molecule matrix in `.github/workflows/tests.yml` has two lists: **required**
+scenarios (they must pass for a PR to merge) and **experimental** ones (they run on
+every build but do not fail it). A scenario moves from experimental to required once
+it passes; [docs/molecule-status.md](docs/molecule-status.md) tracks the open ones.
+
+To iterate on scenarios without the full pipeline, push with `[skip ci]` in the
+commit message and start only Molecule:
+
+    gh workflow run tests.yml --ref <branch> -f molecule_only=true -f scenarios='["<scenario>"]'
+
+Every run uploads `molecule-logs-<scenario>`: the containerlab deploy log and a
+post-mortem of every lab node (configuration, routes, qdiscs, BGP, IPsec SAs, logs).
+
 # Contributing a blueprint role
 
 A role should implement one page of the VyOS
