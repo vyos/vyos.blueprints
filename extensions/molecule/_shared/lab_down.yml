@@ -30,6 +30,9 @@
                 docker exec "$c" /opt/vyatta/bin/vyatta-op-cmd-wrapper show configuration commands 2>&1 | grep -v -E "$hide"
                 echo "== tc qdiscs";  docker exec "$c" tc -s qdisc 2>&1 | head -40
                 echo "== bgp";        docker exec "$c" vtysh -c 'show bgp summary' 2>&1 | head -30
+                echo "== ospf";       docker exec "$c" vtysh -c 'show ip ospf neighbor' 2>&1 | head -20
+                docker exec "$c" vtysh -c 'show ip ospf interface' 2>&1 | grep -E "is up|is down|Network Type|Hello|Neighbor Count|Adjacent" | head -30
+                echo "== nhrp";       docker exec "$c" vtysh -c 'show ip nhrp cache' 2>&1 | head -20
                 echo "== ipsec sas";  docker exec "$c" swanctl --list-sas 2>&1 | head -30
                 echo "== ipsec log";  docker exec "$c" journalctl -u strongswan -n 40 --no-pager 2>&1
                 echo "== warnings";   docker exec "$c" journalctl -p warning -n 40 --no-pager 2>&1

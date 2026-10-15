@@ -18,7 +18,7 @@ rolling upgrades. What is tested today:
 |---|---|---|
 | ansible-lint, ansible-test sanity, Galaxy import | every pull request | passing |
 | Render tests - every role and blueprint rendered offline against vyos.vyos and compared with the docs page's commands | every pull request | passing |
-| Molecule - the roles applied to VyOS 1.5 (VyOS Stream, in containerlab): converge, idempotence, and the blueprint's behaviour checked with traffic | every pull request | **24 of 29 scenarios pass and are required**; 5 run as experimental - see [docs/molecule-status.md](https://github.com/vyos/vyos.blueprints/blob/main/docs/molecule-status.md) |
+| Molecule - the roles applied to VyOS 1.5 (VyOS Stream, in containerlab): converge, idempotence, and the blueprint's behaviour checked with traffic | every pull request | **23 of 29 scenarios pass and are required**; 6 run as experimental - see [docs/molecule-status.md](https://github.com/vyos/vyos.blueprints/blob/main/docs/molecule-status.md) |
 
 Until a role's scenario passes, test it in a lab before using it in production, for
 example with the render-only preview (see
