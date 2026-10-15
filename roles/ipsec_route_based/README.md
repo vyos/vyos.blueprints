@@ -66,7 +66,7 @@ Route-based site-to-site IPsec over VTI, with OSPF or BGP (Cisco, Palo Alto and 
 | `ipsec_route_based_esp_group.hash` | str |  | `sha256` | Hash. |
 | `ipsec_route_based_ospf` | dict |  |  | OSPF over the VTIs. Omit to configure routing yourself. |
 | `ipsec_route_based_ospf.router_id` | str | yes |  | OSPF router-id. |
-| `ipsec_route_based_ospf.area` | str |  | `'0'` | OSPF area. |
+| `ipsec_route_based_ospf.area` | str |  | `0` | OSPF area. |
 | `ipsec_route_based_ospf.networks` | list | yes |  | Networks to advertise, including the VTI network(s), as on the docs page. |
 | `ipsec_route_based_ospf.passive_interfaces` | list |  | `[]` | LAN interfaces that should not form adjacencies. |
 | `ipsec_route_based_interfaces` | list |  | `[]` | Interfaces IPsec listens on (`vpn ipsec interface`), e.g. `[eth0]`. |

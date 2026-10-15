@@ -19,7 +19,13 @@ argument_specs:
       - Bulk runs use the play's forks; use C(throttle) or C(serial) in the
         play to limit concurrency.
     options:
-      backup_root: {type: str, default: "{{ playbook_dir }}/backups", description: Backup directory on the controller.}
+      backup_root:
+        type: str
+        default: "{{ lookup('ansible.builtin.env', 'PWD', default=lookup('ansible.builtin.pipe', 'pwd')) }}/backups"
+        description:
+          - Backup directory on the controller.
+          - The default is C(backups) in the directory Ansible runs from (C(PWD); if that is
+            not set, the directory Ansible reports as current).
       backup_formats:
         type: list
         elements: str

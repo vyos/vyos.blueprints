@@ -28,7 +28,13 @@ def options_table(options, prefix=""):
     for name, spec in (options or {}).items():
         spec = spec or {}
         default = spec.get("default")
-        default = "" if default is None else f"`{yaml.safe_dump(default, default_flow_style=True).strip().removesuffix('...').strip()}`"
+        if default is None:
+            default = ""
+        elif isinstance(default, str):
+            # as written, on one line; an empty string as ''
+            default = f"`{default}`".replace("|", "\\|") if default else "`''`"
+        else:
+            default = f"`{yaml.safe_dump(default, default_flow_style=True, width=10**6).strip().removesuffix('...').strip()}`"
         required = "yes" if spec.get("required") else ""
         rows.append(f"| `{prefix}{name}` | {spec.get('type', '')} | {required} | {default} | {text(spec.get('description'))} |")
         if spec.get("options"):
