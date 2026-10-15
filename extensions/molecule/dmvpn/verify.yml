@@ -3,10 +3,19 @@
   hosts: dmvpn
   gather_facts: false
   tasks:
-    - name: Wait for NHRP registration, IPsec and OSPF
-      ansible.builtin.pause:
-        seconds: 60
-      run_once: true
+    - name: Wait until every DMVPN tunnel has a Full OSPF adjacency
+      # Convergence (IPsec, NHRP registration, OSPF exchange) varies between runs;
+      # poll instead of a fixed pause.
+      vyos.vyos.vyos_command:
+        commands: [show ip ospf neighbor]
+      register: _ospf_nbr
+      until: >-
+        dmvpn_nhrp_tunnels | map(attribute='name')
+        | reject('in', (_ospf_nbr.stdout[0] | default('')).splitlines() | select('search', 'Full') | join(' '))
+        | list | length == 0
+      retries: 24
+      delay: 10
+      failed_when: false   # the role checks below report a tunnel that never converges
 
     - name: Run role checks
       ansible.builtin.include_role:
