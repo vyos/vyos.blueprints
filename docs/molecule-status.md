@@ -13,7 +13,7 @@ inter_vrf, zone_firewall, bridge_firewall, gre_tunnel, wan_load_balance, qos,
 dmvpn, ipsec_route_based, ipsec_route_based_bgp, ipsec_route_based_bgp_dual,
 ipsec_route_based_gcp, ipsec_policy_based, policy_ipsec_firewall.
 
-The IPsec scenarios configure responders before initiators (`converge.yml`): an
+The IPsec scenarios (and `dmvpn`: hubs before spokes) configure responders before initiators (`converge.yml`): an
 initiator that starts IKE before its peer is configured gets NO_PROPOSAL_CHOSEN and
 does not retry.
 
