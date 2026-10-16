@@ -60,6 +60,18 @@
          else 'the installer exited' }}
     quiet: true
 
+- name: The image installer got as far as copying the image
+  # "add system image" prints no success message, but "Copying system image files"
+  # only after download, checks and signature validation succeeded (VyOS 1.4 and 1.5).
+  # Failures before it ("The image cannot be fetched from ...", a full disk, a wrong
+  # architecture) end the installer without it.
+  ansible.builtin.assert:
+    that: _upgrade_add.stdout[0] is search('Copying system image files')
+    fail_msg: >-
+      add system image did not install the image on {{ inventory_hostname }}; the
+      installer said: {{ _upgrade_add.stdout[0] | default('') | trim | truncate(600) }}
+    quiet: true
+
 - name: The image installer reported no error
   # The installer can print "Error: ..." after copying everything (vyos.dev T7668).
   ansible.builtin.assert:
@@ -80,7 +92,7 @@
     _upgrade_default_col: "{{ (_upgrade_lines | select('match', '^Name\\s') | first | default('')).find('Default boot') }}"
   vars:
     _upgrade_lines: "{{ _upgrade_images.stdout[0].splitlines() }}"
-    _upgrade_name: "{{ upgrade_image_name or (_upgrade_add.stdout[0] | regex_search('\\(Default: ([^)]+)\\)', '\\1') | first | default('')) }}"
+    _upgrade_name: "{{ upgrade_image_name or ((_upgrade_add.stdout[0] | regex_search('\\(Default: ([^)]+)\\)', '\\1') or ['']) | first) }}"
 
 - name: The new image is installed (and is the default boot image)
   ansible.builtin.assert:
