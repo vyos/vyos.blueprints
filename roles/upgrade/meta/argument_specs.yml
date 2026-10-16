@@ -12,8 +12,8 @@ argument_specs:
       - For bulk upgrades use the collection playbook C(vyos.blueprints.upgrade),
         which upgrades one router at a time (C(serial)) and stops at the first
         failure, so HA pairs never reboot together.
-      - Uses ansible.netcommon.cli_command and vyos.vyos.vyos_command; vyos.vyos
-        has no image-management module.
+      - Uses vyos.vyos.vyos_command (with prompt answers for C(add system image));
+        vyos.vyos has no image-management module.
     options:
       upgrade_image_url:
         type: str
@@ -35,6 +35,13 @@ argument_specs:
       upgrade_set_default: {type: bool, default: true, description: Make the new image the default boot image.}
       upgrade_copy_config: {type: bool, default: true, description: Copy the active configuration to the new image.}
       upgrade_copy_ssh_keys: {type: bool, default: true, description: Copy SSH host keys to the new image.}
+      upgrade_allow_unsigned:
+        type: bool
+        default: false
+        description:
+          - Install the image when no signature (C(.minisig) or C(.asc)) is found next to it.
+          - VyOS asks before installing an unsigned image; by default the role declines and
+            the upgrade fails. An image with an invalid signature is never installed.
       upgrade_backup: {type: bool, default: true, description: Back up the configuration first with vyos.blueprints.backup.}
       upgrade_reboot: {type: bool, default: true, description: Reboot into the new image and verify it. Without it the image is only installed.}
       upgrade_command_timeout: {type: int, default: 1800, description: Seconds allowed for downloading and installing the image.}

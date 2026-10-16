@@ -20,30 +20,51 @@
   when: upgrade_backup | bool
 
 - name: Add the new image
-  # Prompts as printed by VyOS 1.4/1.5 (name, default boot, copy config, copy SSH keys).
-  ansible.netcommon.cli_command:
-    command: "{{ _upgrade_add_command }}"
-    check_all: false
-    prompt:
-      - What would you like to name this image
-      - Would you like to set the new image as the default one for boot
-      - Would you like to copy it to the new image
-      - Would you like to copy SSH host keys
-    answer:
-      - "{{ upgrade_image_name }}"
-      - "{{ _upgrade_yes_no[0] }}"
-      - "{{ _upgrade_yes_no[1] }}"
-      - "{{ _upgrade_yes_no[2] }}"
+  # Every question "add system image" can ask in VyOS 1.5 (vyos-1x image_installer.py,
+  # add_image/image_fetch/validate_signature): name, default boot, copy config, copy
+  # SSH host keys, and the two signature questions. An invalid signature is always
+  # declined; an unsigned image only installs with upgrade_allow_unsigned.
+  vyos.vyos.vyos_command:
+    commands:
+      - command: "{{ _upgrade_add_command }}"
+        check_all: false
+        prompt:
+          - What would you like to name this image
+          - Would you like to set the new image as the default one for boot
+          - Would you like to copy it to the new image
+          - Would you like to copy SSH host keys
+          - Signature is not available. Do you want to continue with installation
+          - Signature is not valid. Do you want to continue with installation
+        answer:
+          - "{{ upgrade_image_name }}"
+          - "{{ _upgrade_yes_no[0] }}"
+          - "{{ _upgrade_yes_no[1] }}"
+          - "{{ _upgrade_yes_no[2] }}"
+          - "{{ _upgrade_yes_no[3] }}"
+          - "N"
   vars:
     ansible_command_timeout: "{{ upgrade_command_timeout }}"
   register: _upgrade_add
   changed_when: true
 
+- name: The image installer did not stop on a signature question
+  # Declining a question ends the installer with "Exiting from VyOS installation".
+  ansible.builtin.assert:
+    that: _upgrade_add.stdout[0] is not search('Exiting from VyOS installation')
+    fail_msg: >-
+      add system image stopped on {{ inventory_hostname }}:
+      {{ 'the image signature is not valid'
+         if _upgrade_add.stdout[0] is search('Signature is not valid')
+         else 'the image has no signature (.minisig/.asc next to the ISO); set upgrade_allow_unsigned to install it anyway'
+         if _upgrade_add.stdout[0] is search('Signature is not available')
+         else 'the installer exited' }}
+    quiet: true
+
 - name: The image installer reported no error
   # The installer can print "Error: ..." after copying everything (vyos.dev T7668).
   ansible.builtin.assert:
-    that: _upgrade_add.stdout is not search('(?im)^\s*(error|failed)(?![A-Za-z0-9_])')
-    fail_msg: "add system image failed on {{ inventory_hostname }}: {{ _upgrade_add.stdout | regex_search('(?im)^\\s*(error|failed).*$') }}"
+    that: _upgrade_add.stdout[0] is not search('(?im)^\s*(error|failed)(?![A-Za-z0-9_])')
+    fail_msg: "add system image failed on {{ inventory_hostname }}: {{ _upgrade_add.stdout[0] | regex_search('(?im)^\\s*(error|failed).*$') }}"
     quiet: true
 
 - name: Read the installed images
@@ -59,7 +80,7 @@
     _upgrade_default_col: "{{ (_upgrade_lines | select('match', '^Name\\s') | first | default('')).find('Default boot') }}"
   vars:
     _upgrade_lines: "{{ _upgrade_images.stdout[0].splitlines() }}"
-    _upgrade_name: "{{ upgrade_image_name or (_upgrade_add.stdout | regex_search('\\(Default: ([^)]+)\\)', '\\1') | first | default('')) }}"
+    _upgrade_name: "{{ upgrade_image_name or (_upgrade_add.stdout[0] | regex_search('\\(Default: ([^)]+)\\)', '\\1') | first | default('')) }}"
 
 - name: The new image is installed (and is the default boot image)
   ansible.builtin.assert:
@@ -76,8 +97,8 @@
   when: upgrade_reboot | bool
   block:
     - name: Reboot
-      ansible.netcommon.cli_command:
-        command: reboot now
+      vyos.vyos.vyos_command:
+        commands: [reboot now]
       register: _upgrade_reboot
       failed_when: false
       changed_when: true

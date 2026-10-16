@@ -3,5 +3,6 @@ _upgrade_yes_no:
   - "{{ 'Y' if upgrade_set_default | bool else 'n' }}"
   - "{{ 'Y' if upgrade_copy_config | bool else 'n' }}"
   - "{{ 'Y' if upgrade_copy_ssh_keys | bool else 'n' }}"
+  - "{{ 'y' if upgrade_allow_unsigned | bool else 'N' }}"
 _upgrade_add_command: >-
   add system image {{ upgrade_image_url }}{{ (' vrf ' ~ upgrade_vrf) if upgrade_vrf else '' }}

@@ -1,0 +1,9 @@
+---
+minor_changes:
+  - >-
+    upgrade - new ``upgrade_allow_unsigned`` (default ``false``). ``add system image`` asks before
+    installing an image without a signature; the role now answers that question instead of waiting
+    for its timeout, and always declines an image with an invalid signature.
+  - upgrade - uses ``vyos.vyos.vyos_command`` (with prompt answers) instead of ``ansible.netcommon.cli_command``.
+bugfixes:
+  - upgrade - when the installer stops on a signature question, the run fails with a message that names the cause.

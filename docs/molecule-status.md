@@ -18,7 +18,7 @@ initiator that starts IKE before its peer is configured gets NO_PROPOSAL_CHOSEN 
 does not retry.
 
 `upgrade` covers the skip and failure paths only (containers cannot boot a new
-image); `qos` checks classification and delivery, not DSCP re-marking, which
+image; the VM test is described in `upgrade-testing.md`); `qos` checks classification and delivery, not DSCP re-marking, which
 VyOS 1.5 does not implement (see `upstream-findings.md`, VyOS issues).
 
 ## Experimental (being made to pass)

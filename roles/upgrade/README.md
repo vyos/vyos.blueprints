@@ -7,7 +7,7 @@ Upgrade VyOS routers to a new image
 - Per router - optional backup (`vyos.blueprints.backup`), `add system image` with its prompts answered, a check that the image is installed and set as default boot, a reboot, a wait for the router to come back, and a check of the running version.
 - With `upgrade_expected_version`, routers already running that version are skipped, so a bulk upgrade can be re-run safely.
 - For bulk upgrades use the collection playbook `vyos.blueprints.upgrade`, which upgrades one router at a time (`serial`) and stops at the first failure, so HA pairs never reboot together.
-- Uses ansible.netcommon.cli_command and vyos.vyos.vyos_command; vyos.vyos has no image-management module.
+- Uses vyos.vyos.vyos_command (with prompt answers for `add system image`); vyos.vyos has no image-management module.
 
 ## Usage
 
@@ -29,6 +29,7 @@ Upgrade VyOS routers to a new image
 | `upgrade_set_default` | bool |  | `true` | Make the new image the default boot image. |
 | `upgrade_copy_config` | bool |  | `true` | Copy the active configuration to the new image. |
 | `upgrade_copy_ssh_keys` | bool |  | `true` | Copy SSH host keys to the new image. |
+| `upgrade_allow_unsigned` | bool |  | `false` | Install the image when no signature (`.minisig` or `.asc`) is found next to it. VyOS asks before installing an unsigned image; by default the role declines and the upgrade fails. An image with an invalid signature is never installed. |
 | `upgrade_backup` | bool |  | `true` | Back up the configuration first with vyos.blueprints.backup. |
 | `upgrade_reboot` | bool |  | `true` | Reboot into the new image and verify it. Without it the image is only installed. |
 | `upgrade_command_timeout` | int |  | `1800` | Seconds allowed for downloading and installing the image. |
