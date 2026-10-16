@@ -19,65 +19,143 @@
     name: vyos.blueprints.backup
   when: upgrade_backup | bool
 
-- name: Add the new image
-  # Every question "add system image" can ask in VyOS 1.5 (vyos-1x image_installer.py,
-  # add_image/image_fetch/validate_signature): name, default boot, copy config, copy
-  # SSH host keys, and the two signature questions. An invalid signature is always
-  # declined; an unsigned image only installs with upgrade_allow_unsigned.
-  vyos.vyos.vyos_command:
-    commands:
-      - command: "{{ _upgrade_add_command }}"
-        check_all: false
-        prompt:
-          - What would you like to name this image
-          - Would you like to set the new image as the default one for boot
-          - Would you like to copy it to the new image
-          - Would you like to copy SSH host keys
-          - Signature is not available. Do you want to continue with installation
-          - Signature is not valid. Do you want to continue with installation
-        answer:
-          - "{{ upgrade_image_name }}"
-          - "{{ _upgrade_yes_no[0] }}"
-          - "{{ _upgrade_yes_no[1] }}"
-          - "{{ _upgrade_yes_no[2] }}"
-          - "{{ _upgrade_yes_no[3] }}"
-          - "N"
-  vars:
-    ansible_command_timeout: "{{ upgrade_command_timeout }}"
-  register: _upgrade_add
-  changed_when: true
+- name: Stage and install the new image
+  block:
+    - name: Check the free space for the staged image
+      vyos.vyos.vyos_command:
+        commands: ["df -Pm {{ upgrade_stage_dir | quote }}"]
+      register: _upgrade_df
+      when: _upgrade_remote | bool
 
-- name: The image installer did not stop on a signature question
-  # Declining a question ends the installer with "Exiting from VyOS installation".
-  ansible.builtin.assert:
-    that: _upgrade_add.stdout[0] is not search('Exiting from VyOS installation')
-    fail_msg: >-
-      add system image stopped on {{ inventory_hostname }}:
-      {{ 'the image signature is not valid'
-         if _upgrade_add.stdout[0] is search('Signature is not valid')
-         else 'the image has no signature (.minisig/.asc next to the ISO); set upgrade_allow_unsigned to install it anyway'
-         if _upgrade_add.stdout[0] is search('Signature is not available')
-         else 'the installer exited' }}
-    quiet: true
+    - name: There is room for the image
+      ansible.builtin.assert:
+        that: ((_upgrade_df.stdout[0].splitlines() | last).split()[3] | int) >= upgrade_stage_min_free_mb | int
+        fail_msg: >-
+          {{ inventory_hostname }}: less than {{ upgrade_stage_min_free_mb }} MB free in
+          {{ upgrade_stage_dir }}: {{ _upgrade_df.stdout[0] | default('') }}
+        quiet: true
+      when: _upgrade_remote | bool
 
-- name: The image installer got as far as copying the image
-  # "add system image" prints no success message, but "Copying system image files"
-  # only after download, checks and signature validation succeeded (VyOS 1.4 and 1.5).
-  # Failures before it ("The image cannot be fetched from ...", a full disk, a wrong
-  # architecture) end the installer without it.
-  ansible.builtin.assert:
-    that: _upgrade_add.stdout[0] is search('Copying system image files')
-    fail_msg: >-
-      add system image did not install the image on {{ inventory_hostname }}; the
-      installer said: {{ _upgrade_add.stdout[0] | default('') | trim | truncate(600) }}
-    quiet: true
+    - name: Download the image to the router (quietly)
+      vyos.vyos.vyos_command:
+        commands:
+          - "{{ _upgrade_vrf_exec }}curl -sSfL --retry 3 -o {{ _upgrade_staged | quote }} {{ upgrade_image_url | quote }}; echo download-rc=$?"
+      vars:
+        ansible_command_timeout: "{{ upgrade_command_timeout }}"
+      register: _upgrade_download
+      when: _upgrade_remote | bool
 
-- name: The image installer reported no error
-  # The installer can print "Error: ..." after copying everything (vyos.dev T7668).
-  ansible.builtin.assert:
-    that: _upgrade_add.stdout[0] is not search('(?im)^\s*(error|failed)(?![A-Za-z0-9_])')
-    fail_msg: "add system image failed on {{ inventory_hostname }}: {{ _upgrade_add.stdout[0] | regex_search('(?im)^\\s*(error|failed).*$') }}"
-    quiet: true
+    - name: The image was downloaded
+      ansible.builtin.assert:
+        that: _upgrade_download.stdout[0] is search('download-rc=0')
+        fail_msg: "{{ inventory_hostname }}: downloading {{ upgrade_image_url }} failed: {{ _upgrade_download.stdout[0] | trim | truncate(400) }}"
+        quiet: true
+      when: _upgrade_remote | bool
+
+    - name: Download the image signature, if there is one
+      vyos.vyos.vyos_command:
+        commands:
+          - >-
+            {{ _upgrade_vrf_exec }}curl -sSfL -o {{ (_upgrade_staged ~ '.minisig') | quote }}
+            {{ (upgrade_image_url ~ '.minisig') | quote }}; echo signature-rc=$?
+      register: _upgrade_sig_download
+      when: _upgrade_remote | bool
+
+    - name: Verify the signature as the VyOS installer does
+      # validate_signature in vyos-1x image_installer.py: any key in /usr/share/vyos/keys.
+      # The installer does not check a local file itself, so the role does it here.
+      vyos.vyos.vyos_command:
+        commands:
+          - >-
+            for k in /usr/share/vyos/keys/*.minisign.pub; do
+            minisign -V -q -p "$k" -m {{ _upgrade_staged | quote }} -x {{ (_upgrade_staged ~ '.minisig') | quote }}
+            && { echo signature-valid; break; }; done; echo signature-checked
+      register: _upgrade_sig_check
+      when:
+        - _upgrade_remote | bool
+        - _upgrade_sig_download.stdout[0] is search('signature-rc=0')
+
+    - name: The image signature is valid, or an unsigned image is allowed
+      ansible.builtin.assert:
+        that: >-
+          (_upgrade_sig_check.stdout[0] | default('')) is search('signature-valid')
+          if _upgrade_sig_download.stdout[0] is search('signature-rc=0')
+          else upgrade_allow_unsigned | bool
+        fail_msg: >-
+          {{ inventory_hostname }}:
+          {{ 'the image signature is not valid'
+             if _upgrade_sig_download.stdout[0] is search('signature-rc=0')
+             else 'the image has no signature (' ~ upgrade_image_url ~ '.minisig); set upgrade_allow_unsigned to install it anyway' }}
+        quiet: true
+      when: _upgrade_remote | bool
+
+    - name: Add the new image
+      # Every question "add system image" can ask in VyOS 1.5 (vyos-1x image_installer.py,
+      # add_image/image_fetch/validate_signature): name, default boot, copy config, copy
+      # SSH host keys, and the two signature questions. An invalid signature is always
+      # declined; an unsigned image only installs with upgrade_allow_unsigned.
+      vyos.vyos.vyos_command:
+        commands:
+          - command: "{{ _upgrade_add_command }}"
+            check_all: false
+            prompt:
+              - What would you like to name this image
+              - Would you like to set the new image as the default one for boot
+              - Would you like to copy it to the new image
+              - Would you like to copy SSH host keys
+              - Signature is not available. Do you want to continue with installation
+              - Signature is not valid. Do you want to continue with installation
+            answer:
+              - "{{ upgrade_image_name }}"
+              - "{{ _upgrade_yes_no[0] }}"
+              - "{{ _upgrade_yes_no[1] }}"
+              - "{{ _upgrade_yes_no[2] }}"
+              - "{{ _upgrade_yes_no[3] }}"
+              - "N"
+      vars:
+        ansible_command_timeout: "{{ upgrade_command_timeout }}"
+      register: _upgrade_add
+      changed_when: true
+
+    - name: The image installer did not stop on a signature question
+      # Declining a question ends the installer with "Exiting from VyOS installation".
+      ansible.builtin.assert:
+        that: _upgrade_add.stdout[0] is not search('Exiting from VyOS installation')
+        fail_msg: >-
+          add system image stopped on {{ inventory_hostname }}:
+          {{ 'the image signature is not valid'
+             if _upgrade_add.stdout[0] is search('Signature is not valid')
+             else 'the image has no signature (.minisig/.asc next to the ISO); set upgrade_allow_unsigned to install it anyway'
+             if _upgrade_add.stdout[0] is search('Signature is not available')
+             else 'the installer exited' }}
+        quiet: true
+
+    - name: The image installer got as far as copying the image
+      # "add system image" prints no success message, but "Copying system image files"
+      # only after download, checks and signature validation succeeded (VyOS 1.4 and 1.5).
+      # Failures before it ("The image cannot be fetched from ...", a full disk, a wrong
+      # architecture) end the installer without it.
+      ansible.builtin.assert:
+        that: _upgrade_add.stdout[0] is search('Copying system image files')
+        fail_msg: >-
+          add system image did not install the image on {{ inventory_hostname }}; the
+          installer said: {{ _upgrade_add.stdout[0] | default('') | trim | truncate(600) }}
+        quiet: true
+
+    - name: The image installer reported no error
+      # The installer can print "Error: ..." after copying everything (vyos.dev T7668).
+      ansible.builtin.assert:
+        that: _upgrade_add.stdout[0] is not search('(?im)^\s*(error|failed)(?![A-Za-z0-9_])')
+        fail_msg: "add system image failed on {{ inventory_hostname }}: {{ _upgrade_add.stdout[0] | regex_search('(?im)^\\s*(error|failed).*$') }}"
+        quiet: true
+
+  always:
+    - name: Remove the staged image
+      vyos.vyos.vyos_command:
+        # files downloaded through "sudo ip vrf exec" belong to root (sticky /var/tmp)
+        commands: ["{{ 'sudo ' if upgrade_vrf else '' }}rm -f {{ _upgrade_staged | quote }} {{ (_upgrade_staged ~ '.minisig') | quote }}"]
+      when: _upgrade_remote | bool
+      changed_when: false
 
 - name: Read the installed images
   vyos.vyos.vyos_command:

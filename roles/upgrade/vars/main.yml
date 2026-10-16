@@ -4,5 +4,10 @@ _upgrade_yes_no:
   - "{{ 'Y' if upgrade_copy_config | bool else 'n' }}"
   - "{{ 'Y' if upgrade_copy_ssh_keys | bool else 'n' }}"
   - "{{ 'y' if upgrade_allow_unsigned | bool else 'N' }}"
+# A URL is downloaded by the role (quietly) and installed from the staged local file:
+# the installer's own download draws a progress bar that floods the CLI connection.
+_upgrade_remote: "{{ upgrade_image_url is match('^[A-Za-z][A-Za-z0-9+.-]*://') }}"
+_upgrade_staged: "{{ upgrade_stage_dir ~ '/vyos-blueprints-upgrade.iso' }}"
+_upgrade_vrf_exec: "{{ ('sudo ip vrf exec ' ~ upgrade_vrf ~ ' ') if upgrade_vrf else '' }}"
 _upgrade_add_command: >-
-  add system image {{ upgrade_image_url }}{{ (' vrf ' ~ upgrade_vrf) if upgrade_vrf else '' }}
+  add system image {{ _upgrade_staged if _upgrade_remote | bool else upgrade_image_url }}

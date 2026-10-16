@@ -35,11 +35,24 @@ argument_specs:
       upgrade_set_default: {type: bool, default: true, description: Make the new image the default boot image.}
       upgrade_copy_config: {type: bool, default: true, description: Copy the active configuration to the new image.}
       upgrade_copy_ssh_keys: {type: bool, default: true, description: Copy SSH host keys to the new image.}
+      upgrade_stage_dir:
+        type: str
+        default: /var/tmp
+        description:
+          - Directory on the router where an image given as a URL is downloaded before it is
+            installed, and removed afterwards. Must be on disk (not the RAM-backed C(/tmp)).
+          - The role downloads the image and its C(.minisig) quietly and verifies the signature
+            itself, as the VyOS installer does; the installer's own download draws a progress
+            bar that overloads the CLI connection. An image path on the router is installed as is.
+      upgrade_stage_min_free_mb:
+        type: int
+        default: 1024
+        description: Free space (MB) required in O(upgrade_stage_dir) before downloading.
       upgrade_allow_unsigned:
         type: bool
         default: false
         description:
-          - Install the image when no signature (C(.minisig) or C(.asc)) is found next to it.
+          - Install the image when no signature (C(.minisig)) is found next to it.
           - VyOS asks before installing an unsigned image; by default the role declines and
             the upgrade fails. An image with an invalid signature is never installed.
       upgrade_backup: {type: bool, default: true, description: Back up the configuration first with vyos.blueprints.backup.}

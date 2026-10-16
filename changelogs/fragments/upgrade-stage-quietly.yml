@@ -1,0 +1,11 @@
+---
+bugfixes:
+  - >-
+    upgrade - an image given as a URL is now downloaded by the role (quietly, with ``curl``) into
+    ``upgrade_stage_dir`` on the router, its signature verified as the VyOS installer does, and
+    then installed from the local file. The installer's own download draws a progress bar that
+    overloaded the CLI connection, so ``add system image <url>`` ran into the command timeout on a
+    real router although the download itself took about 90 seconds. The staged files are removed
+    afterwards, also when the upgrade fails.
+minor_changes:
+  - upgrade - new ``upgrade_stage_dir`` (default ``/var/tmp``) and ``upgrade_stage_min_free_mb`` (default ``1024``).
