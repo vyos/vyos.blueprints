@@ -67,6 +67,8 @@ jobs:
           done
       - name: Lab topologies are valid
         run: python3 ansible_collections/vyos/blueprints/scripts/check-topologies.py
+      - name: No "?" in commands sent to the VyOS CLI
+        run: python3 ansible_collections/vyos/blueprints/scripts/check-cli-commands.py
       - name: No single-backslash word boundaries in assert conditions
         run: python3 ansible_collections/vyos/blueprints/scripts/check-assert-escapes.py
       - name: Role READMEs match their argument specs

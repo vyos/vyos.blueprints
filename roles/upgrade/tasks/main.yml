@@ -21,6 +21,18 @@
 
 - name: Stage and install the new image
   block:
+    - name: The image URL contains no question mark
+      # The VyOS shell treats "?" as a request for completions and waits for an answer,
+      # so a command containing one never runs (e.g. a pre-signed URL with a query string).
+      ansible.builtin.assert:
+        that: "'?' not in upgrade_image_url"
+        fail_msg: >-
+          {{ inventory_hostname }}: upgrade_image_url contains "?", which the VyOS shell cannot take
+          in a command; use a URL without a query string, or copy the image to the router and
+          give its path.
+        quiet: true
+      when: _upgrade_remote | bool
+
     - name: Check the free space for the staged image
       vyos.vyos.vyos_command:
         commands: ["sudo df -Pm {{ upgrade_stage_dir | quote }}"]
@@ -39,7 +51,10 @@
     - name: Download the image to the router (quietly)
       vyos.vyos.vyos_command:
         commands:
-          - "{{ _upgrade_vrf_exec }}curl -sSfL --retry 3 -o {{ _upgrade_staged | quote }} {{ upgrade_image_url | quote }}; echo download-rc=$?"
+          # No "?" anywhere: in the VyOS shell "?" lists completions and waits for an answer.
+          - >-
+            {{ _upgrade_vrf_exec }}curl -sSfL --retry 3 -o {{ _upgrade_staged | quote }} {{ upgrade_image_url | quote }}
+            && echo download-ok || echo download-failed
       vars:
         ansible_command_timeout: "{{ upgrade_command_timeout }}"
       register: _upgrade_download
@@ -47,7 +62,7 @@
 
     - name: The image was downloaded
       ansible.builtin.assert:
-        that: _upgrade_download.stdout[0] is search('download-rc=0')
+        that: _upgrade_download.stdout[0] is search('download-ok')
         fail_msg: "{{ inventory_hostname }}: downloading {{ upgrade_image_url }} failed: {{ _upgrade_download.stdout[0] | trim | truncate(400) }}"
         quiet: true
       when: _upgrade_remote | bool
@@ -57,7 +72,7 @@
         commands:
           - >-
             {{ _upgrade_vrf_exec }}curl -sSfL -o {{ (_upgrade_staged ~ '.minisig') | quote }}
-            {{ (upgrade_image_url ~ '.minisig') | quote }}; echo signature-rc=$?
+            {{ (upgrade_image_url ~ '.minisig') | quote }} && echo signature-found || echo signature-missing
       register: _upgrade_sig_download
       when: _upgrade_remote | bool
 
@@ -73,18 +88,18 @@
       register: _upgrade_sig_check
       when:
         - _upgrade_remote | bool
-        - _upgrade_sig_download.stdout[0] is search('signature-rc=0')
+        - _upgrade_sig_download.stdout[0] is search('signature-found')
 
     - name: The image signature is valid, or an unsigned image is allowed
       ansible.builtin.assert:
         that: >-
           (_upgrade_sig_check.stdout[0] | default('')) is search('signature-valid')
-          if _upgrade_sig_download.stdout[0] is search('signature-rc=0')
+          if _upgrade_sig_download.stdout[0] is search('signature-found')
           else upgrade_allow_unsigned | bool
         fail_msg: >-
           {{ inventory_hostname }}:
           {{ 'the image signature is not valid'
-             if _upgrade_sig_download.stdout[0] is search('signature-rc=0')
+             if _upgrade_sig_download.stdout[0] is search('signature-found')
              else 'the image has no signature (' ~ upgrade_image_url ~ '.minisig); set upgrade_allow_unsigned to install it anyway' }}
         quiet: true
       when: _upgrade_remote | bool
