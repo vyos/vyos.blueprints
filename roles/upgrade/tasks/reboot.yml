@@ -1,0 +1,57 @@
+---
+# Included from main.yml only when upgrade_reboot is true (meta tasks ignore "when").
+- name: Note the boot ID before the reboot
+  # A changed boot ID proves the reboot. Watching SSH go down races with fast
+  # reboots: a VM can be back before the first check and the port never looks closed.
+  vyos.vyos.vyos_command:
+    commands: [cat /proc/sys/kernel/random/boot_id]
+  register: _upgrade_boot_before
+
+- name: Reboot
+  vyos.vyos.vyos_command:
+    commands: [reboot now]
+  register: _upgrade_reboot
+  failed_when: false
+  changed_when: true
+
+- name: Drop the old connection
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for the SSH port to be open
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host | default(inventory_hostname) }}"
+    port: "{{ ansible_port | default(22) }}"
+    state: started
+    delay: 15
+    timeout: "{{ upgrade_reboot_timeout }}"
+  delegate_to: localhost
+
+- name: Wait until the router has rebooted (new boot ID)
+  vyos.vyos.vyos_command:
+    commands: [cat /proc/sys/kernel/random/boot_id]
+  register: _upgrade_boot_after
+  until:
+    - _upgrade_boot_after is succeeded
+    - (_upgrade_boot_after.stdout[0] | default('') | trim) | length > 0
+    - (_upgrade_boot_after.stdout[0] | trim) != (_upgrade_boot_before.stdout[0] | trim)
+  retries: "{{ (upgrade_reboot_timeout | int / 10) | round(0, 'ceil') | int }}"
+  delay: 10
+  vars:
+    ansible_command_timeout: 30
+
+- name: Wait until the router answers commands
+  vyos.vyos.vyos_command:
+    commands: [show version]
+  register: _upgrade_after
+  until: _upgrade_after is succeeded
+  retries: 30
+  delay: 10
+
+- name: The router runs the expected version
+  ansible.builtin.assert:
+    that: upgrade_expected_version in (_upgrade_after.stdout[0] | regex_search('(?m)^Version:.*$'))
+    fail_msg: >-
+      {{ inventory_hostname }} runs {{ _upgrade_after.stdout[0] | regex_search('(?m)^Version:.*$') }},
+      expected {{ upgrade_expected_version }}
+    quiet: true
+  when: upgrade_expected_version | length > 0

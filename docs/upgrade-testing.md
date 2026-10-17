@@ -29,3 +29,25 @@ at 100% CPU, which is what `add system image <url>` caused with its progress bar
 
 The prompt answers against the real installer, the signature handling, the reboot and
 reconnect, the default-boot and version checks, and the skip on a second run.
+
+## Tested on
+
+| Date | From -> to | Platform | Result |
+|---|---|---|---|
+| 2026-10-17 | VyOS 1.4.2 -> VyOS Stream 2026.03 | KVM VM, upgrade from community-downloads.vyos.dev | full path passes (`failed=0`): backup, quiet download to `/root`, signature valid, four installer questions answered, `2026.03` default boot, reboot confirmed by a new boot ID, version `2026.03`; a second run skips the router (`ok=3 changed=0`) |
+
+Found and fixed on the way (all invisible in containers):
+
+- the installer's download progress bar overloads the CLI connection (100% CPU on the
+  controller, command timeout): the role downloads quietly and installs the local file;
+- `/tmp` and `/var/tmp` are small tmpfs; the 1.4.2 installer itself downloads to root's
+  home, so the role stages in `/root` (with sudo);
+- for a local file the installer skips the signature check: the role runs the installer's
+  own minisign check before installing;
+- `?` in a command makes the VyOS shell list completions and wait (`echo $?`): no `?` in
+  any CLI command (guard: `scripts/check-cli-commands.py`);
+- with `check_all: false`, network_cli answers only the first question of a command:
+  `check_all: true`, with the questions in the installer's order;
+- a fast reboot is back before "SSH down" is noticed: the reboot is confirmed by a changed
+  boot ID instead.
+

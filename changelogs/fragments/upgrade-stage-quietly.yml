@@ -27,3 +27,5 @@ minor_changes:
   - >-
     upgrade - new ``upgrade_stage_dir`` (default ``/root``, where the VyOS 1.4.2 installer
     downloads; staging uses sudo) and ``upgrade_stage_min_free_mb`` (default ``1024``).
+trivial:
+  - upgrade - the reboot steps are in ``tasks/reboot.yml``, included only when ``upgrade_reboot`` is true (no meta-task warning).
