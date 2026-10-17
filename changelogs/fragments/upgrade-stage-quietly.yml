@@ -8,4 +8,6 @@ bugfixes:
     real router although the download itself took about 90 seconds. The staged files are removed
     afterwards, also when the upgrade fails.
 minor_changes:
-  - upgrade - new ``upgrade_stage_dir`` (default ``/var/tmp``) and ``upgrade_stage_min_free_mb`` (default ``1024``).
+  - >-
+    upgrade - new ``upgrade_stage_dir`` (default ``/root``, where the VyOS 1.4.2 installer
+    downloads; staging uses sudo) and ``upgrade_stage_min_free_mb`` (default ``1024``).

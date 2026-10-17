@@ -8,6 +8,7 @@ _upgrade_yes_no:
 # the installer's own download draws a progress bar that floods the CLI connection.
 _upgrade_remote: "{{ upgrade_image_url is match('^[A-Za-z][A-Za-z0-9+.-]*://') }}"
 _upgrade_staged: "{{ upgrade_stage_dir ~ '/vyos-blueprints-upgrade.iso' }}"
-_upgrade_vrf_exec: "{{ ('sudo ip vrf exec ' ~ upgrade_vrf ~ ' ') if upgrade_vrf else '' }}"
+# Staging runs as root, like the installer (VyOS 1.4.2 downloads to root's home).
+_upgrade_vrf_exec: "{{ ('sudo ip vrf exec ' ~ upgrade_vrf ~ ' ') if upgrade_vrf else 'sudo ' }}"
 _upgrade_add_command: >-
   add system image {{ _upgrade_staged if _upgrade_remote | bool else upgrade_image_url }}

@@ -60,12 +60,12 @@
 
     - name: No staged image is left behind
       vyos.vyos.vyos_command:
-        commands: ["ls /var/tmp/vyos-blueprints-upgrade.iso /var/tmp/vyos-blueprints-upgrade.iso.minisig 2>&1; true"]
+        commands: ["sudo ls /root/vyos-blueprints-upgrade.iso /root/vyos-blueprints-upgrade.iso.minisig 2>&1; true"]
       register: _staged_left
 
     - name: The staged files were removed
       ansible.builtin.assert:
-        that: _staged_left.stdout[0] is not search('^/var/tmp/vyos-blueprints-upgrade', multiline=true)
+        that: _staged_left.stdout[0] is not search('^/root/vyos-blueprints-upgrade', multiline=true)
         quiet: true
 
     - name: The router is still up and running its original image

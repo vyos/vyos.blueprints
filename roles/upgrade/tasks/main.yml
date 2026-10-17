@@ -23,7 +23,7 @@
   block:
     - name: Check the free space for the staged image
       vyos.vyos.vyos_command:
-        commands: ["df -Pm {{ upgrade_stage_dir | quote }}"]
+        commands: ["sudo df -Pm {{ upgrade_stage_dir | quote }}"]
       register: _upgrade_df
       when: _upgrade_remote | bool
 
@@ -68,7 +68,7 @@
         commands:
           - >-
             for k in /usr/share/vyos/keys/*.minisign.pub; do
-            minisign -V -q -p "$k" -m {{ _upgrade_staged | quote }} -x {{ (_upgrade_staged ~ '.minisig') | quote }}
+            sudo minisign -V -q -p "$k" -m {{ _upgrade_staged | quote }} -x {{ (_upgrade_staged ~ '.minisig') | quote }}
             && { echo signature-valid; break; }; done; echo signature-checked
       register: _upgrade_sig_check
       when:
@@ -152,8 +152,7 @@
   always:
     - name: Remove the staged image
       vyos.vyos.vyos_command:
-        # files downloaded through "sudo ip vrf exec" belong to root (sticky /var/tmp)
-        commands: ["{{ 'sudo ' if upgrade_vrf else '' }}rm -f {{ _upgrade_staged | quote }} {{ (_upgrade_staged ~ '.minisig') | quote }}"]
+        commands: ["sudo rm -f {{ _upgrade_staged | quote }} {{ (_upgrade_staged ~ '.minisig') | quote }}"]
       when: _upgrade_remote | bool
       changed_when: false
 
