@@ -39,18 +39,40 @@ def walk(node, path, bad):
             walk(item, path, bad)
 
 
+class AnsibleTagLoader(yaml.SafeLoader):
+    """SafeLoader that accepts Ansible tags (!vault, !unsafe, ...) without acting on them."""
+
+
+def _tagged_value(loader, tag_suffix, node):
+    # The value of a tagged scalar is kept as text (a !vault value stays ciphertext).
+    if isinstance(node, yaml.ScalarNode):
+        return loader.construct_scalar(node)
+    if isinstance(node, yaml.SequenceNode):
+        return loader.construct_sequence(node)
+    return loader.construct_mapping(node)
+
+
+AnsibleTagLoader.add_multi_constructor("!", _tagged_value)
+
+
 def main():
     bad = []
+    unreadable = []
     files = sorted((ROOT / "roles").rglob("*.yml")) + sorted((ROOT / "extensions" / "molecule").rglob("*.yml"))
     for path in files:
         try:
-            data = yaml.safe_load(path.read_text())
-        except yaml.YAMLError:
+            data = yaml.load(path.read_text(), Loader=AnsibleTagLoader)  # noqa: S506 - safe loader subclass
+        except yaml.YAMLError as err:
+            unreadable.append(f"{path.relative_to(ROOT)}: {str(err).splitlines()[0]}")
             continue
         walk(data, path.relative_to(ROOT), bad)
+    if unreadable:
+        print("Files the CLI command check cannot read (fix them, or the check is incomplete):")
+        print("\n".join(f"  {line}" for line in unreadable))
     if bad:
         print('CLI commands containing "?" (the VyOS shell waits for an answer):')
         print("\n".join(f"  {line}" for line in bad))
+    if bad or unreadable:
         return 1
     print(f"cli commands: ok ({len(files)} files)")
     return 0

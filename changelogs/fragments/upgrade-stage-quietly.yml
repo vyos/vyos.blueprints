@@ -23,6 +23,10 @@ bugfixes:
     upgrade - the reboot is confirmed by a changed boot ID instead of waiting for SSH to go down. A
     fast-booting router could be back before the first check; the port then never looked closed and the
     task waited for its timeout although the upgrade had succeeded.
+  - >-
+    upgrade - result markers (``download-ok`` and the others) must stand on a line of their own, so an
+    echoed command line can no longer satisfy a check; a render-only run (``vyos_blueprints_render_only``)
+    skips the role entirely instead of reaching the install and reboot steps.
 minor_changes:
   - >-
     upgrade - new ``upgrade_stage_dir`` (default ``/root``, where the VyOS 1.4.2 installer

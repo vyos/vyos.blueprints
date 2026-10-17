@@ -49,6 +49,12 @@ argument_specs:
         type: int
         default: 1024
         description: Free space (MB) required in O(upgrade_stage_dir) before downloading.
+      vyos_blueprints_render_only:
+        type: bool
+        default: false
+        description:
+          - Set by the collection's render tests. An upgrade is an operation, not
+            configuration, so the role then ends immediately without touching the device.
       upgrade_allow_unsigned:
         type: bool
         default: false
