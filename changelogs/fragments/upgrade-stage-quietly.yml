@@ -19,6 +19,10 @@ bugfixes:
   - >-
     upgrade - the installer's questions are matched in both the 1.4.2/1.5 wording ("copy ...") and
     the earlier one ("save ..."), and answered with ``yes``/``no``, which both accept.
+  - >-
+    upgrade - the reboot is confirmed by a changed boot ID instead of waiting for SSH to go down. A
+    fast-booting router could be back before the first check; the port then never looked closed and the
+    task waited for its timeout although the upgrade had succeeded.
 minor_changes:
   - >-
     upgrade - new ``upgrade_stage_dir`` (default ``/root``, where the VyOS 1.4.2 installer
