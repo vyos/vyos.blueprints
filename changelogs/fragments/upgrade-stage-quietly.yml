@@ -11,6 +11,14 @@ bugfixes:
     upgrade - the role's own commands no longer contain ``?``: the VyOS shell treats it as a request for
     completions and waits for an answer, so the download never started. Image URLs containing ``?`` are
     rejected with a clear message.
+  - >-
+    upgrade - all four installer questions are answered now (``check_all: true``). With
+    ``check_all: false`` network_cli answers only the first question of a command, so the
+    installer waited at "set the new image as the default one for boot". The role also fails
+    early, with instructions, when ``/mnt/installation`` is left over from an interrupted install.
+  - >-
+    upgrade - the installer's questions are matched in both the 1.4.2/1.5 wording ("copy ...") and
+    the earlier one ("save ..."), and answered with ``yes``/``no``, which both accept.
 minor_changes:
   - >-
     upgrade - new ``upgrade_stage_dir`` (default ``/root``, where the VyOS 1.4.2 installer

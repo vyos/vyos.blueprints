@@ -104,29 +104,42 @@
         quiet: true
       when: _upgrade_remote | bool
 
+    - name: No installation from an interrupted run is left over
+      # An interrupted installer leaves /mnt/installation behind; the next "add system
+      # image" then fails with "[Errno 17] File exists: '/mnt/installation/iso_src'".
+      vyos.vyos.vyos_command:
+        commands: ["sudo test -e /mnt/installation && echo installation-leftover || echo installation-clean"]
+      register: _upgrade_leftover
+
+    - name: The installer's working directory is free
+      ansible.builtin.assert:
+        that: _upgrade_leftover.stdout[0] is search('installation-clean')
+        fail_msg: >-
+          {{ inventory_hostname }}: /mnt/installation exists, left by an interrupted install.
+          Check "mount | grep /mnt/installation", unmount what it lists, then
+          "sudo rm -rf /mnt/installation".
+        quiet: true
+
     - name: Add the new image
-      # Every question "add system image" can ask in VyOS 1.5 (vyos-1x image_installer.py,
-      # add_image/image_fetch/validate_signature): name, default boot, copy config, copy
-      # SSH host keys, and the two signature questions. An invalid signature is always
-      # declined; an unsigned image only installs with upgrade_allow_unsigned.
+      # The installer's questions for a local image, in order (VyOS 1.4.2 and 1.5): name,
+      # default boot, copy config, copy SSH host keys; older releases word them differently. check_all is required: without it
+      # network_cli answers only the first question of a command and the installer waits.
+      # The installer asks no signature question for a local file; the role verified it.
       vyos.vyos.vyos_command:
         commands:
           - command: "{{ _upgrade_add_command }}"
-            check_all: false
+            check_all: true
+            # Wording differs between releases ("copy ..." in 1.4.2/1.5, "save ..." earlier).
             prompt:
               - What would you like to name this image
-              - Would you like to set the new image as the default one for boot
-              - Would you like to copy it to the new image
-              - Would you like to copy SSH host keys
-              - Signature is not available. Do you want to continue with installation
-              - Signature is not valid. Do you want to continue with installation
+              - default one for boot
+              - copy it to the new image|save the current configuration
+              - SSH host keys
             answer:
               - "{{ upgrade_image_name }}"
               - "{{ _upgrade_yes_no[0] }}"
               - "{{ _upgrade_yes_no[1] }}"
               - "{{ _upgrade_yes_no[2] }}"
-              - "{{ _upgrade_yes_no[3] }}"
-              - "N"
       vars:
         ansible_command_timeout: "{{ upgrade_command_timeout }}"
       register: _upgrade_add

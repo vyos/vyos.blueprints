@@ -1,9 +1,10 @@
 ---
+# Full words: accepted by the [Y/n] questions of 1.4.2/1.5 and the (Yes/No) ones of
+# earlier releases.
 _upgrade_yes_no:
-  - "{{ 'Y' if upgrade_set_default | bool else 'n' }}"
-  - "{{ 'Y' if upgrade_copy_config | bool else 'n' }}"
-  - "{{ 'Y' if upgrade_copy_ssh_keys | bool else 'n' }}"
-  - "{{ 'y' if upgrade_allow_unsigned | bool else 'N' }}"
+  - "{{ 'yes' if upgrade_set_default | bool else 'no' }}"
+  - "{{ 'yes' if upgrade_copy_config | bool else 'no' }}"
+  - "{{ 'yes' if upgrade_copy_ssh_keys | bool else 'no' }}"
 # A URL is downloaded by the role (quietly) and installed from the staged local file:
 # the installer's own download draws a progress bar that floods the CLI connection.
 _upgrade_remote: "{{ upgrade_image_url is match('^[A-Za-z][A-Za-z0-9+.-]*://') }}"
