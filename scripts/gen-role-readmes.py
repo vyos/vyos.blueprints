@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Generate roles/<role>/README.md from roles/<role>/meta/argument_specs.yml.
 
 Run from the collection root after changing a role's argument spec:

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Fail when a command sent to a VyOS CLI contains "?".
 
 In the VyOS shell "?" lists completions ("Display all N possibilities? (y or n)")

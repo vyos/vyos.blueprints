@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Check `assert` conditions in role tasks and Molecule playbooks.
 
 1. Every condition must be a string. An unquoted condition containing ": " (for

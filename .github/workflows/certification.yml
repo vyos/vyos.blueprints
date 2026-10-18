@@ -1,0 +1,27 @@
+---
+# Red Hat's partner certification checks for Automation Hub: galaxy-importer on the
+# built collection, ansible-lint (production profile) and ansible-test sanity on every
+# ansible-core version from requires_ansible up (stable-2.16, 2.18, 2.20).
+# Reusable workflow pinned to a release commit; Dependabot proposes updates.
+name: Certification checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"   # weekly: catches new checker or ansible-core releases
+
+permissions:
+  contents: read
+
+concurrency:
+  group: certification-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  certification:
+    uses: ansible-collections/partner-certification-checker/.github/workflows/certification-reusable.yml@0b3575fff9a50e8057134e01862c52450648c3fc # v6.0.0
+    with:
+      # the collection's dependencies, for the sanity import test
+      collection-deps: "vyos.vyos ansible.netcommon ansible.utils"
