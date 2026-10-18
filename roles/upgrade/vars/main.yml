@@ -1,8 +1,15 @@
 ---
+# Full words: accepted by the [Y/n] questions of 1.4.2/1.5 and the (Yes/No) ones of
+# earlier releases.
 _upgrade_yes_no:
-  - "{{ 'Y' if upgrade_set_default | bool else 'n' }}"
-  - "{{ 'Y' if upgrade_copy_config | bool else 'n' }}"
-  - "{{ 'Y' if upgrade_copy_ssh_keys | bool else 'n' }}"
-  - "{{ 'y' if upgrade_allow_unsigned | bool else 'N' }}"
+  - "{{ 'yes' if upgrade_set_default | bool else 'no' }}"
+  - "{{ 'yes' if upgrade_copy_config | bool else 'no' }}"
+  - "{{ 'yes' if upgrade_copy_ssh_keys | bool else 'no' }}"
+# A URL is downloaded by the role (quietly) and installed from the staged local file:
+# the installer's own download draws a progress bar that floods the CLI connection.
+_upgrade_remote: "{{ upgrade_image_url is match('^[A-Za-z][A-Za-z0-9+.-]*://') }}"
+_upgrade_staged: "{{ upgrade_stage_dir ~ '/vyos-blueprints-upgrade.iso' }}"
+# Staging runs as root, like the installer (VyOS 1.4.2 downloads to root's home).
+_upgrade_vrf_exec: "{{ ('sudo ip vrf exec ' ~ upgrade_vrf ~ ' ') if upgrade_vrf else 'sudo ' }}"
 _upgrade_add_command: >-
-  add system image {{ upgrade_image_url }}{{ (' vrf ' ~ upgrade_vrf) if upgrade_vrf else '' }}
+  add system image {{ _upgrade_staged if _upgrade_remote | bool else upgrade_image_url }}

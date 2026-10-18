@@ -7,6 +7,8 @@ upgrade_set_default: true
 upgrade_copy_config: true
 upgrade_copy_ssh_keys: true
 upgrade_allow_unsigned: false
+upgrade_stage_dir: /root
+upgrade_stage_min_free_mb: 1024
 upgrade_backup: true
 upgrade_reboot: true
 upgrade_command_timeout: 1800

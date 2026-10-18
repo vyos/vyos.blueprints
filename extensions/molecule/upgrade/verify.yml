@@ -37,6 +37,37 @@
             that: _upgrade_reboot is not defined
             quiet: true
 
+    - name: Try to install an image that cannot be downloaded
+      block:
+        - name: Run the upgrade role with an unreachable URL
+          ansible.builtin.include_role:
+            name: vyos.blueprints.upgrade
+          vars:
+            upgrade_image_url: https://example.invalid/never-downloaded.iso
+            upgrade_backup: false
+            upgrade_command_timeout: 120
+
+        - name: The role should not get here
+          ansible.builtin.fail:
+            msg: the upgrade role did not fail for an unreachable URL
+      rescue:
+        - name: The download step failed, before the reboot
+          ansible.builtin.assert:
+            that:
+              - _upgrade_reboot is not defined
+              - ansible_failed_result.msg is search('downloading .* failed')
+            quiet: true
+
+    - name: No staged image is left behind
+      vyos.vyos.vyos_command:
+        commands: ["sudo ls /root/vyos-blueprints-upgrade.iso /root/vyos-blueprints-upgrade.iso.minisig 2>&1; true"]
+      register: _staged_left
+
+    - name: The staged files were removed
+      ansible.builtin.assert:
+        that: _staged_left.stdout[0] is not search('^/root/vyos-blueprints-upgrade', multiline=true)
+        quiet: true
+
     - name: The router is still up and running its original image
       vyos.vyos.vyos_command:
         commands: [show version]

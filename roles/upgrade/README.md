@@ -29,7 +29,10 @@ Upgrade VyOS routers to a new image
 | `upgrade_set_default` | bool |  | `true` | Make the new image the default boot image. |
 | `upgrade_copy_config` | bool |  | `true` | Copy the active configuration to the new image. |
 | `upgrade_copy_ssh_keys` | bool |  | `true` | Copy SSH host keys to the new image. |
-| `upgrade_allow_unsigned` | bool |  | `false` | Install the image when no signature (`.minisig` or `.asc`) is found next to it. VyOS asks before installing an unsigned image; by default the role declines and the upgrade fails. An image with an invalid signature is never installed. |
+| `upgrade_stage_dir` | str |  | `/root` | Directory on the router where an image given as a URL is downloaded before it is installed, and removed afterwards. The default is where the VyOS 1.4.2 installer itself downloads images (root's home, on disk; `/tmp` is a small tmpfs). Staging uses sudo. The role downloads the image and its `.minisig` quietly and verifies the signature itself, as the VyOS installer does; the installer's own download draws a progress bar that overloads the CLI connection. An image path on the router is installed as is. |
+| `upgrade_stage_min_free_mb` | int |  | `1024` | Free space (MB) required in O(upgrade_stage_dir) before downloading. |
+| `vyos_blueprints_render_only` | bool |  | `false` | Set by the collection's render tests. An upgrade is an operation, not configuration, so the role then ends immediately without touching the device. |
+| `upgrade_allow_unsigned` | bool |  | `false` | Install the image when no signature (`.minisig`) is found next to it. VyOS asks before installing an unsigned image; by default the role declines and the upgrade fails. An image with an invalid signature is never installed. |
 | `upgrade_backup` | bool |  | `true` | Back up the configuration first with vyos.blueprints.backup. |
 | `upgrade_reboot` | bool |  | `true` | Reboot into the new image and verify it. Without it the image is only installed. |
 | `upgrade_command_timeout` | int |  | `1800` | Seconds allowed for downloading and installing the image. |

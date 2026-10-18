@@ -7,3 +7,7 @@ minor_changes:
   - upgrade - uses ``vyos.vyos.vyos_command`` (with prompt answers) instead of ``ansible.netcommon.cli_command``.
 bugfixes:
   - upgrade - when the installer stops on a signature question, the run fails with a message that names the cause.
+  - >-
+    upgrade - a failed ``add system image`` (for example "The image cannot be fetched from ...") now fails
+    the run with the installer's message; the role requires the installer's "Copying system image files"
+    step. Before, it continued and failed later with an unrelated templating error.
