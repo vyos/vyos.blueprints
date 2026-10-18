@@ -1,0 +1,7 @@
+---
+trivial:
+  - >-
+    Certification readiness - Red Hat's partner certification checks run on every pull request
+    and weekly (galaxy-importer, ansible-lint production profile, sanity on ansible-core 2.16, 2.18
+    and 2.20); the README follows the certified-content structure with absolute links; the helper
+    scripts in scripts/ no longer carry shebangs, which the sanity test rejects.

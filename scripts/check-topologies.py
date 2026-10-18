@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Check the containerlab topologies (Molecule scenarios and examples).
 
 Every node's `exec` entry must be a string. An unquoted value ending in a colon,
