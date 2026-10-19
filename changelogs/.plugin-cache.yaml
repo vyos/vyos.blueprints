@@ -1,0 +1,154 @@
+objects:
+  role:
+    backup:
+      description: Back up VyOS configurations in bulk
+      name: backup
+      version_added: null
+    base:
+      description: Baseline settings for a VyOS node
+      name: base
+      version_added: null
+    bgp:
+      description: BGP routing (IPv4 unicast)
+      name: bgp
+      version_added: null
+    bgp_unnumbered:
+      description: BGP IPv6 unnumbered with extended next-hop (docs blueprint of the
+        same name)
+      name: bgp_unnumbered
+      version_added: null
+    bonding:
+      description: Bonding (LAG/LACP) interfaces
+      name: bonding
+      version_added: null
+    bridge_firewall:
+      description: Bridges with bridge and IPv4 firewall (docs blueprint "Bridge and
+        firewall example")
+      name: bridge_firewall
+      version_added: null
+    dmvpn:
+      description: DMVPN (docs blueprint "DMVPN Dual HUB Dual Cloud")
+      name: dmvpn
+      version_added: null
+    edge_nat:
+      description: Internet edge with source NAT
+      name: edge_nat
+      version_added: null
+    firewall:
+      description: Firewall groups and base-chain filters
+      name: firewall
+      version_added: null
+    gre_tunnel:
+      description: Tunnel interfaces (GRE and other encapsulations)
+      name: gre_tunnel
+      version_added: null
+    ha_vrrp:
+      description: VRRP high-availability pair (docs blueprint "High Availability
+        Walkthrough")
+      name: ha_vrrp
+      version_added: null
+    ipsec_policy_based:
+      description: Policy-based site-to-site IPsec (docs blueprint "Policy-based Site-to-Site
+        VPN IPsec between VyOS and Cisco")
+      name: ipsec_policy_based
+      version_added: null
+    ipsec_route_based:
+      description: Route-based site-to-site IPsec over VTI, with OSPF or BGP (Cisco,
+        Palo Alto and Azure docs blueprints)
+      name: ipsec_route_based
+      version_added: null
+    isis:
+      description: IS-IS and segment routing (docs blueprint "Segment-routing IS-IS
+        example")
+      name: isis
+      version_added: null
+    l2tp_lns:
+      description: L2TP network server (docs blueprint "PPPoE over L2TP")
+      name: l2tp_lns
+      version_added: null
+    l3vpn:
+      description: L3VPN control plane (docs blueprint "L3VPN for Hub-and-Spoke connectivity
+        with VyOS")
+      name: l3vpn
+      version_added: null
+    management:
+      description: Management plane - SNMP, traps, syslog, NTP, RADIUS login
+      name: management
+      version_added: null
+    mpls_ldp:
+      description: MPLS with LDP
+      name: mpls_ldp
+      version_added: null
+    nat:
+      description: Source and destination NAT
+      name: nat
+      version_added: null
+    ospf:
+      description: OSPFv2 routing
+      name: ospf
+      version_added: null
+    ospf_unnumbered:
+      description: OSPF unnumbered with ECMP (docs blueprint "OSPF unnumbered with
+        ECMP")
+      name: ospf_unnumbered
+      version_added: null
+    pppoe:
+      description: PPPoE client with DHCPv6-PD (docs blueprint "PPPoE IPv6 Basic Setup
+        for Home Network")
+      name: pppoe
+      version_added: null
+    qos:
+      description: QoS shaper policies and DSCP marking (docs blueprint "QoS example")
+      name: qos
+      version_added: null
+    route_policy:
+      description: Routing policy - access-lists, prefix-lists and route-maps
+      name: route_policy
+      version_added: null
+    router_advert:
+      description: IPv6 router advertisements
+      name: router_advert
+      version_added: null
+    upgrade:
+      description: Upgrade VyOS routers to a new image
+      name: upgrade
+      version_added: null
+    vrf_firewall:
+      description: VRFs with route leaking and firewall (docs blueprint "VRF and firewall
+        example")
+      name: vrf_firewall
+      version_added: null
+    vrf_lite:
+      description: Inter-VRF routing over VRF Lite (docs blueprint of the same name)
+      name: vrf_lite
+      version_added: null
+    wan_load_balance:
+      description: WAN load balancing and failover (docs blueprint "WAN Load Balancer
+        examples")
+      name: wan_load_balance
+      version_added: null
+    wireguard:
+      description: WireGuard interfaces and peers
+      name: wireguard
+      version_added: null
+    zone_firewall:
+      description: Zone-based firewall (docs blueprint "Zone-Policy example")
+      name: zone_firewall
+      version_added: null
+plugins:
+  become: {}
+  cache: {}
+  callback: {}
+  cliconf: {}
+  connection: {}
+  filter: {}
+  httpapi: {}
+  inventory: {}
+  lookup: {}
+  module: {}
+  netconf: {}
+  shell: {}
+  strategy: {}
+  test: {}
+  vars: {}
+version: 1.0.0

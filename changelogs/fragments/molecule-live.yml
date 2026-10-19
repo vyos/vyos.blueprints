@@ -1,7 +1,0 @@
----
-bugfixes:
-  - management - SNMP trap targets with a community or port no longer report a change on every run (idempotence).
-  - bgp_unnumbered - drop ``parameters default no-ipv4-unicast``, which VyOS 1.5 rejects; VyOS always applies it.
-  - bgp_unnumbered - the BGP neighbour now renders without a bare ``interface v6only`` line, which made every run report a change.
-  - verify tasks - checks with a word boundary in ``assert`` conditions could never match (``\b`` became a backspace); rewritten without backslash escapes.
-  - upgrade - the check for installer errors now detects ``Error:`` lines from ``add system image``.
