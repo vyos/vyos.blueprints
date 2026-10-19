@@ -1,6 +1,0 @@
----
-bugfixes:
-  - >-
-    backup - the default ``backup_root`` is now ``backups`` in the directory Ansible runs from.
-    It was ``{{ playbook_dir }}/backups``, which for the collection playbook
-    (``ansible-playbook vyos.blueprints.backup``) is inside the installed collection.
