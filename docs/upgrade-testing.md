@@ -1,8 +1,10 @@
 # Testing the upgrade role on a VM
 
 Containers cannot boot a new VyOS image, so the `upgrade` Molecule scenario covers the
-skip and failure paths only. The install-and-reboot path needs a VyOS VM. This is the
-checklist for that job (planned together with the vyos.vyos integration tests on VMs).
+skip and failure paths only. The install-and-reboot path is tested on a VyOS VM: it passed
+on 2026-10-17 (see [Tested on](#tested-on)). This checklist is for repeating that test, and
+the basis for an automated VM job, planned together with the vyos.vyos integration tests
+on VMs.
 
 ## Setup
 
@@ -13,12 +15,12 @@ checklist for that job (planned together with the vyos.vyos integration tests on
 
 ## Checks
 
-| Run | Expect |
-|---|---|
+| Run                                                                                                                                         | Expect                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ansible-playbook vyos.blueprints.upgrade -i <inventory> -e upgrade_image_url=http://10.0.2.2:8000/<iso> -e upgrade_expected_version=<new>` | passes; afterwards `show version` reports the new version, `show system image` lists both images with the new one as default boot, and `backup_root` holds a `.cfg`, `.set` and `.json` from before the upgrade |
-| the same command again | the router is skipped: no backup, no install, no reboot |
-| an image URL that does not exist | fails at the download step, **before** any reboot; no staged file is left in `/root`; the router keeps its version |
-| the ISO served **without** its `.minisig` | fails before any reboot with "the image has no signature"; with `-e upgrade_allow_unsigned=true` it installs |
+| the same command again                                                                                                                      | the router is skipped: no backup, no install, no reboot                                                                                                                                                         |
+| an image URL that does not exist                                                                                                            | fails at the download step, **before** any reboot; no staged file is left in `/root`; the router keeps its version                                                                                              |
+| the ISO served **without** its `.minisig`                                                                                                   | fails before any reboot with "the image has no signature"; with `-e upgrade_allow_unsigned=true` it installs                                                                                                    |
 
 ## What it proves
 
@@ -26,14 +28,13 @@ Also watch the controller during the install: since the role downloads the image
 (quietly) and installs the local file, the connection process should stay idle instead of
 at 100% CPU, which is what `add system image <url>` caused with its progress bar.
 
-
 The prompt answers against the real installer, the signature handling, the reboot and
 reconnect, the default-boot and version checks, and the skip on a second run.
 
 ## Tested on
 
-| Date | From -> to | Platform | Result |
-|---|---|---|---|
+| Date       | From -> to                        | Platform                                          | Result                                                                                                                                                                                                                                               |
+| ---------- | --------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-10-17 | VyOS 1.4.2 -> VyOS Stream 2026.03 | KVM VM, upgrade from community-downloads.vyos.dev | full path passes (`failed=0`): backup, quiet download to `/root`, signature valid, four installer questions answered, `2026.03` default boot, reboot confirmed by a new boot ID, version `2026.03`; a second run skips the router (`ok=3 changed=0`) |
 
 Found and fixed on the way (all invisible in containers):
@@ -50,4 +51,3 @@ Found and fixed on the way (all invisible in containers):
   `check_all: true`, with the questions in the installer's order;
 - a fast reboot is back before "SSH down" is noticed: the reboot is confirmed by a changed
   boot ID instead.
-
